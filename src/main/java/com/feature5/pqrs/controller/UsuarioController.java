@@ -14,13 +14,13 @@ public class UsuarioController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // ✅ Listar todos los usuarios
+    //Listar todos los usuarios
     @GetMapping
     public List<Usuario> listarUsuarios() {
         return usuarioRepository.findAll();
     }
 
-    // ✅ Crear un usuario
+    //Crear un usuario
     @PostMapping
     public Usuario crearUsuario(@RequestBody Usuario usuario) {
         return usuarioRepository.save(usuario);

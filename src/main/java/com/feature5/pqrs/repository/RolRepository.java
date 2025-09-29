@@ -1,9 +1,9 @@
 package com.feature5.pqrs.repository;
 
-import com.feature5.pqrs.entities.Usuario;
+import com.feature5.pqrs.entities.Rol;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface RolRepository extends JpaRepository<Rol, Long> {
 }
