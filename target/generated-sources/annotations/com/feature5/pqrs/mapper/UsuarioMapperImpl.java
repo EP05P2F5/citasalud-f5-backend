@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-10-11T19:36:39-0500",
+    date = "2025-10-11T22:12:48-0500",
     comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251001-1143, environment: Java 21.0.8 (Eclipse Adoptium)"
 )
 @Component
@@ -22,16 +22,16 @@ public class UsuarioMapperImpl implements UsuarioMapper {
 
         UsuarioDTO usuarioDTO = new UsuarioDTO();
 
-        usuarioDTO.setIdUsuario( usuario.getIdUsuario() );
-        usuarioDTO.setNombre( usuario.getNombre() );
         usuarioDTO.setApellido( usuario.getApellido() );
-        usuarioDTO.setFechaDeNacimiento( usuario.getFechaDeNacimiento() );
         usuarioDTO.setDireccion( usuario.getDireccion() );
         usuarioDTO.setEmail( usuario.getEmail() );
-        usuarioDTO.setTelefono( usuario.getTelefono() );
+        usuarioDTO.setFechaDeNacimiento( usuario.getFechaDeNacimiento() );
+        usuarioDTO.setIdUsuario( usuario.getIdUsuario() );
         usuarioDTO.setNickname( usuario.getNickname() );
+        usuarioDTO.setNombre( usuario.getNombre() );
         usuarioDTO.setPassword( usuario.getPassword() );
         usuarioDTO.setRol( usuario.getRol() );
+        usuarioDTO.setTelefono( usuario.getTelefono() );
 
         return usuarioDTO;
     }
@@ -66,13 +66,13 @@ public class UsuarioMapperImpl implements UsuarioMapper {
 
         UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO();
 
-        usuarioResponseDTO.setIdUsuario( usuario.getIdUsuario() );
-        usuarioResponseDTO.setNombre( usuario.getNombre() );
         usuarioResponseDTO.setApellido( usuario.getApellido() );
         usuarioResponseDTO.setEmail( usuario.getEmail() );
-        usuarioResponseDTO.setTelefono( usuario.getTelefono() );
+        usuarioResponseDTO.setIdUsuario( usuario.getIdUsuario() );
         usuarioResponseDTO.setNickname( usuario.getNickname() );
+        usuarioResponseDTO.setNombre( usuario.getNombre() );
         usuarioResponseDTO.setRol( usuario.getRol() );
+        usuarioResponseDTO.setTelefono( usuario.getTelefono() );
 
         return usuarioResponseDTO;
     }

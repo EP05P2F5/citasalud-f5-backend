@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-10-11T19:38:57-0500",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251001-1143, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-10-11T22:09:27-0500",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.2 (Eclipse Adoptium)"
 )
 @Component
 public class PqrsMapperImpl implements PqrsMapper {
@@ -43,13 +43,13 @@ public class PqrsMapperImpl implements PqrsMapper {
 
         Pqrs pqrs = new Pqrs();
 
-        pqrs.setDescripcion( pqrsDTO.getDescripcion() );
-        pqrs.setEstado( pqrsDTO.getEstado() );
-        pqrs.setFechaDeGeneracion( pqrsDTO.getFechaDeGeneracion() );
-        pqrs.setFechaDeRespuesta( pqrsDTO.getFechaDeRespuesta() );
-        pqrs.setIdTipo( pqrsDTO.getIdTipo() );
         pqrs.setIdUsuario( pqrsDTO.getIdUsuario() );
+        pqrs.setIdTipo( pqrsDTO.getIdTipo() );
+        pqrs.setDescripcion( pqrsDTO.getDescripcion() );
+        pqrs.setFechaDeGeneracion( pqrsDTO.getFechaDeGeneracion() );
         pqrs.setRadicado( pqrsDTO.getRadicado() );
+        pqrs.setEstado( pqrsDTO.getEstado() );
+        pqrs.setFechaDeRespuesta( pqrsDTO.getFechaDeRespuesta() );
         pqrs.setRespuesta( pqrsDTO.getRespuesta() );
 
         return pqrs;
