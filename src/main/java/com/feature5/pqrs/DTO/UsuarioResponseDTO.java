@@ -1,5 +1,6 @@
 package com.feature5.pqrs.DTO;
 
+import com.feature5.pqrs.entities.Rol;
 
 public class UsuarioResponseDTO {
     private Long idUsuario;
@@ -8,7 +9,7 @@ public class UsuarioResponseDTO {
     private String email;
     private String telefono;
     private String nickname;
-    private String rol;
+    private Rol rol;
 
     // Getters y setters
 
@@ -61,11 +62,11 @@ public class UsuarioResponseDTO {
         this.nickname = nickname;
     }
 
-    public String getRol() {
+    public Rol getRol() {
         return rol;
     }
 
-    public void setRol(String rol) {
+    public void setRol(Rol rol) {
         this.rol = rol;
     }
 }

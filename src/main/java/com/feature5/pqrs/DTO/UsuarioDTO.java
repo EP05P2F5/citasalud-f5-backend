@@ -1,8 +1,10 @@
 package com.feature5.pqrs.DTO;
 
+import com.feature5.pqrs.entities.Rol;
 import java.time.LocalDate;
 
 public class UsuarioDTO {
+    private Long idUsuario;
     private String nombre;
     private String apellido;
     private LocalDate fechaDeNacimiento;
@@ -11,9 +13,17 @@ public class UsuarioDTO {
     private String telefono;
     private String nickname;
     private String password;
-    private Long idRol;
+    private Rol rol;
 
     // Getters y setters
+
+    public Long getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
+    }
 
     public String getNombre() {
         return nombre;
@@ -79,12 +89,12 @@ public class UsuarioDTO {
         this.password = password;
     }
 
-    public Long getIdRol() {
-        return idRol;
+    public Rol getRol() {
+        return rol;
     }
 
-    public void setIdRol(Long idRol) {
-        this.idRol = idRol;
+    public void setRol(Rol rol) {
+        this.rol = rol;
     }
 }
 
