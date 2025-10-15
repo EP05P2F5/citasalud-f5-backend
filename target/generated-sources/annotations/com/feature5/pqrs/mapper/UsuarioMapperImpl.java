@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-10-11T22:12:48-0500",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251001-1143, environment: Java 21.0.8 (Eclipse Adoptium)"
+    date = "2025-10-15T13:07:40-0500",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.12 (Oracle Corporation)"
 )
 @Component
 public class UsuarioMapperImpl implements UsuarioMapper {
@@ -22,16 +22,16 @@ public class UsuarioMapperImpl implements UsuarioMapper {
 
         UsuarioDTO usuarioDTO = new UsuarioDTO();
 
+        usuarioDTO.setIdUsuario( usuario.getIdUsuario() );
+        usuarioDTO.setNombre( usuario.getNombre() );
         usuarioDTO.setApellido( usuario.getApellido() );
+        usuarioDTO.setFechaDeNacimiento( usuario.getFechaDeNacimiento() );
         usuarioDTO.setDireccion( usuario.getDireccion() );
         usuarioDTO.setEmail( usuario.getEmail() );
-        usuarioDTO.setFechaDeNacimiento( usuario.getFechaDeNacimiento() );
-        usuarioDTO.setIdUsuario( usuario.getIdUsuario() );
+        usuarioDTO.setTelefono( usuario.getTelefono() );
         usuarioDTO.setNickname( usuario.getNickname() );
-        usuarioDTO.setNombre( usuario.getNombre() );
         usuarioDTO.setPassword( usuario.getPassword() );
         usuarioDTO.setRol( usuario.getRol() );
-        usuarioDTO.setTelefono( usuario.getTelefono() );
 
         return usuarioDTO;
     }
@@ -44,16 +44,16 @@ public class UsuarioMapperImpl implements UsuarioMapper {
 
         Usuario usuario = new Usuario();
 
+        usuario.setIdUsuario( dto.getIdUsuario() );
+        usuario.setNombre( dto.getNombre() );
         usuario.setApellido( dto.getApellido() );
+        usuario.setFechaDeNacimiento( dto.getFechaDeNacimiento() );
         usuario.setDireccion( dto.getDireccion() );
         usuario.setEmail( dto.getEmail() );
-        usuario.setFechaDeNacimiento( dto.getFechaDeNacimiento() );
-        usuario.setIdUsuario( dto.getIdUsuario() );
+        usuario.setTelefono( dto.getTelefono() );
         usuario.setNickname( dto.getNickname() );
-        usuario.setNombre( dto.getNombre() );
         usuario.setPassword( dto.getPassword() );
         usuario.setRol( dto.getRol() );
-        usuario.setTelefono( dto.getTelefono() );
 
         return usuario;
     }
@@ -66,13 +66,13 @@ public class UsuarioMapperImpl implements UsuarioMapper {
 
         UsuarioResponseDTO usuarioResponseDTO = new UsuarioResponseDTO();
 
+        usuarioResponseDTO.setIdUsuario( usuario.getIdUsuario() );
+        usuarioResponseDTO.setNombre( usuario.getNombre() );
         usuarioResponseDTO.setApellido( usuario.getApellido() );
         usuarioResponseDTO.setEmail( usuario.getEmail() );
-        usuarioResponseDTO.setIdUsuario( usuario.getIdUsuario() );
-        usuarioResponseDTO.setNickname( usuario.getNickname() );
-        usuarioResponseDTO.setNombre( usuario.getNombre() );
-        usuarioResponseDTO.setRol( usuario.getRol() );
         usuarioResponseDTO.setTelefono( usuario.getTelefono() );
+        usuarioResponseDTO.setNickname( usuario.getNickname() );
+        usuarioResponseDTO.setRol( usuario.getRol() );
 
         return usuarioResponseDTO;
     }
