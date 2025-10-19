@@ -57,7 +57,7 @@ class UsuarioServiceTest {
         assertNotNull(saved);
         assertNotNull(saved.getIdUsuario());
 
-        UsuarioDTO login = usuarioService.login("sergio@example.com", "abc123");
+        UsuarioDTO login = usuarioService.login("sergio85", "abc123");
         assertNotNull(login);
         assertEquals("sergio85", login.getNickname());
 

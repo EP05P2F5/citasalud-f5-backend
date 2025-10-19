@@ -1,19 +1,20 @@
 package com.feature5.pqrs.controller;
 
-import com.feature5.pqrs.DTO.UsuarioDTO;
-import com.feature5.pqrs.entities.Rol;
-import com.feature5.pqrs.repository.RolRepository;
-import com.feature5.pqrs.repository.UsuarioRepository;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
+import com.feature5.pqrs.DTO.UsuarioDTO;
+import com.feature5.pqrs.entities.Rol;
+import com.feature5.pqrs.repository.RolRepository;
+import com.feature5.pqrs.repository.UsuarioRepository;
 
 @SpringBootTest
 class UsuarioControllerTest {
@@ -56,11 +57,11 @@ class UsuarioControllerTest {
         assertNotNull(created.getBody().getIdUsuario());
 
         // successful login
-        ResponseEntity<UsuarioDTO> loginOk = usuarioController.login("test@example.com", "pass123");
+        ResponseEntity<UsuarioDTO> loginOk = usuarioController.login("testnick", "pass123");
         assertEquals(200, loginOk.getStatusCodeValue());
 
         // failed login
-        ResponseEntity<UsuarioDTO> loginFail = usuarioController.login("test@example.com", "wrong");
+        ResponseEntity<UsuarioDTO> loginFail = usuarioController.login("testnick", "wrong");
         assertEquals(401, loginFail.getStatusCodeValue());
 
         // list
