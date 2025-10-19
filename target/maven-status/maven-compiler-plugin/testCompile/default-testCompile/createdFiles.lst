@@ -1,5 +1,8 @@
-com\feature5\pqrs\service\UsuarioServiceTest.class
-com\feature5\pqrs\Feature5PqrsApplicationTests.class
 com\feature5\pqrs\controller\RolControllerTest.class
+com\feature5\pqrs\mapper\PqrsMapperImplTest.class
+com\feature5\pqrs\service\UsuarioServiceTest.class
+com\feature5\pqrs\controller\AuthControllerTest.class
+com\feature5\pqrs\Feature5PqrsApplicationTests.class
 com\feature5\pqrs\controller\PqrsControllerTest.class
+com\feature5\pqrs\mapper\UsuarioMapperTest.class
 com\feature5\pqrs\controller\UsuarioControllerTest.class
