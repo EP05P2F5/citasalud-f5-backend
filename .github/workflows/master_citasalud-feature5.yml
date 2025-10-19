@@ -60,4 +60,3 @@ jobs:
           app-name: 'citasalud-feature5'
           slot-name: 'Production'
           package: '*.jar'
-          
