@@ -12,7 +12,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 🔹 Aquí podrías consultar la BD (por ahora usuario simulado)
+        // Aquí podrías consultar la BD (por ahora usuario simulado)
         if (username.equals("admin")) {
             return new User("admin", "{noop}1234", Collections.emptyList());
         }

@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // 🚫 Si la ruta es pública, saltamos la validación JWT
+        // Si la ruta es pública, saltamos la validación JWT
         if (isPublic(path)) {
             filterChain.doFilter(request, response);
             return;
