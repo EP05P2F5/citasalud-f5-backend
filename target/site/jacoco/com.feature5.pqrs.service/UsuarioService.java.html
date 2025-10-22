@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UsuarioService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Feature5PQRS</a> &gt; <a href="index.source.html" class="el_package">com.feature5.pqrs.service</a> &gt; <span class="el_source">UsuarioService.java</span></div><h1>UsuarioService.java</h1><pre class="source lang-java linenums">package com.feature5.pqrs.service;
+
+import com.feature5.pqrs.DTO.UsuarioDTO;
+import com.feature5.pqrs.entities.Rol;
+import com.feature5.pqrs.entities.Usuario;
+import com.feature5.pqrs.mapper.UsuarioMapper;
+import com.feature5.pqrs.repository.RolRepository;
+import com.feature5.pqrs.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+import java.util.List;
+
+@Service
+public class UsuarioService {
+
+<span class="fc" id="L20">    private static final Logger log = LoggerFactory.getLogger(UsuarioService.class);</span>
+
+    private final UsuarioRepository usuarioRepository;
+    private final RolRepository rolRepository;
+    private final UsuarioMapper usuarioMapper;
+    private final PasswordEncoder passwordEncoder;
+
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          RolRepository rolRepository,
+                          UsuarioMapper usuarioMapper,
+<span class="fc" id="L30">                          PasswordEncoder passwordEncoder) {</span>
+<span class="fc" id="L31">        this.usuarioRepository = usuarioRepository;</span>
+<span class="fc" id="L32">        this.rolRepository = rolRepository;</span>
+<span class="fc" id="L33">        this.usuarioMapper = usuarioMapper;</span>
+<span class="fc" id="L34">        this.passwordEncoder = passwordEncoder;</span>
+<span class="fc" id="L35">    }</span>
+
+    /**
+     * Registra un nuevo usuario, encriptando la contraseña y asignando correctamente el rol.
+     */
+    public UsuarioDTO registrarUsuario(UsuarioDTO usuarioDTO) {
+        // 🔍 Verificar si el correo o nickname ya existen
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">        if (usuarioRepository.existsByEmail(usuarioDTO.getEmail())) {</span>
+<span class="nc" id="L43">            log.warn(&quot;Intento de registro con un email ya existente: {}&quot;, usuarioDTO.getEmail());</span>
+<span class="nc" id="L44">            throw new IllegalArgumentException(&quot;El correo ya está registrado: &quot; + usuarioDTO.getEmail());</span>
+        }
+
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">        if (usuarioRepository.existsByNickname(usuarioDTO.getNickname())) {</span>
+<span class="nc" id="L48">            log.warn(&quot;Intento de registro con un nickname ya existente: {}&quot;, usuarioDTO.getNickname());</span>
+<span class="nc" id="L49">            throw new IllegalArgumentException(&quot;El nickname ya está registrado: &quot; + usuarioDTO.getNickname());</span>
+        }
+
+<span class="fc" id="L52">        Usuario usuario = usuarioMapper.toEntity(usuarioDTO);</span>
+
+        //  Encriptar la contraseña antes de guardar
+<span class="fc" id="L55">        usuario.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));</span>
+
+        //  Asignar o crear el rol correspondiente
+<span class="pc bpc" id="L58" title="2 of 4 branches missed.">        if (usuario.getRol() != null &amp;&amp; usuario.getRol().getDescripcion() != null) {</span>
+<span class="fc" id="L59">            String descripcion = usuario.getRol().getDescripcion();</span>
+
+<span class="fc" id="L61">            Rol rolExistente = rolRepository.findByDescripcion(descripcion)</span>
+<span class="fc" id="L62">                    .orElseGet(() -&gt; {</span>
+<span class="fc" id="L63">                        Rol nuevoRol = new Rol();</span>
+<span class="fc" id="L64">                        nuevoRol.setDescripcion(descripcion);</span>
+<span class="fc" id="L65">                        log.info(&quot;Rol '{}' no existía, se creó automáticamente.&quot;, descripcion);</span>
+<span class="fc" id="L66">                        return rolRepository.save(nuevoRol);</span>
+                    });
+
+<span class="fc" id="L69">            usuario.setRol(rolExistente);</span>
+        }
+
+<span class="fc" id="L72">        usuario = usuarioRepository.save(usuario);</span>
+<span class="fc" id="L73">        log.info(&quot; Usuario '{}' creado correctamente con rol '{}'.&quot;,</span>
+<span class="fc" id="L74">                usuario.getEmail(),</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">                usuario.getRol() != null ? usuario.getRol().getDescripcion() : &quot;Sin rol&quot;);</span>
+
+<span class="fc" id="L77">        return usuarioMapper.toDTO(usuario);</span>
+    }
+
+    /**
+     * Valida las credenciales del usuario por nickname y contraseña.
+     */
+    public UsuarioDTO login(String nickname, String password) {
+<span class="fc" id="L84">        Optional&lt;Usuario&gt; usuarioOpt = usuarioRepository.findByNickname(nickname);</span>
+
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        if (usuarioOpt.isPresent()) {</span>
+<span class="fc" id="L87">            Usuario usuario = usuarioOpt.get();</span>
+
+            // Compara la contraseña ingresada con la encriptada en la BD
+<span class="fc bfc" id="L90" title="All 2 branches covered.">            if (passwordEncoder.matches(password, usuario.getPassword())) {</span>
+<span class="fc" id="L91">                log.info(&quot;Inicio de sesión exitoso para el usuario '{}'.&quot;, nickname);</span>
+<span class="fc" id="L92">                return usuarioMapper.toDTO(usuario);</span>
+            } else {
+<span class="fc" id="L94">                log.warn(&quot;Intento de inicio de sesión fallido: contraseña incorrecta para '{}'.&quot;, nickname);</span>
+            }
+<span class="fc" id="L96">        } else {</span>
+<span class="fc" id="L97">            log.warn(&quot;Intento de inicio de sesión fallido: usuario '{}' no encontrado.&quot;, nickname);</span>
+        }
+
+<span class="fc" id="L100">        return null; // Credenciales incorrectas</span>
+    }
+
+    /**
+     * Lista todos los usuarios registrados.
+     */
+    public List&lt;UsuarioDTO&gt; listarUsuarios() {
+<span class="fc" id="L107">        List&lt;UsuarioDTO&gt; usuarios = usuarioRepository.findAll()</span>
+<span class="fc" id="L108">                .stream()</span>
+<span class="fc" id="L109">                .map(usuarioMapper::toDTO)</span>
+<span class="fc" id="L110">                .toList();</span>
+<span class="fc" id="L111">        log.info(&quot;Se listaron {} usuarios registrados.&quot;, usuarios.size());</span>
+<span class="fc" id="L112">        return usuarios;</span>
+    }
+
+    /**
+     * Busca un usuario por su nickname.
+     */
+    public UsuarioDTO buscarPorNickname(String nickname) {
+<span class="fc" id="L119">        return usuarioRepository.findByNickname(nickname)</span>
+<span class="fc" id="L120">                .map(usuario -&gt; {</span>
+<span class="fc" id="L121">                    log.info(&quot;Usuario '{}' encontrado correctamente.&quot;, nickname);</span>
+<span class="fc" id="L122">                    return usuarioMapper.toDTO(usuario);</span>
+                })
+<span class="fc" id="L124">                .orElseGet(() -&gt; {</span>
+<span class="nc" id="L125">                    log.warn(&quot;Usuario '{}' no encontrado.&quot;, nickname);</span>
+<span class="nc" id="L126">                    return null;</span>
+                });
+    }
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
