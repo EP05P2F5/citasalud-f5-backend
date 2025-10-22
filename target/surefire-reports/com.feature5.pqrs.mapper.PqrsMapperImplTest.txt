@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.feature5.pqrs.mapper.PqrsMapperImplTest
--------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.068 s -- in com.feature5.pqrs.mapper.PqrsMapperImplTest

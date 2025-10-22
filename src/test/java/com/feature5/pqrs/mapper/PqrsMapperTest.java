@@ -9,13 +9,13 @@ import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PqrsMapperImplTest {
+class PqrsMapperTest {
 
     @Test
     void toDTO_shouldMapFields() {
         Pqrs pqrs = new Pqrs();
         pqrs.setIdUsuario(42L);
-        pqrs.setIdTipo("TIPO_X");
+        pqrs.setIdTipo(1);
         pqrs.setDescripcion("desc prueba");
         pqrs.setFechaDeGeneracion(LocalDate.of(2024,1,2));
         pqrs.setRadicado("RAD-123");
@@ -25,7 +25,7 @@ class PqrsMapperImplTest {
 
         assertThat(dto).isNotNull();
         assertThat(dto.getIdUsuario()).isEqualTo(42L);
-        assertThat(dto.getIdTipo()).isEqualTo("TIPO_X");
+        assertThat(dto.getIdTipo()).isEqualTo(1);
         assertThat(dto.getDescripcion()).isEqualTo("desc prueba");
         assertThat(dto.getRadicado()).isEqualTo("RAD-123");
         assertThat(dto.getEstado()).isEqualTo("PENDIENTE");
@@ -35,7 +35,7 @@ class PqrsMapperImplTest {
     void toEntity_shouldMapFields() {
         PqrsDTO dto = new PqrsDTO();
         dto.setIdUsuario(99L);
-        dto.setIdTipo("TIPO_Y");
+    dto.setIdTipo(2);
         dto.setDescripcion("otra descripcion");
         dto.setRadicado("RAD-999");
         dto.setEstado("CERRADO");
@@ -44,7 +44,7 @@ class PqrsMapperImplTest {
 
         assertThat(entity).isNotNull();
         assertThat(entity.getIdUsuario()).isEqualTo(99L);
-        assertThat(entity.getIdTipo()).isEqualTo("TIPO_Y");
+        assertThat(entity.getIdTipo()).isEqualTo(2);
         assertThat(entity.getDescripcion()).isEqualTo("otra descripcion");
         assertThat(entity.getRadicado()).isEqualTo("RAD-999");
         assertThat(entity.getEstado()).isEqualTo("CERRADO");
@@ -54,7 +54,7 @@ class PqrsMapperImplTest {
     void toResponseDTO_shouldMapFields() {
         Pqrs pqrs = new Pqrs();
         pqrs.setIdUsuario(7L);
-        pqrs.setIdTipo("TIPO_Z");
+    pqrs.setIdTipo(3);
         pqrs.setDescripcion("respuesta desc");
         pqrs.setFechaDeGeneracion(LocalDate.of(2025,6,7));
         pqrs.setRadicado("RAD-7");
@@ -65,7 +65,7 @@ class PqrsMapperImplTest {
         PqrsResponseDTO resp = PqrsMapper.INSTANCE.toResponseDTO(pqrs);
 
         assertThat(resp).isNotNull();
-        assertThat(resp.getIdTipo()).isEqualTo("TIPO_Z");
+        assertThat(resp.getIdTipo()).isEqualTo(3);
         assertThat(resp.getDescripcion()).isEqualTo("respuesta desc");
         assertThat(resp.getRadicado()).isEqualTo("RAD-7");
         assertThat(resp.getEstado()).isEqualTo("RESPONDIDO");

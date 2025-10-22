@@ -5,11 +5,14 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.List;
@@ -20,7 +23,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final UserDetailsService userDetailsService;
 
-    // 🔓 Rutas públicas que no deben requerir token
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
+    // Rutas públicas que no deben requerir token
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/auth/",
             "/auth/login",
@@ -41,27 +46,41 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // 🚫 Si la ruta es pública, saltamos la validación JWT
+        // Si la ruta es pública, saltamos la validación JWT
         if (isPublic(path)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String authHeader = request.getHeader("Authorization");
+    final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
 
-        // Si no hay header o no empieza con Bearer → continuar sin validar
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        logger.debug("Incoming request {} {} - Authorization header present: {}", request.getMethod(), path, authHeader != null);
+
+        // Si no hay header o no empieza con Bearer (insensible a mayus/minus) → continuar sin validar
+        if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
+            if (authHeader != null && !authHeader.toLowerCase().startsWith("bearer ")) {
+                logger.debug("Authorization header does not start with 'Bearer ' (value='{}')", authHeader);
+            }
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        username = jwtUtils.extractUsername(jwt);
+        jwt = authHeader.substring(7).trim();
+        try {
+            username = jwtUtils.extractUsername(jwt);
+        } catch (Exception e) {
+            logger.info("Failed to extract username from token: {}", e.getMessage());
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-        // Si el usuario no está autenticado todavía
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        logger.debug("Extracted username from token: {}", username);
+
+    // Si el usuario no está autenticado todavía (o es anónimo), autenticar por JWT
+    var currentAuth = SecurityContextHolder.getContext().getAuthentication();
+    if (username != null && (currentAuth == null || currentAuth instanceof AnonymousAuthenticationToken)) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             if (jwtUtils.validateToken(jwt)) {
@@ -71,6 +90,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+                logger.debug("JWT validated and authentication set for user={}", username);
             }
         }
 

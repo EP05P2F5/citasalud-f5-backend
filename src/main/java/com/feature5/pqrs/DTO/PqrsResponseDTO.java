@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class PqrsResponseDTO {
     private Long idPqrs;
-    private String idTipo;
+    private Integer idTipo;
     private String descripcion;
     private LocalDate fechaDeGeneracion;
     private String radicado;
@@ -24,11 +24,11 @@ public class PqrsResponseDTO {
         this.idPqrs = idPqrs;
     }
 
-    public String getIdTipo() {
+    public Integer getIdTipo() {
         return idTipo;
     }
 
-    public void setIdTipo(String idTipo) {
+    public void setIdTipo(Integer idTipo) {
         this.idTipo = idTipo;
     }
 

@@ -9,6 +9,7 @@ com\feature5\pqrs\mapper\RolMapper.class
 com\feature5\pqrs\entities\Usuario.class
 com\feature5\pqrs\config\JwtAuthenticationFilter.class
 com\feature5\pqrs\controller\PqrsController.class
+com\feature5\pqrs\entities\Estado.class
 com\feature5\pqrs\mapper\RolMapperImpl.class
 com\feature5\pqrs\Feature5PqrsApplication.class
 com\feature5\pqrs\entities\Rol.class
@@ -17,11 +18,13 @@ com\feature5\pqrs\mapper\PqrsMapperImpl.class
 com\feature5\pqrs\repository\PqrsRepository.class
 com\feature5\pqrs\DTO\UsuarioDTO.class
 com\feature5\pqrs\DTO\UsuarioResponseDTO.class
+com\feature5\pqrs\repository\EstadoRepository.class
 com\feature5\pqrs\mapper\PqrsMapper.class
 com\feature5\pqrs\controller\RolController.class
 com\feature5\pqrs\controller\TestController.class
 com\feature5\pqrs\repository\UsuarioRepository.class
 com\feature5\pqrs\DTO\PqrsResponseDTO.class
+com\feature5\pqrs\service\PqrsService.class
 com\feature5\pqrs\mapper\UsuarioMapper.class
 com\feature5\pqrs\config\DataInitializer.class
 com\feature5\pqrs\repository\RolRepository.class

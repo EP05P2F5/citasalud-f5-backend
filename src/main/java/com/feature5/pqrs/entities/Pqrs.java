@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "PQRS")
+@Table(name = "pqrs")
 
 public class Pqrs {
 
@@ -17,13 +17,13 @@ public class Pqrs {
     @Column(name = "idusuario", nullable = false)
     private Long idUsuario;
 
-    @Column(name = "idTipo", nullable = false)
-    private String idTipo;
+    @Column(name = "idtipo", nullable = false)
+    private Integer idTipo;
 
     @Column(name = "descripcion")
     private String descripcion;
 
-    @Column(name = "fechaDeGeneracion")
+    @Column(name = "fecha_de_generacion")
     private LocalDate fechaDeGeneracion;
 
     @Column(name = "radicado")
@@ -32,7 +32,11 @@ public class Pqrs {
     @Column(name = "estado")
     private String estado;
 
-    @Column(name = "fechaDeRespuesta")
+    // Algunas bases usan un FK obligatorio para estado (idestado). Si existe en la tabla, se mapea aquí.
+    @Column(name = "idestado")
+    private Integer idEstado;
+
+    @Column(name = "fecha_de_respuesta")
     private LocalDate fechaDeRespuesta;
 
     @Column(name = "respuesta")
@@ -50,11 +54,11 @@ public class Pqrs {
         this.idUsuario = idUsuario;
     }
 
-    public String getIdTipo() {
+    public Integer getIdTipo() {
         return idTipo;
     }
 
-    public void setIdTipo(String idTipo) {
+    public void setIdTipo(Integer idTipo) {
         this.idTipo = idTipo;
     }
 
@@ -88,6 +92,14 @@ public class Pqrs {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public Integer getIdEstado() {
+        return idEstado;
+    }
+
+    public void setIdEstado(Integer idEstado) {
+        this.idEstado = idEstado;
     }
 
     public LocalDate getFechaDeRespuesta() {

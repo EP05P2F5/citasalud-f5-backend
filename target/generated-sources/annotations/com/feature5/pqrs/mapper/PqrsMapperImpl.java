@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2025-10-19T02:00:41-0500",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.2 (Eclipse Adoptium)"
+    date = "2025-10-22T00:06:52-0500",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.44.0.v20251001-1143, environment: Java 21.0.8 (Eclipse Adoptium)"
 )
 @Component
 public class PqrsMapperImpl implements PqrsMapper {
@@ -22,14 +22,14 @@ public class PqrsMapperImpl implements PqrsMapper {
 
         PqrsDTO pqrsDTO = new PqrsDTO();
 
-        pqrsDTO.setIdPqrs( pqrs.getIdPqrs() );
-        pqrsDTO.setIdUsuario( pqrs.getIdUsuario() );
-        pqrsDTO.setIdTipo( pqrs.getIdTipo() );
         pqrsDTO.setDescripcion( pqrs.getDescripcion() );
-        pqrsDTO.setFechaDeGeneracion( pqrs.getFechaDeGeneracion() );
-        pqrsDTO.setRadicado( pqrs.getRadicado() );
         pqrsDTO.setEstado( pqrs.getEstado() );
+        pqrsDTO.setFechaDeGeneracion( pqrs.getFechaDeGeneracion() );
         pqrsDTO.setFechaDeRespuesta( pqrs.getFechaDeRespuesta() );
+        pqrsDTO.setIdPqrs( pqrs.getIdPqrs() );
+        pqrsDTO.setIdTipo( pqrs.getIdTipo() );
+        pqrsDTO.setIdUsuario( pqrs.getIdUsuario() );
+        pqrsDTO.setRadicado( pqrs.getRadicado() );
         pqrsDTO.setRespuesta( pqrs.getRespuesta() );
 
         return pqrsDTO;
@@ -43,13 +43,13 @@ public class PqrsMapperImpl implements PqrsMapper {
 
         Pqrs pqrs = new Pqrs();
 
-        pqrs.setIdUsuario( pqrsDTO.getIdUsuario() );
-        pqrs.setIdTipo( pqrsDTO.getIdTipo() );
         pqrs.setDescripcion( pqrsDTO.getDescripcion() );
-        pqrs.setFechaDeGeneracion( pqrsDTO.getFechaDeGeneracion() );
-        pqrs.setRadicado( pqrsDTO.getRadicado() );
         pqrs.setEstado( pqrsDTO.getEstado() );
+        pqrs.setFechaDeGeneracion( pqrsDTO.getFechaDeGeneracion() );
         pqrs.setFechaDeRespuesta( pqrsDTO.getFechaDeRespuesta() );
+        pqrs.setIdTipo( pqrsDTO.getIdTipo() );
+        pqrs.setIdUsuario( pqrsDTO.getIdUsuario() );
+        pqrs.setRadicado( pqrsDTO.getRadicado() );
         pqrs.setRespuesta( pqrsDTO.getRespuesta() );
 
         return pqrs;
@@ -63,13 +63,13 @@ public class PqrsMapperImpl implements PqrsMapper {
 
         PqrsResponseDTO pqrsResponseDTO = new PqrsResponseDTO();
 
+        pqrsResponseDTO.setDescripcion( pqrs.getDescripcion() );
+        pqrsResponseDTO.setEstado( pqrs.getEstado() );
+        pqrsResponseDTO.setFechaDeGeneracion( pqrs.getFechaDeGeneracion() );
+        pqrsResponseDTO.setFechaDeRespuesta( pqrs.getFechaDeRespuesta() );
         pqrsResponseDTO.setIdPqrs( pqrs.getIdPqrs() );
         pqrsResponseDTO.setIdTipo( pqrs.getIdTipo() );
-        pqrsResponseDTO.setDescripcion( pqrs.getDescripcion() );
-        pqrsResponseDTO.setFechaDeGeneracion( pqrs.getFechaDeGeneracion() );
         pqrsResponseDTO.setRadicado( pqrs.getRadicado() );
-        pqrsResponseDTO.setEstado( pqrs.getEstado() );
-        pqrsResponseDTO.setFechaDeRespuesta( pqrs.getFechaDeRespuesta() );
         pqrsResponseDTO.setRespuesta( pqrs.getRespuesta() );
 
         return pqrsResponseDTO;
