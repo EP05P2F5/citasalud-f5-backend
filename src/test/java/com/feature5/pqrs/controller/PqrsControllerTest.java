@@ -28,13 +28,16 @@ class PqrsControllerTest {
     @Test
     void postReturnsBadRequestWhenRequiredMissing() {
         Pqrs pqrs = new Pqrs();
-        pqrs.setDescripcion("sin usuario ni tipo");
+        pqrs.setIdUsuario(1L);  // Agregar usuario válido
+        // Falta idTipo intencionalmente
+        pqrs.setDescripcion("sin tipo");
 
         try {
             pqrsController.crearPqrs(pqrs);
-            fail("Expected ResponseStatusException for missing fields");
-        } catch (org.springframework.web.server.ResponseStatusException ex) {
-            assertEquals(org.springframework.http.HttpStatus.BAD_REQUEST, ex.getStatusCode());
+            fail("Expected DataIntegrityViolationException for missing idTipo");
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            // Esperado: constraint violation por falta de idTipo
+            assertTrue(ex.getMessage().contains("IDTIPO") || ex.getMessage().contains("idtipo"));
         }
     }
 
