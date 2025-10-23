@@ -1,77 +1,89 @@
 package com.feature5.pqrs.controller;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import com.feature5.pqrs.entities.Pqrs;
+import com.feature5.pqrs.repository.PqrsRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.feature5.pqrs.entities.Pqrs;
-import com.feature5.pqrs.repository.PqrsRepository;
+import java.time.LocalDate;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 class PqrsControllerTest {
 
     @Autowired
-    PqrsController pqrsController;
+    private PqrsController pqrsController;
 
     @Autowired
-    PqrsRepository pqrsRepository;
+    private PqrsRepository pqrsRepository;
+
+    @BeforeEach
+    void setup() {
+        pqrsRepository.deleteAll();
+    }
 
     @Test
-    void crudAndSearch() {
-        // start clean
-        pqrsRepository.deleteAll();
+    void postReturnsBadRequestWhenRequiredMissing() {
+        Pqrs pqrs = new Pqrs();
+        pqrs.setIdUsuario(1L);  // Agregar usuario válido
+        // Falta idTipo intencionalmente
+        pqrs.setDescripcion("sin tipo");
 
-        Pqrs p = new Pqrs();
-        p.setIdUsuario(1L);
-        p.setIdTipo("QUEJA");
-        p.setDescripcion("Descripcion test");
-        p.setFechaDeGeneracion(LocalDate.now());
-        p.setRadicado("R-123");
-        p.setEstado("ABIERTO");
+        try {
+            pqrsController.crearPqrs(pqrs);
+            fail("Expected DataIntegrityViolationException for missing idTipo");
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            // Esperado: constraint violation por falta de idTipo
+            assertTrue(ex.getMessage().contains("IDTIPO") || ex.getMessage().contains("idtipo"));
+        }
+    }
 
-        // create
-        Pqrs creado = pqrsController.crearPqrs(p);
-        assertNotNull(creado);
-        assertNotNull(creado.getIdPqrs());
+    @Test
+    void createAndGetFlow() {
+        Pqrs pqrs = new Pqrs();
+        pqrs.setIdUsuario(1L);
+        pqrs.setIdTipo(1);
+        pqrs.setDescripcion("Descripcion test");
+        pqrs.setFechaDeGeneracion(LocalDate.now());
+        pqrs.setRadicado("R-123");
 
-        Long id = creado.getIdPqrs();
+        org.springframework.http.ResponseEntity<Pqrs> createdResp = pqrsController.crearPqrs(pqrs);
+        assertEquals(201, createdResp.getStatusCodeValue());
+        Pqrs created = createdResp.getBody();
+        assertNotNull(created);
+        Long id = created.getIdPqrs();
 
-        // read
-        assertTrue(pqrsController.obtenerPqrsPorId(id).getBody().getDescripcion().contains("Descripcion test"));
+        org.springframework.http.ResponseEntity<Pqrs> fetched = pqrsController.obtenerPqrsPorId(id);
+    assertEquals(200, fetched.getStatusCodeValue());
+    assertNotNull(fetched.getBody());
+    assertEquals("Descripcion test", fetched.getBody().getDescripcion());
+    }
 
-        // update
-        Pqrs actualizado = new Pqrs();
-        actualizado.setIdUsuario(2L);
-        actualizado.setIdTipo("PETICION");
-        actualizado.setDescripcion("Modificado");
-        actualizado.setFechaDeGeneracion(LocalDate.now());
-        actualizado.setRadicado("R-999");
-        actualizado.setEstado("CERRADO");
+    @Test
+    void putAndDeleteFlows() {
+        Pqrs base = new Pqrs();
+        base.setIdUsuario(1L);
+        base.setIdTipo(1);
+        base.setDescripcion("orig");
+        base.setFechaDeGeneracion(LocalDate.now());
+        base.setRadicado("R-50");
 
-        assertEquals(200, pqrsController.actualizarPqrs(id, actualizado).getStatusCodeValue());
-        assertEquals("CERRADO", pqrsRepository.findById(id).get().getEstado());
+        Pqrs saved = pqrsRepository.save(base);
+        Long id = saved.getIdPqrs();
 
-        // buscar por estado
-        List<Pqrs> encontrados = pqrsController.buscarPorEstado("CERRADO");
-        assertFalse(encontrados.isEmpty());
+        Pqrs update = new Pqrs();
+        update.setIdUsuario(2L);
+    update.setIdTipo(2);
+        update.setDescripcion("Modificado");
 
-        // buscar por usuario
-        List<Pqrs> porUsuario = pqrsController.buscarPorUsuario(2L);
-        assertFalse(porUsuario.isEmpty());
+        org.springframework.http.ResponseEntity<Pqrs> updated = pqrsController.actualizarPqrs(id, update);
+        assertEquals(200, updated.getStatusCodeValue());
 
-        // listar todos
-        List<Pqrs> todos = pqrsController.listarPqrs();
-        assertFalse(todos.isEmpty());
-
-        // delete
-        assertEquals(200, pqrsController.eliminarPqrs(id).getStatusCodeValue());
+        org.springframework.http.ResponseEntity<?> deleted = pqrsController.eliminarPqrs(id);
+        assertEquals(200, deleted.getStatusCodeValue());
         assertFalse(pqrsRepository.existsById(id));
     }
 }

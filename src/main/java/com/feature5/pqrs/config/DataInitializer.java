@@ -3,6 +3,8 @@ package com.feature5.pqrs.config;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.repository.UsuarioRepository;
+import com.feature5.pqrs.repository.EstadoRepository;
+import com.feature5.pqrs.entities.Estado;
 import com.feature5.pqrs.service.UsuarioService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +18,12 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
+    private final EstadoRepository estadoRepository;
 
-    public DataInitializer(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
+    public DataInitializer(UsuarioService usuarioService, UsuarioRepository usuarioRepository, EstadoRepository estadoRepository) {
         this.usuarioService = usuarioService;
         this.usuarioRepository = usuarioRepository;
+        this.estadoRepository = estadoRepository;
     }
 
     @Override
@@ -30,7 +34,7 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        //  Crear el usuario administrador solo si no existe
+    //  Crear el usuario administrador solo si no existe
         UsuarioDTO admin = new UsuarioDTO();
         admin.setNombre("Administrador");
         admin.setApellido("Principal");
@@ -46,6 +50,21 @@ public class DataInitializer implements CommandLineRunner {
 
         usuarioService.registrarUsuario(admin);
         log.info(" Usuario administrador creado correctamente");
+
+        // Asegurar estados básicos
+        ensureEstadoExists("PENDIENTE");
+        ensureEstadoExists("RESPONDIDO");
+        ensureEstadoExists("CERRADO");
+    }
+
+    private void ensureEstadoExists(String descripcion) {
+        estadoRepository.findByDescripcion(descripcion).orElseGet(() -> {
+            Estado e = new Estado();
+            e.setDescripcion(descripcion);
+            Estado saved = estadoRepository.save(e);
+            log.info("Estado '{}' asegurado con id {}", descripcion, saved.getIdEstado());
+            return saved;
+        });
     }
 }
 

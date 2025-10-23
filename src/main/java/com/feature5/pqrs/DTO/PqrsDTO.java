@@ -1,11 +1,14 @@
 package com.feature5.pqrs.DTO;
 
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public class PqrsDTO {
     private Long idPqrs;
+    @NotNull(message = "idUsuario es obligatorio")
     private Long idUsuario;
-    private String idTipo;
+    @NotNull(message = "idTipo es obligatorio")
+    private Integer idTipo;
     private String descripcion;
     private LocalDate fechaDeGeneracion;
     private String radicado;
@@ -17,7 +20,7 @@ public class PqrsDTO {
     public PqrsDTO() {}
 
     // Constructor con parámetros principales
-    public PqrsDTO(Long idUsuario, String idTipo, String descripcion) {
+    public PqrsDTO(Long idUsuario, Integer idTipo, String descripcion) {
         this.idUsuario = idUsuario;
         this.idTipo = idTipo;
         this.descripcion = descripcion;
@@ -42,11 +45,11 @@ public class PqrsDTO {
         this.idUsuario = idUsuario;
     }
 
-    public String getIdTipo() {
+    public Integer getIdTipo() {
         return idTipo;
     }
 
-    public void setIdTipo(String idTipo) {
+    public void setIdTipo(Integer idTipo) {
         this.idTipo = idTipo;
     }
 

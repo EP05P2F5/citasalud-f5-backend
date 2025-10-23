@@ -2,10 +2,15 @@ package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.entities.Pqrs;
 import com.feature5.pqrs.repository.PqrsRepository;
+import com.feature5.pqrs.service.PqrsService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+ 
 import java.util.List;
 import java.util.Optional;
 
@@ -13,8 +18,17 @@ import java.util.Optional;
 @RequestMapping("/pqrs")
 public class PqrsController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PqrsController.class);
+
     @Autowired
     private PqrsRepository pqrsRepository;
+
+    private final PqrsService pqrsService;
+
+    public PqrsController(PqrsRepository pqrsRepository, PqrsService pqrsService) {
+        this.pqrsRepository = pqrsRepository;
+        this.pqrsService = pqrsService;
+    }
 
     //Listar todas las PQRS
     @GetMapping
@@ -31,8 +45,9 @@ public class PqrsController {
 
     //Crear nueva PQRS
     @PostMapping
-    public Pqrs crearPqrs(@RequestBody Pqrs pqrs) {
-        return pqrsRepository.save(pqrs);
+    public ResponseEntity<Pqrs> crearPqrs(@Valid @RequestBody Pqrs pqrs) {
+        Pqrs saved = pqrsService.createPqrs(pqrs);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     //Actualizar PQRS

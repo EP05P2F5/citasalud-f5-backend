@@ -84,6 +84,7 @@
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
+<<<<<<< HEAD
 
         <!-- Processor adicional para IDEs -->
         <dependency>
@@ -92,6 +93,8 @@
             <version>${mapstruct.version}</version>
             <scope>provided</scope>
         </dependency>
+=======
+>>>>>>> origin/master
 
         <!-- Lombok -->
         <dependency>
@@ -148,7 +151,11 @@
                 </configuration>
             </plugin>
 
+<<<<<<< HEAD
             <!-- JaCoCo (cobertura de tests) -->
+=======
+            <!-- JaCoCo -->
+>>>>>>> origin/master
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -177,7 +184,10 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+<<<<<<< HEAD
                     <encoding>${project.build.sourceEncoding}</encoding>
+=======
+>>>>>>> origin/master
 
                     <annotationProcessorPaths>
                         <path>
@@ -202,4 +212,8 @@
         </plugins>
     </build>
 
+<<<<<<< HEAD
 </project>
+=======
+</project>
+>>>>>>> origin/master

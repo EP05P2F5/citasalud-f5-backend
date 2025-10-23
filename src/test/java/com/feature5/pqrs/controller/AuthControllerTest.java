@@ -30,7 +30,6 @@ class AuthControllerTest {
 
     @BeforeEach
     void setUp() {
-        // delete users first to avoid FK constraint when deleting roles
         usuarioRepository.deleteAll();
         usuarioRepository.flush();
         rolRepository.deleteAll();
@@ -65,7 +64,6 @@ class AuthControllerTest {
         ResponseEntity<?> resp = authController.login(req);
         assertEquals(200, resp.getStatusCodeValue());
         assertNotNull(resp.getBody());
-        // body is a map with token and usuario
         @SuppressWarnings("unchecked")
         java.util.Map<String, Object> body = (java.util.Map<String, Object>) resp.getBody();
         assertTrue(body.containsKey("token"));
