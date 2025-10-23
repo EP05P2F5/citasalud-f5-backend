@@ -26,24 +26,22 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-<<<<<<< HEAD
-        // Aquí podrías consultar la BD (por ahora usuario simulado)
+        // 🔹 Usuario de prueba temporal
         if (username.equals("admin")) {
             return new User("admin", "{noop}1234", Collections.emptyList());
-=======
-        // Buscamos el usuario por nickname en la BD
+        }
+
+        // 🔹 Buscar usuario real en la base de datos
         Usuario usuario = usuarioRepository.findByNickname(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        // Mapear rol a authorities (si no hay rol, dejar lista vacía)
+        // 🔹 Asignar roles como authorities (vacío si no tiene rol)
         List<GrantedAuthority> authorities = Collections.emptyList();
         if (usuario.getRol() != null && usuario.getRol().getDescripcion() != null) {
             authorities = List.of(new SimpleGrantedAuthority(usuario.getRol().getDescripcion()));
->>>>>>> origin/master
         }
 
-        // Nota: password en la BD ya está encriptada por UsuarioService.registrarUsuario
+        // 🔹 Retornar objeto User de Spring Security
         return new User(usuario.getNickname(), usuario.getPassword(), authorities);
     }
 }
-
