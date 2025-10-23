@@ -23,7 +23,7 @@ public class Pqrs {
     @Column(name = "descripcion")
     private String descripcion;
 
-    @Column(name = "fecha_de_generacion")
+    @Column(name = "fechadegeneracion")
     private LocalDate fechaDeGeneracion;
 
     @Column(name = "radicado")
@@ -36,7 +36,7 @@ public class Pqrs {
     @Column(name = "idestado")
     private Integer idEstado;
 
-    @Column(name = "fecha_de_respuesta")
+    @Column(name = "fechaderespuesta")
     private LocalDate fechaDeRespuesta;
 
     @Column(name = "respuesta")
