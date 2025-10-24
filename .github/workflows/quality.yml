@@ -55,6 +55,7 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
+
     - name: Upload JaCoCo coverage report
       uses: actions/upload-artifact@v4
       with:
