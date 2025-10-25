@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 class PqrsMapperTest {
 
@@ -23,12 +23,12 @@ class PqrsMapperTest {
 
         PqrsDTO dto = PqrsMapper.INSTANCE.toDTO(pqrs);
 
-        assertThat(dto).isNotNull();
-        assertThat(dto.getIdUsuario()).isEqualTo(42L);
-        assertThat(dto.getIdTipo()).isEqualTo(1);
-        assertThat(dto.getDescripcion()).isEqualTo("desc prueba");
-        assertThat(dto.getRadicado()).isEqualTo("RAD-123");
-        assertThat(dto.getEstado()).isEqualTo("PENDIENTE");
+        assertNotNull(dto);
+        assertEquals(42L, dto.getIdUsuario());
+        assertEquals(1, dto.getIdTipo());
+        assertEquals("desc prueba", dto.getDescripcion());
+        assertEquals("RAD-123", dto.getRadicado());
+        assertEquals("PENDIENTE", dto.getEstado());
     }
 
     @Test
@@ -42,12 +42,12 @@ class PqrsMapperTest {
 
         Pqrs entity = PqrsMapper.INSTANCE.toEntity(dto);
 
-        assertThat(entity).isNotNull();
-        assertThat(entity.getIdUsuario()).isEqualTo(99L);
-        assertThat(entity.getIdTipo()).isEqualTo(2);
-        assertThat(entity.getDescripcion()).isEqualTo("otra descripcion");
-        assertThat(entity.getRadicado()).isEqualTo("RAD-999");
-        assertThat(entity.getEstado()).isEqualTo("CERRADO");
+        assertNotNull(entity);
+        assertEquals(99L, entity.getIdUsuario());
+        assertEquals(2, entity.getIdTipo());
+        assertEquals("otra descripcion", entity.getDescripcion());
+        assertEquals("RAD-999", entity.getRadicado());
+        assertEquals("CERRADO", entity.getEstado());
     }
 
     @Test
@@ -64,12 +64,12 @@ class PqrsMapperTest {
 
         PqrsResponseDTO resp = PqrsMapper.INSTANCE.toResponseDTO(pqrs);
 
-        assertThat(resp).isNotNull();
-        assertThat(resp.getIdTipo()).isEqualTo(3);
-        assertThat(resp.getDescripcion()).isEqualTo("respuesta desc");
-        assertThat(resp.getRadicado()).isEqualTo("RAD-7");
-        assertThat(resp.getEstado()).isEqualTo("RESPONDIDO");
-        assertThat(resp.getRespuesta()).isEqualTo("Hecho");
-        assertThat(resp.getFechaDeRespuesta()).isEqualTo(LocalDate.of(2025,7,1));
+        assertNotNull(resp);
+        assertEquals(3, resp.getIdTipo());
+        assertEquals("respuesta desc", resp.getDescripcion());
+        assertEquals("RAD-7", resp.getRadicado());
+        assertEquals("RESPONDIDO", resp.getEstado());
+        assertEquals("Hecho", resp.getRespuesta());
+        assertEquals(LocalDate.of(2025,7,1), resp.getFechaDeRespuesta());
     }
 }

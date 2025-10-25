@@ -1,13 +1,10 @@
 package com.feature5.pqrs.DTO;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public class PqrsDTO {
     private Long idPqrs;
-    @NotNull(message = "idUsuario es obligatorio")
     private Long idUsuario;
-    @NotNull(message = "idTipo es obligatorio")
     private Integer idTipo;
     private String descripcion;
     private LocalDate fechaDeGeneracion;

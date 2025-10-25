@@ -1,18 +1,36 @@
 package com.feature5.pqrs.DTO;
 
 import com.feature5.pqrs.entities.Rol;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public class UsuarioDTO {
     private Long idUsuario;
+
+    @NotBlank(message = "nombre es obligatorio")
     private String nombre;
+
+    @NotBlank(message = "apellido es obligatorio")
     private String apellido;
+
     private LocalDate fechaDeNacimiento;
     private String direccion;
+
+    @NotBlank(message = "email es obligatorio")
+    @Email(message = "email no es válido")
     private String email;
+
     private String telefono;
+
+    @NotBlank(message = "nickname es obligatorio")
     private String nickname;
+
+    @NotBlank(message = "password es obligatoria")
     private String password;
+
+    @NotNull(message = "rol es obligatorio")
     private Rol rol;
 
     // Getters y setters

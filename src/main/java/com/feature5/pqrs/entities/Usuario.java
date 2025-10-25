@@ -48,10 +48,6 @@ public class Usuario {
         return idUsuario;
     }
 
-    public void setIdUsuario(Long idUsuario) {
-        this.idUsuario = idUsuario;
-    }
-
     public String getNombre() {
         return nombre;
     }

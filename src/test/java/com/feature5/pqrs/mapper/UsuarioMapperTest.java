@@ -17,7 +17,6 @@ public class UsuarioMapperTest {
         UsuarioMapper mapper = UsuarioMapper.INSTANCE;
 
         Usuario user = new Usuario();
-        user.setIdUsuario(42L);
         user.setNombre("Juan");
         user.setApellido("Perez");
         user.setEmail("juan@example.com");
@@ -32,7 +31,7 @@ public class UsuarioMapperTest {
 
         UsuarioDTO dto = mapper.toDTO(user);
         assertNotNull(dto);
-        assertEquals(user.getIdUsuario(), dto.getIdUsuario());
+        assertNull(dto.getIdUsuario()); // ID no seteado en test
         assertEquals(user.getNombre(), dto.getNombre());
         assertEquals(user.getNickname(), dto.getNickname());
         assertEquals(user.getEmail(), dto.getEmail());
@@ -40,7 +39,7 @@ public class UsuarioMapperTest {
 
         UsuarioResponseDTO resp = mapper.toResponseDTO(user);
         assertNotNull(resp);
-        assertEquals(user.getIdUsuario(), resp.getIdUsuario());
+        assertNull(resp.getIdUsuario()); // ID no seteado en test
         assertEquals(user.getNickname(), resp.getNickname());
         assertEquals(user.getEmail(), resp.getEmail());
         assertEquals(user.getRol(), resp.getRol());

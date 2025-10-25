@@ -2,6 +2,7 @@ package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.service.UsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -17,7 +18,7 @@ public class UsuarioController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UsuarioDTO> registrar(@RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<UsuarioDTO> registrar(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         UsuarioDTO nuevoUsuario = usuarioService.registrarUsuario(usuarioDTO);
         return ResponseEntity.ok(nuevoUsuario);
     }

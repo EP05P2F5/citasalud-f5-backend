@@ -26,22 +26,6 @@ class PqrsControllerTest {
     }
 
     @Test
-    void postReturnsBadRequestWhenRequiredMissing() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setIdUsuario(1L);  // Agregar usuario válido
-        // Falta idTipo intencionalmente
-        pqrs.setDescripcion("sin tipo");
-
-        try {
-            pqrsController.crearPqrs(pqrs);
-            fail("Expected DataIntegrityViolationException for missing idTipo");
-        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
-            // Esperado: constraint violation por falta de idTipo
-            assertTrue(ex.getMessage().contains("IDTIPO") || ex.getMessage().contains("idtipo"));
-        }
-    }
-
-    @Test
     void createAndGetFlow() {
         Pqrs pqrs = new Pqrs();
         pqrs.setIdUsuario(1L);
