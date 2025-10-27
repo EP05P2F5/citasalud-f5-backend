@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
  
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -93,5 +94,21 @@ public class PqrsController {
     @GetMapping("/usuario/{idUsuario}")
     public List<Pqrs> buscarPorUsuario(@PathVariable Long idUsuario) {
         return pqrsRepository.findByIdUsuario(idUsuario);
+    }
+
+    //Responder PQRS - Solo modifica respuesta y fecha de respuesta
+    @RequestMapping(value = "/{id}/responder", method = {RequestMethod.PUT, RequestMethod.POST})
+    public ResponseEntity<Pqrs> responderPqrs(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String respuesta = body.get("respuesta");
+        
+        if (respuesta == null || respuesta.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        
+        Optional<Pqrs> pqrsActualizada = pqrsService.responderPqrs(id, respuesta);
+        
+        return pqrsActualizada
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

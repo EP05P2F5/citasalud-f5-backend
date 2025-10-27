@@ -1,6 +1,7 @@
 package com.feature5.pqrs.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
@@ -14,16 +15,18 @@ public class Pqrs {
     @Column(name = "idPQRS")
     private Long idPqrs;
 
+    @NotNull(message = "idUsuario es obligatorio")
     @Column(name = "idusuario", nullable = false)
     private Long idUsuario;
 
+    @NotNull(message = "idTipo es obligatorio")
     @Column(name = "idtipo", nullable = false)
     private Integer idTipo;
 
     @Column(name = "descripcion")
     private String descripcion;
 
-    @Column(name = "fecha_de_generacion")
+    @Column(name = "fechadegeneracion")
     private LocalDate fechaDeGeneracion;
 
     @Column(name = "radicado")
@@ -36,7 +39,7 @@ public class Pqrs {
     @Column(name = "idestado")
     private Integer idEstado;
 
-    @Column(name = "fecha_de_respuesta")
+    @Column(name = "fechaderespuesta")
     private LocalDate fechaDeRespuesta;
 
     @Column(name = "respuesta")
