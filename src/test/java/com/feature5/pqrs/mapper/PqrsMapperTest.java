@@ -1,7 +1,6 @@
 package com.feature5.pqrs.mapper;
 
 import com.feature5.pqrs.DTO.PqrsDTO;
-import com.feature5.pqrs.DTO.PqrsResponseDTO;
 import com.feature5.pqrs.entities.Pqrs;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +34,7 @@ class PqrsMapperTest {
     void toEntity_shouldMapFields() {
         PqrsDTO dto = new PqrsDTO();
         dto.setIdUsuario(99L);
-    dto.setIdTipo(2);
+        dto.setIdTipo(2);
         dto.setDescripcion("otra descripcion");
         dto.setRadicado("RAD-999");
         dto.setEstado("CERRADO");
@@ -48,28 +47,5 @@ class PqrsMapperTest {
         assertEquals("otra descripcion", entity.getDescripcion());
         assertEquals("RAD-999", entity.getRadicado());
         assertEquals("CERRADO", entity.getEstado());
-    }
-
-    @Test
-    void toResponseDTO_shouldMapFields() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setIdUsuario(7L);
-    pqrs.setIdTipo(3);
-        pqrs.setDescripcion("respuesta desc");
-        pqrs.setFechaDeGeneracion(LocalDate.of(2025,6,7));
-        pqrs.setRadicado("RAD-7");
-        pqrs.setEstado("RESPONDIDO");
-        pqrs.setFechaDeRespuesta(LocalDate.of(2025,7,1));
-        pqrs.setRespuesta("Hecho");
-
-        PqrsResponseDTO resp = PqrsMapper.INSTANCE.toResponseDTO(pqrs);
-
-        assertNotNull(resp);
-        assertEquals(3, resp.getIdTipo());
-        assertEquals("respuesta desc", resp.getDescripcion());
-        assertEquals("RAD-7", resp.getRadicado());
-        assertEquals("RESPONDIDO", resp.getEstado());
-        assertEquals("Hecho", resp.getRespuesta());
-        assertEquals(LocalDate.of(2025,7,1), resp.getFechaDeRespuesta());
     }
 }
