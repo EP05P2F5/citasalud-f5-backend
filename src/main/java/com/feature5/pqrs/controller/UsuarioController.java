@@ -23,14 +23,6 @@ public class UsuarioController {
         return ResponseEntity.ok(nuevoUsuario);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UsuarioDTO> login(@RequestParam String email, @RequestParam String password) {
-        UsuarioDTO usuario = usuarioService.login(email, password);
-        if (usuario != null) {
-            return ResponseEntity.ok(usuario);
-        }
-        return ResponseEntity.status(401).build(); // Unauthorized
-    }
 
     @GetMapping
     public ResponseEntity<List<UsuarioDTO>> listar() {

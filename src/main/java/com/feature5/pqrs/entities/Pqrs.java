@@ -3,120 +3,120 @@ package com.feature5.pqrs.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "pqrs")
-
 public class Pqrs {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idPQRS")
+    @Column(name = "idpqrs")
     private Long idPqrs;
 
-    @NotNull(message = "idUsuario es obligatorio")
-    @Column(name = "idusuario", nullable = false)
-    private Long idUsuario;
+    // FK obligatoria -> usuario.idusuario
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "idusuario", nullable = false)
+    private Usuario usuario;
 
-    @NotNull(message = "idTipo es obligatorio")
-    @Column(name = "idtipo", nullable = false)
-    private Integer idTipo;
+    // FK obligatoria -> tipo.idtipo
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "idtipo", nullable = false)
+    private Tipo tipo;
 
+    // Texto libre (tu tabla lo tiene además de idestado)
     @Column(name = "descripcion")
     private String descripcion;
 
+    // En DB es timestamp -> usar LocalDateTime
     @Column(name = "fechadegeneracion")
-    private LocalDate fechaDeGeneracion;
+    private LocalDateTime fechaDeGeneracion;
 
-    @Column(name = "radicado")
+    @Column(name = "radicado", unique = true)
     private String radicado;
 
+    // Texto libre "estado" (coexiste con idestado)
     @Column(name = "estado")
-    private String estado;
+    private String estadoTexto;
 
-    // Algunas bases usan un FK obligatorio para estado (idestado). Si existe en la tabla, se mapea aquí.
-    @Column(name = "idestado")
-    private Integer idEstado;
+    // FK obligatoria -> estado.idestado
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "idestado", nullable = false)
+    private Estado estado; // referencia a la entidad Estado
 
     @Column(name = "fechaderespuesta")
-    private LocalDate fechaDeRespuesta;
+    private LocalDateTime fechaDeRespuesta;
 
     @Column(name = "respuesta")
     private String respuesta;
 
+    // Getters/Setters
     public Long getIdPqrs() {
         return idPqrs;
     }
 
-    public Long getIdUsuario() {
-        return idUsuario;
+    public Usuario getUsuario() {
+        return usuario;
+    }
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
-    public void setIdUsuario(Long idUsuario) {
-        this.idUsuario = idUsuario;
+    public Tipo getTipo() {
+        return tipo;
     }
-
-    public Integer getIdTipo() {
-        return idTipo;
-    }
-
-    public void setIdTipo(Integer idTipo) {
-        this.idTipo = idTipo;
+    public void setTipo(Tipo tipo) {
+        this.tipo = tipo;
     }
 
     public String getDescripcion() {
         return descripcion;
     }
-
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
     }
 
-    public LocalDate getFechaDeGeneracion() {
+    public LocalDateTime getFechaDeGeneracion() {
         return fechaDeGeneracion;
     }
-
-    public void setFechaDeGeneracion(LocalDate fechaDeGeneracion) {
+    public void setFechaDeGeneracion(LocalDateTime fechaDeGeneracion) {
         this.fechaDeGeneracion = fechaDeGeneracion;
     }
 
     public String getRadicado() {
         return radicado;
     }
-
     public void setRadicado(String radicado) {
         this.radicado = radicado;
     }
 
-    public String getEstado() {
-        return estado;
+    public String getEstadoTexto() {
+        return estadoTexto;
+    }
+    public void setEstadoTexto(String estadoTexto) {
+        this.estadoTexto = estadoTexto;
     }
 
-    public void setEstado(String estado) {
+    public Estado getEstado() {
+        return estado;
+    }
+    public void setEstado(Estado estado) {
         this.estado = estado;
     }
 
-    public Integer getIdEstado() {
-        return idEstado;
-    }
-
-    public void setIdEstado(Integer idEstado) {
-        this.idEstado = idEstado;
-    }
-
-    public LocalDate getFechaDeRespuesta() {
+    public LocalDateTime getFechaDeRespuesta() {
         return fechaDeRespuesta;
     }
-
-    public void setFechaDeRespuesta(LocalDate fechaDeRespuesta) {
+    public void setFechaDeRespuesta(LocalDateTime fechaDeRespuesta) {
         this.fechaDeRespuesta = fechaDeRespuesta;
     }
 
     public String getRespuesta() {
         return respuesta;
     }
-
     public void setRespuesta(String respuesta) {
         this.respuesta = respuesta;
     }

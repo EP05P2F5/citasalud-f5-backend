@@ -1,16 +1,23 @@
 package com.feature5.pqrs.controller;
 
+import com.feature5.pqrs.DTO.PqrsRequestDTO;
+import com.feature5.pqrs.entities.Estado;
 import com.feature5.pqrs.entities.Pqrs;
+import com.feature5.pqrs.entities.Tipo;
+import com.feature5.pqrs.entities.Usuario;
+import com.feature5.pqrs.repository.EstadoRepository;
 import com.feature5.pqrs.repository.PqrsRepository;
+import com.feature5.pqrs.repository.TipoRepository;
+import com.feature5.pqrs.repository.UsuarioRepository;
 import com.feature5.pqrs.service.PqrsService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
- 
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,94 +28,135 @@ public class PqrsController {
 
     private static final Logger logger = LoggerFactory.getLogger(PqrsController.class);
 
-    @Autowired
-    private PqrsRepository pqrsRepository;
-
+    private final PqrsRepository pqrsRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final EstadoRepository estadoRepository;
+    private final TipoRepository tipoRepository;
     private final PqrsService pqrsService;
 
-    public PqrsController(PqrsRepository pqrsRepository, PqrsService pqrsService) {
+    public PqrsController(PqrsRepository pqrsRepository,
+                          UsuarioRepository usuarioRepository,
+                          EstadoRepository estadoRepository,
+                          TipoRepository tipoRepository,
+                          PqrsService pqrsService) {
         this.pqrsRepository = pqrsRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.estadoRepository = estadoRepository;
+        this.tipoRepository = tipoRepository;
         this.pqrsService = pqrsService;
     }
 
-    //Listar todas las PQRS
+    // Listar todas las PQRS
     @GetMapping
-    public List<Pqrs> listarPqrs() {
-        return pqrsRepository.findAll();
+    public ResponseEntity<List<Pqrs>> listarPqrs() {
+        return ResponseEntity.ok(pqrsRepository.findAll());
     }
 
-    //Obtener PQRS por ID
+    // Obtener PQRS por ID
     @GetMapping("/{id}")
     public ResponseEntity<Pqrs> obtenerPqrsPorId(@PathVariable Long id) {
-        Optional<Pqrs> pqrs = pqrsRepository.findById(id);
-        return pqrs.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return pqrsRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    //Crear nueva PQRS
+    // Crear PQRS (recibe DTO con IDs)
     @PostMapping
-    public ResponseEntity<Pqrs> crearPqrs(@Valid @RequestBody Pqrs pqrs) {
+    @Transactional
+    public ResponseEntity<Pqrs> crearPqrs(@Valid @RequestBody PqrsRequestDTO dto) {
+        Usuario usuario = usuarioRepository.findById(dto.usuarioId).orElse(null);
+        if (usuario == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+
+        Tipo tipo = tipoRepository.findById(dto.tipoId).orElse(null);
+        if (tipo == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+
+        Estado estado = estadoRepository.findById(dto.estadoId).orElse(null);
+        if (estado == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+
+        Pqrs pqrs = new Pqrs();
+        pqrs.setUsuario(usuario);
+        pqrs.setTipo(tipo);
+        pqrs.setEstado(estado);
+        pqrs.setEstadoTexto(dto.estadoTexto);
+        pqrs.setDescripcion(dto.descripcion);
+        pqrs.setFechaDeGeneracion(dto.fechaDeGeneracion);
+        pqrs.setRadicado(dto.radicado);
+        pqrs.setFechaDeRespuesta(dto.fechaDeRespuesta);
+        pqrs.setRespuesta(dto.respuesta);
+
         Pqrs saved = pqrsService.createPqrs(pqrs);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-    //Actualizar PQRS
+    // Actualizar PQRS (recibe DTO con IDs)
     @PutMapping("/{id}")
-    public ResponseEntity<Pqrs> actualizarPqrs(@PathVariable Long id, @RequestBody Pqrs pqrsActualizado) {
-        Optional<Pqrs> pqrsExistente = pqrsRepository.findById(id);
+    @Transactional
+    public ResponseEntity<Pqrs> actualizarPqrs(@PathVariable Long id, @RequestBody PqrsRequestDTO dto) {
+        Optional<Pqrs> optional = pqrsRepository.findById(id);
+        if (optional.isEmpty()) return ResponseEntity.notFound().build();
 
-        if (pqrsExistente.isPresent()) {
-            Pqrs pqrs = pqrsExistente.get();
-            pqrs.setIdUsuario(pqrsActualizado.getIdUsuario());
-            pqrs.setIdTipo(pqrsActualizado.getIdTipo());
-            pqrs.setDescripcion(pqrsActualizado.getDescripcion());
-            pqrs.setFechaDeGeneracion(pqrsActualizado.getFechaDeGeneracion());
-            pqrs.setRadicado(pqrsActualizado.getRadicado());
-            pqrs.setEstado(pqrsActualizado.getEstado());
-            pqrs.setFechaDeRespuesta(pqrsActualizado.getFechaDeRespuesta());
-            pqrs.setRespuesta(pqrsActualizado.getRespuesta());
+        Pqrs existing = optional.get();
 
-            return ResponseEntity.ok(pqrsRepository.save(pqrs));
-        } else {
-            return ResponseEntity.notFound().build();
+        if (dto.usuarioId != null) {
+            Usuario u = usuarioRepository.findById(dto.usuarioId).orElse(null);
+            if (u == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            existing.setUsuario(u);
         }
+        if (dto.tipoId != null) {
+            Tipo t = tipoRepository.findById(dto.tipoId).orElse(null);
+            if (t == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            existing.setTipo(t);
+        }
+        if (dto.estadoId != null) {
+            Estado e = estadoRepository.findById(dto.estadoId).orElse(null);
+            if (e == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            existing.setEstado(e);
+        }
+
+        if (dto.estadoTexto != null) existing.setEstadoTexto(dto.estadoTexto);
+        if (dto.descripcion != null) existing.setDescripcion(dto.descripcion);
+        if (dto.fechaDeGeneracion != null) existing.setFechaDeGeneracion(dto.fechaDeGeneracion);
+        if (dto.radicado != null) existing.setRadicado(dto.radicado);
+        if (dto.fechaDeRespuesta != null) existing.setFechaDeRespuesta(dto.fechaDeRespuesta);
+        if (dto.respuesta != null) existing.setRespuesta(dto.respuesta);
+
+        Pqrs updated = pqrsRepository.save(existing);
+        return ResponseEntity.ok(updated);
     }
 
-    //Eliminar PQRS
+    // Eliminar PQRS
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarPqrs(@PathVariable Long id) {
-        if (pqrsRepository.existsById(id)) {
-            pqrsRepository.deleteById(id);
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> eliminarPqrs(@PathVariable Long id) {
+        if (!pqrsRepository.existsById(id)) return ResponseEntity.notFound().build();
+        pqrsRepository.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
-    //Buscar PQRS por estado
-    @GetMapping("/estado/{estado}")
-    public List<Pqrs> buscarPorEstado(@PathVariable String estado) {
-        return pqrsRepository.findByEstado(estado);
+    // Buscar PQRS por estadoTexto
+    @GetMapping("/estado/{estadoTexto}")
+    public ResponseEntity<List<Pqrs>> buscarPorEstado(@PathVariable String estadoTexto) {
+        return ResponseEntity.ok(pqrsRepository.findByEstadoTexto(estadoTexto));
     }
 
-    //Buscar PQRS por usuario
+    // Buscar PQRS por usuario
     @GetMapping("/usuario/{idUsuario}")
-    public List<Pqrs> buscarPorUsuario(@PathVariable Long idUsuario) {
-        return pqrsRepository.findByIdUsuario(idUsuario);
+    public ResponseEntity<List<Pqrs>> buscarPorUsuario(@PathVariable Long idUsuario) {
+        return ResponseEntity.ok(pqrsRepository.findByUsuario_IdUsuario(idUsuario));
     }
 
-    //Responder PQRS - Solo modifica respuesta y fecha de respuesta
+    // Responder PQRS (solo respuesta y fecha)
     @RequestMapping(value = "/{id}/responder", method = {RequestMethod.PUT, RequestMethod.POST})
     public ResponseEntity<Pqrs> responderPqrs(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String respuesta = body.get("respuesta");
-        
+
         if (respuesta == null || respuesta.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
-        
+
         Optional<Pqrs> pqrsActualizada = pqrsService.responderPqrs(id, respuesta);
-        
+
         return pqrsActualizada
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

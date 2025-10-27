@@ -1,14 +1,38 @@
 package com.feature5.pqrs.mapper;
 
 import com.feature5.pqrs.DTO.PqrsDTO;
+import com.feature5.pqrs.entities.Estado;
 import com.feature5.pqrs.entities.Pqrs;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
 @Mapper(componentModel = "spring")
 public interface PqrsMapper {
-    PqrsMapper INSTANCE = Mappers.getMapper(PqrsMapper.class);
-    
+
+    // Entity → DTO
+    @Mapping(source = "usuario.idUsuario", target = "idUsuario")
+    @Mapping(source = "tipo.idTipo", target = "idTipo")
+    @Mapping(source = "estado", target = "estado", qualifiedByName = "estadoToString")
     PqrsDTO toDTO(Pqrs pqrs);
-    Pqrs toEntity(PqrsDTO pqrsDTO);
+
+    // DTO → Entity
+    @Mapping(target = "usuario", ignore = true)
+    @Mapping(target = "tipo", ignore = true)
+    @Mapping(source = "estado", target = "estado", qualifiedByName = "stringToEstado")
+    @Mapping(target = "estadoTexto", expression = "java(dto.getEstado())")
+    Pqrs toEntity(PqrsDTO dto);
+
+    @Named("estadoToString")
+    default String estadoToString(Estado estado) {
+        return estado != null ? estado.getDescripcion() : null;
+    }
+
+    @Named("stringToEstado")
+    default Estado stringToEstado(String descripcion) {
+        if (descripcion == null) return null;
+        Estado e = new Estado();
+        e.setDescripcion(descripcion);
+        return e;
+    }
 }

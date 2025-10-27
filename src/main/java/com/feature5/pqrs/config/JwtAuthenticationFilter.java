@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,8 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
+
+    // Se marca como Lazy para evitar ciclo con CustomUserDetailsService
     private final UserDetailsService userDetailsService;
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
@@ -33,7 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/test/public"
     );
 
-    public JwtAuthenticationFilter(JwtUtils jwtUtils, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtUtils jwtUtils, @Lazy UserDetailsService userDetailsService) {
         this.jwtUtils = jwtUtils;
         this.userDetailsService = userDetailsService;
     }
@@ -52,13 +55,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-    final String authHeader = request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization");
         final String jwt;
         final String username;
 
         logger.debug("Incoming request {} {} - Authorization header present: {}", request.getMethod(), path, authHeader != null);
 
-        // Si no hay header o no empieza con Bearer (insensible a mayus/minus) → continuar sin validar
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
             if (authHeader != null && !authHeader.toLowerCase().startsWith("bearer ")) {
                 logger.debug("Authorization header does not start with 'Bearer ' (value='{}')", authHeader);
@@ -78,12 +80,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         logger.debug("Extracted username from token: {}", username);
 
-    // Si el usuario no está autenticado todavía (o es anónimo), autenticar por JWT
-    var currentAuth = SecurityContextHolder.getContext().getAuthentication();
-    if (username != null && (currentAuth == null || currentAuth instanceof AnonymousAuthenticationToken)) {
+        var currentAuth = SecurityContextHolder.getContext().getAuthentication();
+        if (username != null && (currentAuth == null || currentAuth instanceof AnonymousAuthenticationToken)) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            if (jwtUtils.validateToken(jwt)) {
+            if (jwtUtils.validateToken(jwt) && username.equals(userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails, null, userDetails.getAuthorities());
@@ -102,4 +103,3 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
     }
 }
-

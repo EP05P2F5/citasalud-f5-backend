@@ -1,72 +1,128 @@
 package com.feature5.pqrs.controller;
 
+import com.feature5.pqrs.DTO.PqrsRequestDTO;
+import com.feature5.pqrs.entities.Estado;
 import com.feature5.pqrs.entities.Pqrs;
+import com.feature5.pqrs.entities.Rol;
+import com.feature5.pqrs.entities.Tipo;
+import com.feature5.pqrs.entities.Usuario;
+import com.feature5.pqrs.repository.EstadoRepository;
 import com.feature5.pqrs.repository.PqrsRepository;
+import com.feature5.pqrs.repository.RolRepository;
+import com.feature5.pqrs.repository.TipoRepository;
+import com.feature5.pqrs.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 class PqrsControllerTest {
 
-    @Autowired
-    private PqrsController pqrsController;
+    @Autowired private PqrsController pqrsController;
+    @Autowired private PqrsRepository pqrsRepository;
+    @Autowired private UsuarioRepository usuarioRepository;
+    @Autowired private TipoRepository tipoRepository;
+    @Autowired private EstadoRepository estadoRepository;
+    @Autowired private RolRepository rolRepository;
 
-    @Autowired
-    private PqrsRepository pqrsRepository;
+    private Long usuarioId;
+    private Integer tipoId;
+    private Integer estadoId;
 
     @BeforeEach
     void setup() {
-        pqrsRepository.deleteAll();
+        // Limpiar todo en orden correcto
+        pqrsRepository.deleteAllInBatch();
+        usuarioRepository.deleteAllInBatch();
+        tipoRepository.deleteAllInBatch();
+        estadoRepository.deleteAllInBatch();
+        rolRepository.deleteAllInBatch();
+
+        //  Crear Rol (para cumplir FK)
+        Rol rol = new Rol();
+        rol.setDescripcion("TEST_ROLE");
+        rol = rolRepository.save(rol);
+
+        // Crear Usuario con nickname único
+        Usuario u = new Usuario();
+        u.setNombre("Test");
+        u.setApellido("User");
+        u.setNickname("testnick_" + UUID.randomUUID().toString().substring(0, 8));
+        u.setPassword("pass");
+        u.setRol(rol);
+        usuarioRepository.save(u);
+        usuarioId = u.getIdUsuario();
+
+        // Crear Tipo
+        Tipo t = new Tipo();
+        t.setDescripcion("PETICION");
+        tipoRepository.save(t);
+        tipoId = t.getIdTipo();
+
+        // Crear Estado
+        Estado e = new Estado();
+        e.setDescripcion("PENDIENTE");
+        estadoRepository.save(e);
+        estadoId = e.getIdEstado();
     }
 
     @Test
     void createAndGetFlow() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setIdUsuario(1L);
-        pqrs.setIdTipo(1);
-        pqrs.setDescripcion("Descripcion test");
-        pqrs.setFechaDeGeneracion(LocalDate.now());
-        pqrs.setRadicado("R-123");
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.estadoTexto = "PENDIENTE";
+        dto.descripcion = "Descripcion test";
+        dto.fechaDeGeneracion = LocalDateTime.now();
+        dto.radicado = "R-123";
 
-        org.springframework.http.ResponseEntity<Pqrs> createdResp = pqrsController.crearPqrs(pqrs);
+        ResponseEntity<Pqrs> createdResp = pqrsController.crearPqrs(dto);
         assertEquals(201, createdResp.getStatusCodeValue());
-        Pqrs created = createdResp.getBody();
-        assertNotNull(created);
-        Long id = created.getIdPqrs();
+        assertNotNull(createdResp.getBody());
+        Long id = createdResp.getBody().getIdPqrs();
 
-        org.springframework.http.ResponseEntity<Pqrs> fetched = pqrsController.obtenerPqrsPorId(id);
-    assertEquals(200, fetched.getStatusCodeValue());
-    assertNotNull(fetched.getBody());
-    assertEquals("Descripcion test", fetched.getBody().getDescripcion());
+        ResponseEntity<Pqrs> fetched = pqrsController.obtenerPqrsPorId(id);
+        assertEquals(200, fetched.getStatusCodeValue());
+        assertNotNull(fetched.getBody());
+        assertEquals("Descripcion test", fetched.getBody().getDescripcion());
+        assertEquals("PENDIENTE", fetched.getBody().getEstadoTexto());
+        assertEquals("R-123", fetched.getBody().getRadicado());
     }
 
     @Test
     void putAndDeleteFlows() {
-        Pqrs base = new Pqrs();
-        base.setIdUsuario(1L);
-        base.setIdTipo(1);
-        base.setDescripcion("orig");
-        base.setFechaDeGeneracion(LocalDate.now());
-        base.setRadicado("R-50");
+        // Crear base
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.estadoTexto = "PENDIENTE";
+        dto.descripcion = "orig";
+        dto.radicado = "R-50";
+        ResponseEntity<Pqrs> created = pqrsController.crearPqrs(dto);
+        Long id = created.getBody().getIdPqrs();
 
-        Pqrs saved = pqrsRepository.save(base);
-        Long id = saved.getIdPqrs();
-
-        Pqrs update = new Pqrs();
-        update.setIdUsuario(2L);
-    update.setIdTipo(2);
-        update.setDescripcion("Modificado");
-
-        org.springframework.http.ResponseEntity<Pqrs> updated = pqrsController.actualizarPqrs(id, update);
+        // Actualizar (cambiamos solo descripción/estadoTexto)
+        PqrsRequestDTO upd = new PqrsRequestDTO();
+        upd.descripcion = "Modificado";
+        upd.estadoTexto = "EN_PROCESO";
+        ResponseEntity<Pqrs> updated = pqrsController.actualizarPqrs(id, upd);
         assertEquals(200, updated.getStatusCodeValue());
+        assertEquals("Modificado", updated.getBody().getDescripcion());
+        assertEquals("EN_PROCESO", updated.getBody().getEstadoTexto());
 
-        org.springframework.http.ResponseEntity<?> deleted = pqrsController.eliminarPqrs(id);
+        // Eliminar
+        ResponseEntity<?> deleted = pqrsController.eliminarPqrs(id);
         assertEquals(200, deleted.getStatusCodeValue());
         assertFalse(pqrsRepository.existsById(id));
     }

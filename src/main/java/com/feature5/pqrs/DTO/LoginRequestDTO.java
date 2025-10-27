@@ -1,12 +1,19 @@
 package com.feature5.pqrs.DTO;
 
-
 public class LoginRequestDTO {
+
     private String nickname;
     private String password;
 
-    // Getters y setters
+    // Constructor vacío (necesario para Spring y Jackson)
+    public LoginRequestDTO() {
+    }
 
+    // Constructor con parámetros (usado en tests y llamadas manuales)
+    public LoginRequestDTO(String nickname, String password) {
+        this.nickname = nickname;
+        this.password = password;
+    }
 
     public String getNickname() {
         return nickname;
@@ -24,4 +31,3 @@ public class LoginRequestDTO {
         this.password = password;
     }
 }
-

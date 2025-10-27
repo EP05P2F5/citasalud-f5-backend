@@ -2,12 +2,11 @@ package com.feature5.pqrs.config;
 
 import com.feature5.pqrs.entities.Usuario;
 import com.feature5.pqrs.repository.UsuarioRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,33 +14,37 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
-
-    public CustomUserDetailsService(UsuarioRepository usuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
-    }
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 🔹 Usuario de prueba temporal
-        if (username.equals("admin")) {
-            return new User("admin", "{noop}1234", Collections.emptyList());
+
+        // 🔹 Admin temporal solo para pruebas locales
+        if ("admin".equals(username)) {
+            return User.builder()
+                    .username("admin")
+                    .password(passwordEncoder.encode("admin123"))
+                    .authorities(List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))
+                    .build();
         }
 
-        // 🔹 Buscar usuario real en la base de datos
+        // 🔹 Usuario real
         Usuario usuario = usuarioRepository.findByNickname(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        // 🔹 Asignar roles como authorities (vacío si no tiene rol)
-        List<GrantedAuthority> authorities = Collections.emptyList();
-        if (usuario.getRol() != null && usuario.getRol().getDescripcion() != null) {
-            authorities = List.of(new SimpleGrantedAuthority(usuario.getRol().getDescripcion()));
-        }
+        String rol = usuario.getRol() != null && usuario.getRol().getDescripcion() != null
+                ? usuario.getRol().getDescripcion().toUpperCase()
+                : "USER";
 
-        // 🔹 Retornar objeto User de Spring Security
+        if (!rol.startsWith("ROLE_")) rol = "ROLE_" + rol;
+
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(rol));
+
         return new User(usuario.getNickname(), usuario.getPassword(), authorities);
     }
 }

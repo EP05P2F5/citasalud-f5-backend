@@ -1,32 +1,40 @@
 package com.feature5.pqrs.controller;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import com.feature5.pqrs.DTO.LoginRequestDTO;
+import com.feature5.pqrs.DTO.UsuarioDTO;
+import com.feature5.pqrs.entities.Rol;
+import com.feature5.pqrs.repository.RolRepository;
+import com.feature5.pqrs.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 
-import com.feature5.pqrs.DTO.UsuarioDTO;
-import com.feature5.pqrs.entities.Rol;
-import com.feature5.pqrs.repository.RolRepository;
-import com.feature5.pqrs.repository.UsuarioRepository;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+/**
+ * Prueba integral del flujo de usuario:
+ * Registrar -> Login exitoso -> Login fallido -> Listar -> Buscar.
+ */
 @SpringBootTest
 class UsuarioControllerTest {
 
     @Autowired
-    UsuarioController usuarioController;
+    private UsuarioController usuarioController;
 
     @Autowired
-    UsuarioRepository usuarioRepository;
+    private AuthController authController;
 
     @Autowired
-    RolRepository rolRepository;
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private RolRepository rolRepository;
 
     @BeforeEach
     void setup() {
@@ -36,14 +44,16 @@ class UsuarioControllerTest {
 
     @Test
     void registerLoginListAndFind() {
+        // 1️⃣ Crear y guardar rol base
         Rol rol = new Rol();
-        rol.setDescripcion("ROLE_USER");
+        rol.setDescripcion("USER");
         rol = rolRepository.save(rol);
 
+        // 2️⃣ Crear DTO del nuevo usuario
         UsuarioDTO dto = new UsuarioDTO();
         dto.setNombre("Test");
         dto.setApellido("User");
-        dto.setFechaDeNacimiento(LocalDate.of(1990,1,1));
+        dto.setFechaDeNacimiento(LocalDate.of(1990, 1, 1));
         dto.setDireccion("Calle 1");
         dto.setEmail("test@example.com");
         dto.setTelefono("123456");
@@ -51,26 +61,46 @@ class UsuarioControllerTest {
         dto.setPassword("pass123");
         dto.setRol(rol);
 
+        // 3️⃣ Registrar usuario
         ResponseEntity<UsuarioDTO> created = usuarioController.registrar(dto);
-        assertEquals(200, created.getStatusCodeValue());
-        assertNotNull(created.getBody());
-        assertNotNull(created.getBody().getIdUsuario());
+        assertEquals(200, created.getStatusCodeValue(), "El registro del usuario falló");
+        assertNotNull(created.getBody(), "El cuerpo de la respuesta no debe ser nulo");
+        assertNotNull(created.getBody().getIdUsuario(), "El usuario creado debe tener ID");
 
-        // successful login
-        ResponseEntity<UsuarioDTO> loginOk = usuarioController.login("testnick", "pass123");
-        assertEquals(200, loginOk.getStatusCodeValue());
+        // 4️⃣ Login exitoso (AuthController + JWT)
+        ResponseEntity<?> loginOk = authController.login(
+                new LoginRequestDTO("testnick", "pass123")
+        );
+        assertEquals(200, loginOk.getStatusCodeValue(), "El login debería ser exitoso");
+        assertTrue(loginOk.getBody() instanceof Map, "La respuesta del login debe ser un Map");
 
-        // failed login
-        ResponseEntity<UsuarioDTO> loginFail = usuarioController.login("testnick", "wrong");
-        assertEquals(401, loginFail.getStatusCodeValue());
+        Map<?, ?> okBody = (Map<?, ?>) loginOk.getBody();
 
-        // list
+        // Validaciones alineadas al AuthController actual
+        assertTrue(okBody.containsKey("token"), "La respuesta del login debe incluir un token");
+        assertTrue(okBody.containsKey("username"), "La respuesta del login debe incluir un username");
+        assertEquals("testnick", okBody.get("username"), "El username devuelto debe coincidir");
+        assertNotNull(okBody.get("token"), "El token JWT no debe ser nulo");
+
+        // Si falla por credenciales inválidas, mostrar contenido para diagnóstico
+        if (loginOk.getStatusCodeValue() != 200) {
+            System.out.println("Respuesta del login fallido (debug): " + okBody);
+        }
+
+        // 5️⃣ Login incorrecto (contraseña inválida)
+        ResponseEntity<?> loginFail = authController.login(
+                new LoginRequestDTO("testnick", "wrong")
+        );
+        assertEquals(401, loginFail.getStatusCodeValue(), "El login con contraseña incorrecta debe devolver 401");
+
+        // 6️⃣ Listar usuarios
         ResponseEntity<List<UsuarioDTO>> list = usuarioController.listar();
-        assertEquals(1, list.getBody().size());
+        assertEquals(1, list.getBody().size(), "Debe haber exactamente un usuario registrado");
+        assertEquals("testnick", list.getBody().get(0).getNickname(), "El nickname del usuario listado debe coincidir");
 
-        // find by nickname
+        // 7️⃣ Buscar por nickname
         ResponseEntity<UsuarioDTO> found = usuarioController.buscarPorNickname("testnick");
-        assertEquals(200, found.getStatusCodeValue());
-        assertEquals("testnick", found.getBody().getNickname());
+        assertEquals(200, found.getStatusCodeValue(), "El usuario debería encontrarse por nickname");
+        assertEquals("testnick", found.getBody().getNickname(), "El nickname del usuario encontrado debe coincidir");
     }
 }

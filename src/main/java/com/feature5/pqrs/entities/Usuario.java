@@ -18,7 +18,6 @@ public class Usuario {
     @Column(name = "apellido", nullable = false, length = 100)
     private String apellido;
 
-    // Date -> LocalDate (mapeará a DATE en Postgres)
     @Column(name = "fechadenacimiento")
     private LocalDate fechaDeNacimiento;
 
@@ -46,6 +45,11 @@ public class Usuario {
     // Getters y setters
     public Long getIdUsuario() {
         return idUsuario;
+    }
+
+    // ✅ Setter agregado para permitir asignar ID manualmente en tests o mapeos
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getNombre() {

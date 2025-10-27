@@ -1,26 +1,41 @@
 package com.feature5.pqrs.mapper;
 
 import com.feature5.pqrs.DTO.PqrsDTO;
+import com.feature5.pqrs.entities.Estado;
 import com.feature5.pqrs.entities.Pqrs;
+import com.feature5.pqrs.entities.Tipo;
+import com.feature5.pqrs.entities.Usuario;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PqrsMapperTest {
 
+    private final PqrsMapper mapper = Mappers.getMapper(PqrsMapper.class);
+
     @Test
     void toDTO_shouldMapFields() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setIdUsuario(42L);
-        pqrs.setIdTipo(1);
-        pqrs.setDescripcion("desc prueba");
-        pqrs.setFechaDeGeneracion(LocalDate.of(2024,1,2));
-        pqrs.setRadicado("RAD-123");
-        pqrs.setEstado("PENDIENTE");
+        Usuario usuario = new Usuario();
+        usuario.setIdUsuario(42L);
 
-        PqrsDTO dto = PqrsMapper.INSTANCE.toDTO(pqrs);
+        Tipo tipo = new Tipo();
+        tipo.setIdTipo(1);
+
+        Estado estado = new Estado();
+        estado.setDescripcion("PENDIENTE");
+
+        Pqrs pqrs = new Pqrs();
+        pqrs.setUsuario(usuario);
+        pqrs.setTipo(tipo);
+        pqrs.setDescripcion("desc prueba");
+        pqrs.setFechaDeGeneracion(LocalDateTime.of(2024, 1, 2, 0, 0));
+        pqrs.setRadicado("RAD-123");
+        pqrs.setEstado(estado);
+
+        PqrsDTO dto = mapper.toDTO(pqrs);
 
         assertNotNull(dto);
         assertEquals(42L, dto.getIdUsuario());
@@ -39,13 +54,13 @@ class PqrsMapperTest {
         dto.setRadicado("RAD-999");
         dto.setEstado("CERRADO");
 
-        Pqrs entity = PqrsMapper.INSTANCE.toEntity(dto);
+        Pqrs entity = mapper.toEntity(dto);
 
         assertNotNull(entity);
-        assertEquals(99L, entity.getIdUsuario());
-        assertEquals(2, entity.getIdTipo());
         assertEquals("otra descripcion", entity.getDescripcion());
         assertEquals("RAD-999", entity.getRadicado());
-        assertEquals("CERRADO", entity.getEstado());
+        assertNotNull(entity.getEstado());
+        assertEquals("CERRADO", entity.getEstado().getDescripcion());
+        assertEquals("CERRADO", entity.getEstadoTexto());
     }
 }
