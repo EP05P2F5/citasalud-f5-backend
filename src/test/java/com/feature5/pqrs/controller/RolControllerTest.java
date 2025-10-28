@@ -25,9 +25,9 @@ class RolControllerTest {
 
     @Test
     void crudRole() {
-    // eliminar usuarios primero para evitar violaciones de FK (usuario.idrol -> rol.idrol)
-    usuarioRepository.deleteAll();
-    rolRepository.deleteAll();
+        // eliminar usuarios primero para evitar violaciones de FK (usuario.idrol -> rol.idrol)
+        usuarioRepository.deleteAll();
+        rolRepository.deleteAll();
 
         Rol r = new Rol();
         r.setDescripcion("Admin role");
@@ -51,5 +51,16 @@ class RolControllerTest {
 
         assertEquals(200, rolController.eliminarRol(id).getStatusCodeValue());
         assertFalse(rolRepository.existsById(id));
+    }
+
+    @Test
+    void testErroresBasicos() {
+        usuarioRepository.deleteAll();
+        rolRepository.deleteAll();
+
+        // 404s: obtener, actualizar, eliminar inexistente
+        assertEquals(404, rolController.obtenerRolPorId(99999L).getStatusCodeValue());
+        assertEquals(404, rolController.actualizarRol(99999L, new Rol()).getStatusCodeValue());
+        assertEquals(404, rolController.eliminarRol(99999L).getStatusCodeValue());
     }
 }

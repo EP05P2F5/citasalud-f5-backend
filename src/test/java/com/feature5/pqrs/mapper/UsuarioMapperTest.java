@@ -44,4 +44,60 @@ public class UsuarioMapperTest {
         assertEquals(user.getEmail(), resp.getEmail());
         assertEquals(user.getRol(), resp.getRol());
     }
+
+    @Test
+    public void testToEntity_DebeMappearCorrectamente() {
+        UsuarioMapper mapper = UsuarioMapper.INSTANCE;
+
+        Rol rol = new Rol();
+        rol.setIdRol(3L);
+        rol.setDescripcion("ADMIN");
+
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setIdUsuario(1L);
+        dto.setNombre("Maria");
+        dto.setApellido("Garcia");
+        dto.setEmail("maria@example.com");
+        dto.setNickname("mariag");
+        dto.setPassword("pass456");
+        dto.setTelefono("67890");
+        dto.setFechaDeNacimiento(LocalDate.of(1995, 5, 15));
+        dto.setRol(rol);
+
+        Usuario entity = mapper.toEntity(dto);
+
+        assertNotNull(entity);
+        assertEquals("Maria", entity.getNombre());
+        assertEquals("Garcia", entity.getApellido());
+        assertEquals("maria@example.com", entity.getEmail());
+        assertEquals("mariag", entity.getNickname());
+        assertEquals("pass456", entity.getPassword());
+        assertEquals("67890", entity.getTelefono());
+        assertEquals(LocalDate.of(1995, 5, 15), entity.getFechaDeNacimiento());
+        assertEquals(rol, entity.getRol());
+    }
+
+    @Test
+    public void testToDTO_ConNulos_DebeRetornarNull() {
+        UsuarioMapper mapper = UsuarioMapper.INSTANCE;
+        
+        UsuarioDTO dto = mapper.toDTO(null);
+        assertNull(dto);
+    }
+
+    @Test
+    public void testToEntity_ConNulos_DebeRetornarNull() {
+        UsuarioMapper mapper = UsuarioMapper.INSTANCE;
+        
+        Usuario entity = mapper.toEntity(null);
+        assertNull(entity);
+    }
+
+    @Test
+    public void testToResponseDTO_ConNulos_DebeRetornarNull() {
+        UsuarioMapper mapper = UsuarioMapper.INSTANCE;
+        
+        UsuarioResponseDTO resp = mapper.toResponseDTO(null);
+        assertNull(resp);
+    }
 }

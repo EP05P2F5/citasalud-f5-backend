@@ -59,25 +59,31 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
-    void loadUserWithoutRoleReturnsNoAuthorities() {
-        // En H2 la columna idrol no permite NULL, así que este caso no es realista
-        // Podemos eliminar este test o crear un rol vacío
+    void loadAdminUserReturnsAdminAuthority() {
+        // Test del usuario admin hardcodeado
+        UserDetails details = service.loadUserByUsername("admin");
+        assertEquals("admin", details.getUsername());
+        assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
+        assertEquals(1, details.getAuthorities().size());
+    }
+
+    @Test
+    void loadUserWithRolSinPrefixoROLE_DebeAgregarPrefijo() {
         Rol rol = new Rol();
-        rol.setDescripcion("ROLE_NONE");
-        rolRepository.save(rol);
+        rol.setDescripcion("USER"); // Sin prefijo ROLE_
+        rol = rolRepository.save(rol);
 
         Usuario u = new Usuario();
-        u.setNombre("Carol");
+        u.setNombre("David");
         u.setApellido("Test");
-        u.setNickname("carol");
+        u.setNickname("david");
         u.setPassword("encoded");
-        u.setEmail("carol@example.com");
-        u.setRol(rol); // Con rol pero sin authorities
+        u.setEmail("david@example.com");
+        u.setRol(rol);
         usuarioRepository.save(u);
 
-        UserDetails details = service.loadUserByUsername("carol");
-        assertEquals("carol", details.getUsername());
-        assertEquals(1, details.getAuthorities().size());
-        assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_NONE")));
+        UserDetails details = service.loadUserByUsername("david");
+        assertEquals("david", details.getUsername());
+        assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
     }
 }

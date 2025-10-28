@@ -106,4 +106,15 @@ class AuthControllerTest {
         ResponseEntity<?> resp = authController.login(new LoginRequestDTO("failnick", "wrongpass"));
         assertEquals(401, resp.getStatusCodeValue(), "Con password errónea debe responder 401");
     }
+
+    @Test
+    void login_fail_userNotFound_returns401() {
+        // Intentar login con usuario inexistente
+        ResponseEntity<?> resp = authController.login(new LoginRequestDTO("noexiste", "pass123"));
+        assertEquals(401, resp.getStatusCodeValue(), "Usuario no encontrado debe responder 401");
+        
+        assertTrue(resp.getBody() instanceof Map, "El body debe ser un Map");
+        Map<?, ?> body = (Map<?, ?>) resp.getBody();
+        assertTrue(body.containsKey("error"), "Debe incluir mensaje de error");
+    }
 }

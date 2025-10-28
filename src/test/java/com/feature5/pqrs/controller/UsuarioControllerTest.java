@@ -102,5 +102,9 @@ class UsuarioControllerTest {
         ResponseEntity<UsuarioDTO> found = usuarioController.buscarPorNickname("testnick");
         assertEquals(200, found.getStatusCodeValue(), "El usuario debería encontrarse por nickname");
         assertEquals("testnick", found.getBody().getNickname(), "El nickname del usuario encontrado debe coincidir");
+
+        // 8️⃣ Buscar usuario inexistente debe retornar 404
+        ResponseEntity<UsuarioDTO> notFound = usuarioController.buscarPorNickname("usuarioinexistente");
+        assertEquals(404, notFound.getStatusCodeValue(), "Buscar un usuario inexistente debe retornar 404");
     }
 }
