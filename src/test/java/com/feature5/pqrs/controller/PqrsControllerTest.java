@@ -102,11 +102,16 @@ class PqrsControllerTest {
         dto.radicado = "R-50";
         Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
 
+        // Actualizar solo descripción (sin cambiar IDs)
         PqrsRequestDTO upd = new PqrsRequestDTO();
         upd.descripcion = "Modificado";
+        upd.estadoTexto = "ACTUALIZADO";
+        upd.radicado = "R-51";
         ResponseEntity<Pqrs> updated = pqrsController.actualizarPqrs(id, upd);
         assertEquals(200, updated.getStatusCodeValue());
         assertEquals("Modificado", updated.getBody().getDescripcion());
+        assertEquals("ACTUALIZADO", updated.getBody().getEstadoTexto());
+        assertEquals("R-51", updated.getBody().getRadicado());
 
         pqrsController.eliminarPqrs(id);
         assertFalse(pqrsRepository.existsById(id));
@@ -179,8 +184,21 @@ class PqrsControllerTest {
         Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
         
         java.util.Map<String, String> respuestaVacia = new java.util.HashMap<>();
-        respuestaVacia.put("respuesta", "");
+        respuestaVacia.put("respuesta", "   ");
         assertEquals(400, pqrsController.responderPqrs(id, respuestaVacia).getStatusCodeValue());
+
+        // Test 400 al actualizar con IDs inválidos
+        PqrsRequestDTO invalido = new PqrsRequestDTO();
+        invalido.usuarioId = 99999L;
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
+
+        invalido = new PqrsRequestDTO();
+        invalido.tipoId = 99999;
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
+
+        invalido = new PqrsRequestDTO();
+        invalido.estadoId = 99999;
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
     }
 }
 

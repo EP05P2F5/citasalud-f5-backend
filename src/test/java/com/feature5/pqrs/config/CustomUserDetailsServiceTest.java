@@ -40,22 +40,40 @@ class CustomUserDetailsServiceTest {
 
     @Test
     void loadUserWithRoleCreatesAuthorities() {
-        Rol rol = new Rol();
-        rol.setDescripcion("ROLE_TEST");
-        rol = rolRepository.save(rol);
+        Rol rolConPrefijo = new Rol();
+        rolConPrefijo.setDescripcion("ROLE_TEST");
+        rolConPrefijo = rolRepository.save(rolConPrefijo);
 
-        Usuario u = new Usuario();
-        u.setNombre("Bob");
-        u.setApellido("Test");
-        u.setNickname("bob");
-        u.setPassword("encoded");
-        u.setEmail("bob@example.com");
-        u.setRol(rol);
-        usuarioRepository.save(u);
+        Usuario u1 = new Usuario();
+        u1.setNombre("Bob");
+        u1.setApellido("Test");
+        u1.setNickname("bob");
+        u1.setPassword("encoded");
+        u1.setEmail("bob@example.com");
+        u1.setRol(rolConPrefijo);
+        usuarioRepository.save(u1);
 
         UserDetails details = service.loadUserByUsername("bob");
         assertEquals("bob", details.getUsername());
         assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_TEST")));
+
+        // También probar que roles sin prefijo ROLE_ lo agregan automáticamente
+        Rol rolSinPrefijo = new Rol();
+        rolSinPrefijo.setDescripcion("USER");
+        rolSinPrefijo = rolRepository.save(rolSinPrefijo);
+
+        Usuario u2 = new Usuario();
+        u2.setNombre("David");
+        u2.setApellido("Test");
+        u2.setNickname("david");
+        u2.setPassword("encoded");
+        u2.setEmail("david@example.com");
+        u2.setRol(rolSinPrefijo);
+        usuarioRepository.save(u2);
+
+        UserDetails details2 = service.loadUserByUsername("david");
+        assertEquals("david", details2.getUsername());
+        assertTrue(details2.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
     }
 
     @Test
@@ -65,25 +83,5 @@ class CustomUserDetailsServiceTest {
         assertEquals("admin", details.getUsername());
         assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
         assertEquals(1, details.getAuthorities().size());
-    }
-
-    @Test
-    void loadUserWithRolSinPrefixoROLE_DebeAgregarPrefijo() {
-        Rol rol = new Rol();
-        rol.setDescripcion("USER"); // Sin prefijo ROLE_
-        rol = rolRepository.save(rol);
-
-        Usuario u = new Usuario();
-        u.setNombre("David");
-        u.setApellido("Test");
-        u.setNickname("david");
-        u.setPassword("encoded");
-        u.setEmail("david@example.com");
-        u.setRol(rol);
-        usuarioRepository.save(u);
-
-        UserDetails details = service.loadUserByUsername("david");
-        assertEquals("david", details.getUsername());
-        assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
     }
 }

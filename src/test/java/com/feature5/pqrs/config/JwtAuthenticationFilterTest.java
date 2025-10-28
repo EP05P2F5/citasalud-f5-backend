@@ -87,4 +87,12 @@ class JwtAuthenticationFilterTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
+
+    @Test
+    void invalidTokenIsRejected() throws Exception {
+        // Token malformado debe ser rechazado
+        mockMvc.perform(get("/api/test/secure")
+                        .header("Authorization", "Bearer malformed"))
+                .andExpect(status().is4xxClientError());
+    }
 }

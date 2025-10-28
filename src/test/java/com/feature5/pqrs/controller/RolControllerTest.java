@@ -25,7 +25,6 @@ class RolControllerTest {
 
     @Test
     void crudRole() {
-        // eliminar usuarios primero para evitar violaciones de FK (usuario.idrol -> rol.idrol)
         usuarioRepository.deleteAll();
         rolRepository.deleteAll();
 

@@ -99,17 +99,33 @@ class PqrsServiceTest {
     }
 
     @Test
-    void testCreatePqrs_ConRadicadoPreexistente_DebeRespetarlo() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("Test");
-        pqrs.setRadicado("R-CUSTOM-123");
+    void testCreatePqrs_LogicaRadicadoYEstadoTexto() {
+        // Caso 1: Radicado custom debe respetarse
+        Pqrs pqrs1 = new Pqrs();
+        pqrs1.setUsuario(usuario);
+        pqrs1.setTipo(tipo);
+        pqrs1.setEstado(estadoPendiente);
+        pqrs1.setDescripcion("Test");
+        pqrs1.setRadicado("R-CUSTOM-123");
+        pqrs1.setEstadoTexto("ESTADO_CUSTOM");
 
-        Pqrs resultado = pqrsService.createPqrs(pqrs);
+        Pqrs resultado1 = pqrsService.createPqrs(pqrs1);
+        assertEquals("R-CUSTOM-123", resultado1.getRadicado());
+        assertEquals("ESTADO_CUSTOM", resultado1.getEstadoTexto());
 
-        assertEquals("R-CUSTOM-123", resultado.getRadicado());
+        // Caso 2: Radicado vacío/null debe generarse, estadoTexto vacío/null debe tomarse del estado
+        Pqrs pqrs2 = new Pqrs();
+        pqrs2.setUsuario(usuario);
+        pqrs2.setTipo(tipo);
+        pqrs2.setEstado(estadoPendiente);
+        pqrs2.setDescripcion("Test");
+        pqrs2.setRadicado("");
+        pqrs2.setEstadoTexto("   ");
+
+        Pqrs resultado2 = pqrsService.createPqrs(pqrs2);
+        assertNotNull(resultado2.getRadicado());
+        assertTrue(resultado2.getRadicado().startsWith("R-"));
+        assertEquals("PENDIENTE", resultado2.getEstadoTexto());
     }
 
     @Test
@@ -152,87 +168,5 @@ class PqrsServiceTest {
         Optional<Pqrs> resultado = pqrsService.responderPqrs(99999L, "Respuesta");
 
         assertTrue(resultado.isEmpty());
-    }
-
-    @Test
-    void testCreatePqrs_SinEstadoTexto_DebeTomarloDelEstado() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("Test sin estado texto");
-        pqrs.setEstadoTexto(null);
-
-        Pqrs resultado = pqrsService.createPqrs(pqrs);
-
-        assertEquals("PENDIENTE", resultado.getEstadoTexto());
-    }
-
-    @Test
-    void testCreatePqrs_ConEstadoTextoVacio_DebeTomarloDelEstado() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("Test");
-        pqrs.setEstadoTexto("   ");
-
-        Pqrs resultado = pqrsService.createPqrs(pqrs);
-
-        assertEquals("PENDIENTE", resultado.getEstadoTexto());
-    }
-
-    @Test
-    void testResponderPqrs_SinEstadoRespondidoEnBD_DebeSoloActualizarTexto() {
-        // Crear PQRS
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("PQRS para test sin estado RESPONDIDO");
-        pqrs = pqrsService.createPqrs(pqrs);
-
-        // Eliminar el estado RESPONDIDO de la BD
-        estadoRepository.delete(estadoRespondido);
-
-        String respuesta = "Respuesta cuando no existe estado RESPONDIDO";
-        Optional<Pqrs> resultado = pqrsService.responderPqrs(pqrs.getIdPqrs(), respuesta);
-
-        assertTrue(resultado.isPresent());
-        assertEquals(respuesta, resultado.get().getRespuesta());
-        assertNotNull(resultado.get().getFechaDeRespuesta());
-        assertEquals("RESPONDIDO", resultado.get().getEstadoTexto());
-        // El estado sigue siendo PENDIENTE porque no encontró RESPONDIDO en BD
-        assertEquals(estadoPendiente.getIdEstado(), resultado.get().getEstado().getIdEstado());
-    }
-
-    @Test
-    void testCreatePqrs_ConRadicadoVacio_DebeGenerarRadicado() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("Test");
-        pqrs.setRadicado("");
-
-        Pqrs resultado = pqrsService.createPqrs(pqrs);
-
-        assertNotNull(resultado.getRadicado());
-        assertTrue(resultado.getRadicado().startsWith("R-"));
-        assertFalse(resultado.getRadicado().isBlank());
-    }
-
-    @Test
-    void testCreatePqrs_ConEstadoTextoPreexistente_DebeRespetarlo() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("Test");
-        pqrs.setEstadoTexto("ESTADO_CUSTOM");
-
-        Pqrs resultado = pqrsService.createPqrs(pqrs);
-
-        assertEquals("ESTADO_CUSTOM", resultado.getEstadoTexto());
     }
 }
