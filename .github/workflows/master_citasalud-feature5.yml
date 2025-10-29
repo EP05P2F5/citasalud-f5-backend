@@ -51,12 +51,6 @@ jobs:
       - name: Run Tests with coverage
         run: mvn -B clean verify jacoco:report
 
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifact
-          path: target/pqrs-0.0.1-SNAPSHOT.jar
-
       - name: Run SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -106,7 +100,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Confirm image pushed
-        run: echo "Imagen Docker subida a Docker Hub (quirama11/pqrs-backend:latest)"
+        run: echo "✅ Imagen Docker subida a Docker Hub (quirama11/pqrs-backend:latest)"
 
 
   # ---------------------------
