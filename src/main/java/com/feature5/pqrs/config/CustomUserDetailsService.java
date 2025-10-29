@@ -24,16 +24,21 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        // 🔹 Admin temporal solo para pruebas locales
+        // Admin temporal solo para pruebas locales
         if ("admin".equals(username)) {
+            String adminPassword = System.getenv("ADMIN_PASSWORD");
+            if (adminPassword == null) {
+                throw new IllegalStateException("ADMIN_PASSWORD not configured in environment");
+            }
+
             return User.builder()
                     .username("admin")
-                    .password(passwordEncoder.encode("admin123"))
+                    .password(passwordEncoder.encode(adminPassword))
                     .authorities(List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .build();
         }
 
-        // 🔹 Usuario real
+        // Usuario real
         Usuario usuario = usuarioRepository.findByNickname(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 

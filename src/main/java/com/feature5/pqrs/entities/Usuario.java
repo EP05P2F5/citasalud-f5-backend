@@ -40,14 +40,16 @@ public class Usuario {
     @JoinColumn(name = "idrol", nullable = false)
     private Rol rol;
 
-    public Usuario() { }
+    public Usuario() {
+        // Constructor vacío requerido por JPA para la creación de proxies y entidades.
+        }
 
     // Getters y setters
     public Long getIdUsuario() {
         return idUsuario;
     }
 
-    // ✅ Setter agregado para permitir asignar ID manualmente en tests o mapeos
+    // Setter agregado para permitir asignar ID manualmente en tests o mapeos
     public void setIdUsuario(Long idUsuario) {
         this.idUsuario = idUsuario;
     }

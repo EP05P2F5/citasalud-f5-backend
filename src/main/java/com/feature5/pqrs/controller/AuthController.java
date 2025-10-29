@@ -2,6 +2,7 @@ package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
 import com.feature5.pqrs.config.JwtUtils;
+import com.feature5.pqrs.constants.ResponseKeys;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.entities.Usuario;
 import com.feature5.pqrs.repository.UsuarioRepository;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.feature5.pqrs.constants.ResponseKeys.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -31,7 +34,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Transactional(readOnly = true)  // 👈 mantiene sesión activa mientras accedemos al rol
+    @Transactional(readOnly = true)
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
         try {
             // Buscar usuario
@@ -39,13 +42,13 @@ public class AuthController {
                     .orElse(null);
             if (usuario == null) {
                 return ResponseEntity.status(401)
-                        .body(Map.of("error", "Usuario no encontrado"));
+                        .body(Map.of(ERROR, "Usuario no encontrado"));
             }
 
             // Validar contraseña encriptada
             if (!passwordEncoder.matches(loginRequest.getPassword(), usuario.getPassword())) {
                 return ResponseEntity.status(401)
-                        .body(Map.of("error", "Credenciales inválidas"));
+                        .body(Map.of(ERROR, "Credenciales inválidas"));
             }
 
             // Forzar inicialización del rol para evitar LazyInitializationException
@@ -57,20 +60,20 @@ public class AuthController {
 
             // Construir respuesta
             Map<String, Object> response = new HashMap<>();
-            response.put("token", token);
-            response.put("username", usuario.getNickname());
-            response.put("rol", rolDescripcion);
-            response.put("email", usuario.getEmail());
+            response.put(TOKEN, token);
+            response.put(USERNAME, usuario.getNickname());
+            response.put(ROLE, rolDescripcion);
+            response.put(EMAIL, usuario.getEmail());
 
             return ResponseEntity.ok(response);
 
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(401)
-                    .body(Map.of("error", "Credenciales inválidas"));
+                    .body(Map.of(ERROR, "Credenciales inválidas"));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500)
-                    .body(Map.of("error", "Error interno: " + e.getClass().getSimpleName() + " - " + e.getMessage()));
+                    .body(Map.of(ERROR, "Error interno: " + e.getClass().getSimpleName() + " - " + e.getMessage()));
         }
     }
 }

@@ -93,26 +93,19 @@ public class PqrsController {
     @Transactional
     public ResponseEntity<Pqrs> actualizarPqrs(@PathVariable Long id, @RequestBody PqrsRequestDTO dto) {
         Optional<Pqrs> optional = pqrsRepository.findById(id);
-        if (optional.isEmpty()) return ResponseEntity.notFound().build();
+        if (optional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
         Pqrs existing = optional.get();
 
-        if (dto.usuarioId != null) {
-            Usuario u = usuarioRepository.findById(dto.usuarioId).orElse(null);
-            if (u == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            existing.setUsuario(u);
-        }
-        if (dto.tipoId != null) {
-            Tipo t = tipoRepository.findById(dto.tipoId).orElse(null);
-            if (t == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            existing.setTipo(t);
-        }
-        if (dto.estadoId != null) {
-            Estado e = estadoRepository.findById(dto.estadoId).orElse(null);
-            if (e == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-            existing.setEstado(e);
-        }
+        // Validaciones y asignaciones simplificadas
+        ResponseEntity<Pqrs> errorResponse;
+        if ((errorResponse = validarYAsignarUsuario(dto, existing)) != null) return errorResponse;
+        if ((errorResponse = validarYAsignarTipo(dto, existing)) != null) return errorResponse;
+        if ((errorResponse = validarYAsignarEstado(dto, existing)) != null) return errorResponse;
 
+        // Asignación directa de campos simples
         if (dto.estadoTexto != null) existing.setEstadoTexto(dto.estadoTexto);
         if (dto.descripcion != null) existing.setDescripcion(dto.descripcion);
         if (dto.fechaDeGeneracion != null) existing.setFechaDeGeneracion(dto.fechaDeGeneracion);
@@ -122,6 +115,31 @@ public class PqrsController {
 
         Pqrs updated = pqrsRepository.save(existing);
         return ResponseEntity.ok(updated);
+    }
+
+    // Métodos privados auxiliares para reducir complejidad
+    private ResponseEntity<Pqrs> validarYAsignarUsuario(PqrsRequestDTO dto, Pqrs existing) {
+        if (dto.usuarioId == null) return null;
+        Usuario u = usuarioRepository.findById(dto.usuarioId).orElse(null);
+        if (u == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        existing.setUsuario(u);
+        return null;
+    }
+
+    private ResponseEntity<Pqrs> validarYAsignarTipo(PqrsRequestDTO dto, Pqrs existing) {
+        if (dto.tipoId == null) return null;
+        Tipo t = tipoRepository.findById(dto.tipoId).orElse(null);
+        if (t == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        existing.setTipo(t);
+        return null;
+    }
+
+    private ResponseEntity<Pqrs> validarYAsignarEstado(PqrsRequestDTO dto, Pqrs existing) {
+        if (dto.estadoId == null) return null;
+        Estado e = estadoRepository.findById(dto.estadoId).orElse(null);
+        if (e == null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        existing.setEstado(e);
+        return null;
     }
 
     // Eliminar PQRS

@@ -38,23 +38,23 @@ public class UsuarioService {
      * Registra un nuevo usuario, encriptando la contraseña y asignando correctamente el rol.
      */
     public UsuarioDTO registrarUsuario(UsuarioDTO usuarioDTO) {
-        // 🔍 Verificar si el correo o nickname ya existen
+        // Verificar si el correo o nickname ya existen
         if (usuarioRepository.existsByEmail(usuarioDTO.getEmail())) {
-            log.warn("Intento de registro con un email ya existente: {}", usuarioDTO.getEmail());
-            throw new IllegalArgumentException("El correo ya está registrado: " + usuarioDTO.getEmail());
+            log.warn("Intento de registro con un email ya existente (valor no mostrado por seguridad)");
+            throw new IllegalArgumentException("El correo ya está registrado.");
         }
 
         if (usuarioRepository.existsByNickname(usuarioDTO.getNickname())) {
-            log.warn("Intento de registro con un nickname ya existente: {}", usuarioDTO.getNickname());
-            throw new IllegalArgumentException("El nickname ya está registrado: " + usuarioDTO.getNickname());
+            log.warn("Intento de registro con un nickname ya existente (valor no mostrado por seguridad)");
+            throw new IllegalArgumentException("El nickname ya está registrado.");
         }
 
         Usuario usuario = usuarioMapper.toEntity(usuarioDTO);
 
-        //  Encriptar la contraseña antes de guardar
+        // Encriptar la contraseña antes de guardar
         usuario.setPassword(passwordEncoder.encode(usuarioDTO.getPassword()));
 
-        //  Asignar o crear el rol correspondiente
+        // Asignar o crear el rol correspondiente
         if (usuario.getRol() != null && usuario.getRol().getDescripcion() != null) {
             String descripcion = usuario.getRol().getDescripcion();
 
@@ -70,8 +70,7 @@ public class UsuarioService {
         }
 
         usuario = usuarioRepository.save(usuario);
-        log.info(" Usuario '{}' creado correctamente con rol '{}'.",
-                usuario.getEmail(),
+        log.info("Usuario creado correctamente con rol '{}'.",
                 usuario.getRol() != null ? usuario.getRol().getDescripcion() : "Sin rol");
 
         return usuarioMapper.toDTO(usuario);
@@ -88,13 +87,13 @@ public class UsuarioService {
 
             // Compara la contraseña ingresada con la encriptada en la BD
             if (passwordEncoder.matches(password, usuario.getPassword())) {
-                log.info("Inicio de sesión exitoso para el usuario '{}'.", nickname);
+                log.info("Inicio de sesión exitoso (usuario no mostrado por seguridad)");
                 return usuarioMapper.toDTO(usuario);
             } else {
-                log.warn("Intento de inicio de sesión fallido: contraseña incorrecta para '{}'.", nickname);
+                log.warn("Intento de inicio de sesión fallido: contraseña incorrecta (usuario no mostrado por seguridad)");
             }
         } else {
-            log.warn("Intento de inicio de sesión fallido: usuario '{}' no encontrado.", nickname);
+            log.warn("Intento de inicio de sesión fallido: usuario no encontrado (valor no mostrado por seguridad)");
         }
 
         return null; // Credenciales incorrectas
@@ -118,13 +117,12 @@ public class UsuarioService {
     public UsuarioDTO buscarPorNickname(String nickname) {
         return usuarioRepository.findByNickname(nickname)
                 .map(usuario -> {
-                    log.info("Usuario '{}' encontrado correctamente.", nickname);
+                    log.info("Usuario encontrado correctamente (valor no mostrado por seguridad)");
                     return usuarioMapper.toDTO(usuario);
                 })
                 .orElseGet(() -> {
-                    log.warn("Usuario '{}' no encontrado.", nickname);
+                    log.warn("Usuario no encontrado (valor no mostrado por seguridad)");
                     return null;
                 });
     }
 }
-

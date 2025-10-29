@@ -26,7 +26,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Se marca como Lazy para evitar ciclo con CustomUserDetailsService
     private final UserDetailsService userDetailsService;
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+    // Renombrado para evitar shadowing con GenericFilterBean.logger
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
     // Rutas públicas que no deben requerir token
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
@@ -35,6 +36,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/usuarios/register",
             "/api/test/public"
     );
+
 
     public JwtAuthenticationFilter(JwtUtils jwtUtils, @Lazy UserDetailsService userDetailsService) {
         this.jwtUtils = jwtUtils;
@@ -59,11 +61,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String username;
 
-        logger.debug("Incoming request {} {} - Authorization header present: {}", request.getMethod(), path, authHeader != null);
+        log.debug("Incoming request {} {} - Authorization header present: {}", request.getMethod(), path, authHeader != null);
 
         if (authHeader == null || !authHeader.toLowerCase().startsWith("bearer ")) {
             if (authHeader != null && !authHeader.toLowerCase().startsWith("bearer ")) {
-                logger.debug("Authorization header does not start with 'Bearer ' (value='{}')", authHeader);
+                log.debug("Authorization header does not start with 'Bearer ' (value='{}')", authHeader);
             }
             filterChain.doFilter(request, response);
             return;
@@ -73,17 +75,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             username = jwtUtils.extractUsername(jwt);
         } catch (Exception e) {
-            logger.info("Failed to extract username from token: {}", e.getMessage());
+            log.info("Failed to extract username from token: {}", e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }
 
-        logger.debug("Extracted username from token: {}", username);
+        log.debug("Extracted username from token: {}", username);
 
         var currentAuth = SecurityContextHolder.getContext().getAuthentication();
         if (username != null && (currentAuth == null || currentAuth instanceof AnonymousAuthenticationToken)) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
             if (jwtUtils.validateToken(jwt) && username.equals(userDetails.getUsername())) {
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
@@ -91,10 +92,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                logger.debug("JWT validated and authentication set for user={}", username);
+                log.debug("JWT validated and authentication set for user={}", username);
             }
         }
-
         filterChain.doFilter(request, response);
     }
 
