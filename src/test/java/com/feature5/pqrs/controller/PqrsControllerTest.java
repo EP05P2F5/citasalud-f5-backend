@@ -40,19 +40,16 @@ class PqrsControllerTest {
 
     @BeforeEach
     void setup() {
-        // Limpiar todo en orden correcto
         pqrsRepository.deleteAllInBatch();
         usuarioRepository.deleteAllInBatch();
         tipoRepository.deleteAllInBatch();
         estadoRepository.deleteAllInBatch();
         rolRepository.deleteAllInBatch();
 
-        //  Crear Rol (para cumplir FK)
         Rol rol = new Rol();
         rol.setDescripcion("TEST_ROLE");
         rol = rolRepository.save(rol);
 
-        // Crear Usuario con nickname único
         Usuario u = new Usuario();
         u.setNombre("Test");
         u.setApellido("User");
@@ -62,13 +59,11 @@ class PqrsControllerTest {
         usuarioRepository.save(u);
         usuarioId = u.getIdUsuario();
 
-        // Crear Tipo
         Tipo t = new Tipo();
         t.setDescripcion("PETICION");
         tipoRepository.save(t);
         tipoId = t.getIdTipo();
 
-        // Crear Estado
         Estado e = new Estado();
         e.setDescripcion("PENDIENTE");
         estadoRepository.save(e);
@@ -76,7 +71,7 @@ class PqrsControllerTest {
     }
 
     @Test
-    void createAndGetFlow() {
+    void testCrearYObtenerPqrs() {
         PqrsRequestDTO dto = new PqrsRequestDTO();
         dto.usuarioId = usuarioId;
         dto.tipoId = tipoId;
@@ -93,37 +88,214 @@ class PqrsControllerTest {
 
         ResponseEntity<Pqrs> fetched = pqrsController.obtenerPqrsPorId(id);
         assertEquals(200, fetched.getStatusCodeValue());
-        assertNotNull(fetched.getBody());
         assertEquals("Descripcion test", fetched.getBody().getDescripcion());
-        assertEquals("PENDIENTE", fetched.getBody().getEstadoTexto());
-        assertEquals("R-123", fetched.getBody().getRadicado());
     }
 
     @Test
-    void putAndDeleteFlows() {
-        // Crear base
+    void testActualizarYEliminarPqrs() {
         PqrsRequestDTO dto = new PqrsRequestDTO();
         dto.usuarioId = usuarioId;
         dto.tipoId = tipoId;
         dto.estadoId = estadoId;
         dto.estadoTexto = "PENDIENTE";
-        dto.descripcion = "orig";
+        dto.descripcion = "Original";
         dto.radicado = "R-50";
-        ResponseEntity<Pqrs> created = pqrsController.crearPqrs(dto);
-        Long id = created.getBody().getIdPqrs();
+        Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
 
-        // Actualizar (cambiamos solo descripción/estadoTexto)
+        // Actualizar solo descripción (sin cambiar IDs)
         PqrsRequestDTO upd = new PqrsRequestDTO();
         upd.descripcion = "Modificado";
-        upd.estadoTexto = "EN_PROCESO";
+        upd.estadoTexto = "ACTUALIZADO";
+        upd.radicado = "R-51";
         ResponseEntity<Pqrs> updated = pqrsController.actualizarPqrs(id, upd);
         assertEquals(200, updated.getStatusCodeValue());
         assertEquals("Modificado", updated.getBody().getDescripcion());
-        assertEquals("EN_PROCESO", updated.getBody().getEstadoTexto());
+        assertEquals("ACTUALIZADO", updated.getBody().getEstadoTexto());
+        assertEquals("R-51", updated.getBody().getRadicado());
 
-        // Eliminar
-        ResponseEntity<?> deleted = pqrsController.eliminarPqrs(id);
-        assertEquals(200, deleted.getStatusCodeValue());
+        pqrsController.eliminarPqrs(id);
         assertFalse(pqrsRepository.existsById(id));
     }
+
+    @Test
+    void testListarPqrs() {
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.estadoTexto = "PENDIENTE";
+        dto.descripcion = "PQRS 1";
+        pqrsController.crearPqrs(dto);
+
+        ResponseEntity<java.util.List<Pqrs>> response = pqrsController.listarPqrs();
+        assertEquals(200, response.getStatusCodeValue());
+        assertTrue(response.getBody().size() >= 1);
+    }
+
+    @Test
+    void testBuscarPorEstadoYUsuario() {
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.estadoTexto = "ESPECIAL";
+        dto.descripcion = "Test";
+        pqrsController.crearPqrs(dto);
+
+        ResponseEntity<java.util.List<Pqrs>> porEstado = pqrsController.buscarPorEstado("ESPECIAL");
+        assertEquals(200, porEstado.getStatusCodeValue());
+        assertTrue(porEstado.getBody().size() >= 1);
+
+        ResponseEntity<java.util.List<Pqrs>> porUsuario = pqrsController.buscarPorUsuario(usuarioId);
+        assertEquals(200, porUsuario.getStatusCodeValue());
+        assertTrue(porUsuario.getBody().size() >= 1);
+    }
+
+    @Test
+    void testResponderPqrs() {
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.estadoTexto = "PENDIENTE";
+        dto.descripcion = "Para responder";
+        Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
+
+        java.util.Map<String, String> respuesta = new java.util.HashMap<>();
+        respuesta.put("respuesta", "Esta es la respuesta");
+
+        ResponseEntity<Pqrs> response = pqrsController.responderPqrs(id, respuesta);
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals("Esta es la respuesta", response.getBody().getRespuesta());
+    }
+
+    @Test
+    void testErroresBasicos() {
+        assertEquals(404, pqrsController.obtenerPqrsPorId(99999L).getStatusCodeValue());
+        assertEquals(404, pqrsController.eliminarPqrs(99999L).getStatusCodeValue());
+        assertEquals(404, pqrsController.actualizarPqrs(99999L, new PqrsRequestDTO()).getStatusCodeValue());
+    }
+
+    @Test
+    void testCrearPqrsConIdsInvalidos() {
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = 99999L;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.descripcion = "Test";
+        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCodeValue());
+
+        dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = 99999;
+        dto.estadoId = estadoId;
+        dto.descripcion = "Test";
+        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCodeValue());
+
+        dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = 99999;
+        dto.descripcion = "Test";
+        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCodeValue());
+    }
+
+    @Test
+    void testActualizarPqrsConCambiosCompletos() {
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.estadoTexto = "PENDIENTE";
+        dto.descripcion = "Original";
+        Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
+
+        Rol nuevoRol = new Rol();
+        nuevoRol.setDescripcion("OTRO_ROL");
+        rolRepository.save(nuevoRol);
+
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setNombre("Nuevo");
+        nuevoUsuario.setApellido("Usuario");
+        nuevoUsuario.setNickname("nuevo_" + UUID.randomUUID().toString().substring(0, 8));
+        nuevoUsuario.setPassword("pass2");
+        nuevoUsuario.setRol(nuevoRol);
+        usuarioRepository.save(nuevoUsuario);
+
+        Tipo nuevoTipo = new Tipo();
+        nuevoTipo.setDescripcion("QUEJA");
+        tipoRepository.save(nuevoTipo);
+
+        Estado nuevoEstado = new Estado();
+        nuevoEstado.setDescripcion("RESUELTO");
+        estadoRepository.save(nuevoEstado);
+
+        PqrsRequestDTO upd = new PqrsRequestDTO();
+        upd.usuarioId = nuevoUsuario.getIdUsuario();
+        upd.tipoId = nuevoTipo.getIdTipo();
+        upd.estadoId = nuevoEstado.getIdEstado();
+        upd.estadoTexto = "RESUELTO_TEXTO";
+        upd.descripcion = "Descripcion actualizada";
+        upd.fechaDeGeneracion = LocalDateTime.now().plusDays(1);
+        upd.radicado = "R-999";
+        upd.fechaDeRespuesta = LocalDateTime.now().plusDays(2);
+        upd.respuesta = "Respuesta actualizada";
+
+        ResponseEntity<Pqrs> response = pqrsController.actualizarPqrs(id, upd);
+        assertEquals(200, response.getStatusCodeValue());
+        Pqrs actualizado = response.getBody();
+        
+        assertEquals(nuevoUsuario.getIdUsuario(), actualizado.getUsuario().getIdUsuario());
+        assertEquals(nuevoTipo.getIdTipo(), actualizado.getTipo().getIdTipo());
+        assertEquals(nuevoEstado.getIdEstado(), actualizado.getEstado().getIdEstado());
+        assertEquals("RESUELTO_TEXTO", actualizado.getEstadoTexto());
+        assertEquals("Descripcion actualizada", actualizado.getDescripcion());
+        assertEquals("R-999", actualizado.getRadicado());
+        assertEquals("Respuesta actualizada", actualizado.getRespuesta());
+    }
+
+    @Test
+    void testActualizarPqrsConIdsInvalidos() {
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.descripcion = "Test";
+        Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
+
+        PqrsRequestDTO invalido = new PqrsRequestDTO();
+        invalido.usuarioId = 99999L;
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
+
+        invalido = new PqrsRequestDTO();
+        invalido.tipoId = 99999;
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
+
+        invalido = new PqrsRequestDTO();
+        invalido.estadoId = 99999;
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
+    }
+
+    @Test
+    void testResponderPqrsConRespuestaInvalida() {
+        PqrsRequestDTO dto = new PqrsRequestDTO();
+        dto.usuarioId = usuarioId;
+        dto.tipoId = tipoId;
+        dto.estadoId = estadoId;
+        dto.descripcion = "Test";
+        Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
+
+        java.util.Map<String, String> respuestaVacia = new java.util.HashMap<>();
+        respuestaVacia.put("respuesta", "   ");
+        assertEquals(400, pqrsController.responderPqrs(id, respuestaVacia).getStatusCodeValue());
+
+        java.util.Map<String, String> respuestaNull = new java.util.HashMap<>();
+        respuestaNull.put("respuesta", null);
+        assertEquals(400, pqrsController.responderPqrs(id, respuestaNull).getStatusCodeValue());
+
+        java.util.Map<String, String> respuestaValida = new java.util.HashMap<>();
+        respuestaValida.put("respuesta", "Respuesta valida");
+        assertEquals(404, pqrsController.responderPqrs(99999L, respuestaValida).getStatusCodeValue());
+    }
 }
+

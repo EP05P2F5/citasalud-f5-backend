@@ -31,7 +31,7 @@ public class UsuarioMapperTest {
 
         UsuarioDTO dto = mapper.toDTO(user);
         assertNotNull(dto);
-        assertNull(dto.getIdUsuario()); // ID no seteado en test
+        assertNull(dto.getIdUsuario());
         assertEquals(user.getNombre(), dto.getNombre());
         assertEquals(user.getNickname(), dto.getNickname());
         assertEquals(user.getEmail(), dto.getEmail());
@@ -39,9 +39,41 @@ public class UsuarioMapperTest {
 
         UsuarioResponseDTO resp = mapper.toResponseDTO(user);
         assertNotNull(resp);
-        assertNull(resp.getIdUsuario()); // ID no seteado en test
+        assertNull(resp.getIdUsuario());
         assertEquals(user.getNickname(), resp.getNickname());
         assertEquals(user.getEmail(), resp.getEmail());
         assertEquals(user.getRol(), resp.getRol());
+    }
+
+    @Test
+    public void testToEntity_DebeMappearCorrectamente() {
+        UsuarioMapper mapper = UsuarioMapper.INSTANCE;
+
+        Rol rol = new Rol();
+        rol.setIdRol(3L);
+        rol.setDescripcion("ADMIN");
+
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setIdUsuario(1L);
+        dto.setNombre("Maria");
+        dto.setApellido("Garcia");
+        dto.setEmail("maria@example.com");
+        dto.setNickname("mariag");
+        dto.setPassword("pass456");
+        dto.setTelefono("67890");
+        dto.setFechaDeNacimiento(LocalDate.of(1995, 5, 15));
+        dto.setRol(rol);
+
+        Usuario entity = mapper.toEntity(dto);
+
+        assertNotNull(entity);
+        assertEquals("Maria", entity.getNombre());
+        assertEquals("Garcia", entity.getApellido());
+        assertEquals("maria@example.com", entity.getEmail());
+        assertEquals("mariag", entity.getNickname());
+        assertEquals("pass456", entity.getPassword());
+        assertEquals("67890", entity.getTelefono());
+        assertEquals(LocalDate.of(1995, 5, 15), entity.getFechaDeNacimiento());
+        assertEquals(rol, entity.getRol());
     }
 }
