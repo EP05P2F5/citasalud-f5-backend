@@ -28,6 +28,13 @@ class CustomUserDetailsServiceTest {
     CustomUserDetailsService service;
 
     @BeforeEach
+    void setUp() {
+        System.setProperty("ADMIN_USERNAME", "admin");
+        System.setProperty("ADMIN_PASSWORD", "test_password");
+    }
+
+
+    @BeforeEach
     void setup() {
         usuarioRepository.deleteAll();
         rolRepository.deleteAll();

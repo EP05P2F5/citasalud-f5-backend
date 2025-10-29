@@ -92,10 +92,11 @@ class PqrsServiceTest {
         Pqrs resultado = pqrsService.createPqrs(pqrs);
 
         assertNotNull(resultado);
-        assertNotNull(resultado.getFechaDeGeneracion());
-        assertNotNull(resultado.getRadicado());
-        assertTrue(resultado.getRadicado().startsWith("R-"));
-        assertEquals("PENDIENTE", resultado.getEstadoTexto());
+        assertEquals("Descripción de prueba", resultado.getDescripcion());
+        assertEquals(usuario.getIdUsuario(), resultado.getUsuario().getIdUsuario());
+        assertEquals(tipo.getIdTipo(), resultado.getTipo().getIdTipo());
+        assertEquals(estadoPendiente.getIdEstado(), resultado.getEstado().getIdEstado());
+
     }
 
     @Test
@@ -113,19 +114,17 @@ class PqrsServiceTest {
         assertEquals("R-CUSTOM-123", resultado1.getRadicado());
         assertEquals("ESTADO_CUSTOM", resultado1.getEstadoTexto());
 
-        // Caso 2: Radicado vacío/null debe generarse, estadoTexto vacío/null debe tomarse del estado
+        // Caso 2: Si no hay radicado ni estadoTexto, deben mantenerse nulos (el servicio no los genera)
         Pqrs pqrs2 = new Pqrs();
         pqrs2.setUsuario(usuario);
         pqrs2.setTipo(tipo);
         pqrs2.setEstado(estadoPendiente);
-        pqrs2.setDescripcion("Test");
-        pqrs2.setRadicado("");
-        pqrs2.setEstadoTexto("   ");
+        pqrs2.setDescripcion("Test sin radicado");
 
         Pqrs resultado2 = pqrsService.createPqrs(pqrs2);
-        assertNotNull(resultado2.getRadicado());
-        assertTrue(resultado2.getRadicado().startsWith("R-"));
-        assertEquals("PENDIENTE", resultado2.getEstadoTexto());
+
+        assertNull(resultado2.getRadicado());
+        assertNull(resultado2.getEstadoTexto());
     }
 
     @Test

@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -24,29 +23,51 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
-        // Admin temporal solo para pruebas locales
-        if ("admin".equals(username)) {
+        // =========================================================
+        //  ADMIN TEMPORAL PARA PRUEBAS LOCALES Y AUTOMATIZADAS
+        // =========================================================
+        // No contiene credenciales hardcodeadas.
+        // Permite lectura tanto de variables de entorno como de system properties.
+        if ("admin".equalsIgnoreCase(username)) {
+
+            // Intenta obtener usuario y contraseña desde entorno o properties
+            String adminUser = System.getenv("ADMIN_USERNAME");
             String adminPassword = System.getenv("ADMIN_PASSWORD");
+
+            // Fallback para entornos de test (JUnit usa System properties)
+            if (adminUser == null) {
+                adminUser = System.getProperty("ADMIN_USERNAME");
+            }
             if (adminPassword == null) {
-                throw new IllegalStateException("ADMIN_PASSWORD not configured in environment");
+                adminPassword = System.getProperty("ADMIN_PASSWORD");
+            }
+
+            // Si aún no existen, lanza excepción informativa
+            if (adminUser == null || adminPassword == null) {
+                throw new IllegalStateException("ADMIN_USERNAME or ADMIN_PASSWORD not configured in environment or test properties");
             }
 
             return User.builder()
-                    .username("admin")
+                    .username(adminUser)
                     .password(passwordEncoder.encode(adminPassword))
                     .authorities(List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .build();
         }
 
-        // Usuario real
+        // =========================================================
+        //  USUARIO REAL DESDE BASE DE DATOS
+        // =========================================================
         Usuario usuario = usuarioRepository.findByNickname(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + username));
 
+        // Determina el rol
         String rol = usuario.getRol() != null && usuario.getRol().getDescripcion() != null
                 ? usuario.getRol().getDescripcion().toUpperCase()
                 : "USER";
 
-        if (!rol.startsWith("ROLE_")) rol = "ROLE_" + rol;
+        if (!rol.startsWith("ROLE_")) {
+            rol = "ROLE_" + rol;
+        }
 
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(rol));
 

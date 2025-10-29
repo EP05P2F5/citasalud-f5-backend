@@ -56,7 +56,7 @@ class JwtAuthenticationFilterTest {
     @Test
     void protectedEndpointRequiresAuthentication() throws Exception {
         // Endpoint protegido sin token debe retornar 401 o 403
-        mockMvc.perform(get("/api/test/secure"))
+        mockMvc.perform(get("/api/test/seguro"))
                 .andExpect(status().is4xxClientError());
     }
 
@@ -83,7 +83,7 @@ class JwtAuthenticationFilterTest {
         String token = jwtUtils.generateToken("testuser");
 
         // Acceder con token válido debe funcionar
-        mockMvc.perform(get("/api/test/secure")
+        mockMvc.perform(get("/api/test/seguro")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
