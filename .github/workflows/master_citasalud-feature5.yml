@@ -47,17 +47,17 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Build project
-        run: mvn -B clean install
-
-      - name: Run tests with coverage for SonarCloud
-        run: mvn clean test jacoco:report
+      - name: Build and test project with coverage
+        run: mvn -B clean verify jacoco:report
 
       - name: Upload JAR artifact
+        if: success() && always()
         uses: actions/upload-artifact@v4
         with:
           name: java-app
-          path: '${{ github.workspace }}/target/*.jar'
+          path: |
+            target/pqrs-0.0.1-SNAPSHOT.jar
+            **/target/pqrs-0.0.1-SNAPSHOT.jar
 
       - name: Run SonarCloud analysis
         env:
@@ -156,4 +156,5 @@ jobs:
         with:
           app-name: 'citasalud-feature5'
           slot-name: 'Production'
-          package: '*.jar'
+          package: 'target/pqrs-0.0.1-SNAPSHOT.jar'
+
