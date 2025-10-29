@@ -85,10 +85,17 @@ class CustomUserDetailsServiceTest {
 
     @Test
     void loadAdminUserReturnsAdminAuthority() {
-        // Test del usuario admin hardcodeado
+        // Configurar las variables simuladas del entorno para el test
+        System.setProperty("ADMIN_USERNAME", "test_admin");
+        System.setProperty("ADMIN_PASSWORD", "test_password");
+
+        // Cargar el usuario admin desde el servicio
         UserDetails details = service.loadUserByUsername("admin");
-        assertEquals("admin", details.getUsername());
-        assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
+
+        // Validar que las credenciales dinámicas se reflejan correctamente
+        assertEquals(System.getProperty("ADMIN_USERNAME"), details.getUsername());
+        assertTrue(details.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
         assertEquals(1, details.getAuthorities().size());
     }
 }
