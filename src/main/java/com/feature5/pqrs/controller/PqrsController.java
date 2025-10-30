@@ -26,7 +26,6 @@ import java.util.Optional;
 @RequestMapping("/pqrs")
 public class PqrsController {
 
-    private static final Logger logger = LoggerFactory.getLogger(PqrsController.class);
 
     private final PqrsRepository pqrsRepository;
     private final UsuarioRepository usuarioRepository;

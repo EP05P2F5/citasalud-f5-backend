@@ -81,8 +81,6 @@ public class SecurityConfig {
                 // Filtro JWT
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // (Opcional) si usas H2-console en perfil test:
-        // http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }

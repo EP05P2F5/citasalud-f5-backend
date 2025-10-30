@@ -1,18 +1,15 @@
 package com.feature5.pqrs.mapper;
 
 import com.feature5.pqrs.DTO.UsuarioDTO;
-import com.feature5.pqrs.DTO.UsuarioResponseDTO;
 import com.feature5.pqrs.entities.Usuario;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(componentModel = "spring")
 public interface UsuarioMapper {
-    UsuarioMapper INSTANCE = Mappers.getMapper(UsuarioMapper.class);
-    
-    UsuarioDTO toDTO(Usuario usuario);
+
+    // Convierte una entidad Usuario a DTO (oculta el password por @JsonIgnore)
+    UsuarioDTO toDto(Usuario usuario);
+
+    // Convierte un DTO a entidad Usuario (para guardar en BD)
     Usuario toEntity(UsuarioDTO dto);
-    UsuarioResponseDTO toResponseDTO(Usuario usuario);
 }
-
-

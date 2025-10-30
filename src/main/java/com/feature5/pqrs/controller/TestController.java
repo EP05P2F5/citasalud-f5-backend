@@ -61,8 +61,14 @@ public class TestController {
             String render = System.getenv("RENDER");
             String azure = System.getenv("WEBSITE_SITE_NAME");
 
-            String active = render != null ? "Render" :
-                    azure != null ? "Azure" : "Local";
+            String active;
+            if (render != null) {
+                active = "Render";
+            } else if (azure != null) {
+                active = "Azure";
+            } else {
+                active = "Local";
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -71,7 +77,6 @@ public class TestController {
             response.put("active", active);
 
             return response;
-
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("success", false);
@@ -79,6 +84,7 @@ public class TestController {
             return error;
         }
     }
+
 
 
     @GetMapping("/api/test/seguro")

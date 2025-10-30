@@ -15,21 +15,23 @@ import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
+
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
 
-    // Se marca como Lazy para evitar ciclo con CustomUserDetailsService
     private final UserDetailsService userDetailsService;
 
-    // Renombrado para evitar shadowing con GenericFilterBean.logger
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    // Rutas públicas que no deben requerir token
+    // Endpoints públicos (sin autenticación)
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
             "/auth/login",
             "/usuarios/register",
@@ -40,6 +42,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/swagger-ui.html"
     );
 
+    // Precalcular lista normalizada una vez
+    private static final Set<String> PUBLIC_ENDPOINTS_NORMALIZED = PUBLIC_ENDPOINTS.stream()
+            .map(JwtAuthenticationFilter::normalizePath)
+            .collect(Collectors.toUnmodifiableSet());
 
     public JwtAuthenticationFilter(JwtUtils jwtUtils, @Lazy UserDetailsService userDetailsService) {
         this.jwtUtils = jwtUtils;
@@ -54,7 +60,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Si la ruta es pública, saltamos la validación JWT
+        // Permitir rutas públicas sin autenticación
         if (isPublic(path)) {
             filterChain.doFilter(request, response);
             return;
@@ -101,15 +107,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isPublic(String path) {
-        if (path == null) return false;
+    // --- Métodos auxiliares seguros y sin regex ---
 
-        // Normalizar: quitar barras finales y convertir a minúsculas
-        String normalized = path.toLowerCase().replaceAll("/+$", "");
-
-        return PUBLIC_ENDPOINTS.stream()
-                .map(p -> p.toLowerCase().replaceAll("/+$", ""))
-                .anyMatch(normalized::equals);
+    private static String normalizePath(String path) {
+        if (path == null || path.isEmpty()) return "";
+        String s = path.toLowerCase(Locale.ROOT);
+        int end = s.length();
+        while (end > 1 && s.charAt(end - 1) == '/') {
+            end--;
+        }
+        return s.substring(0, end);
     }
 
+    private boolean isPublic(String path) {
+        String normalized = normalizePath(path);
+        // Puedes cambiar equals() por startsWith() si quieres permitir prefijos (ej: /auth/*)
+        return PUBLIC_ENDPOINTS_NORMALIZED.contains(normalized);
+    }
 }

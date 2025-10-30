@@ -1,15 +1,7 @@
 package com.feature5.pqrs.service;
 
-import com.feature5.pqrs.entities.Estado;
-import com.feature5.pqrs.entities.Pqrs;
-import com.feature5.pqrs.entities.Rol;
-import com.feature5.pqrs.entities.Tipo;
-import com.feature5.pqrs.entities.Usuario;
-import com.feature5.pqrs.repository.EstadoRepository;
-import com.feature5.pqrs.repository.PqrsRepository;
-import com.feature5.pqrs.repository.RolRepository;
-import com.feature5.pqrs.repository.TipoRepository;
-import com.feature5.pqrs.repository.UsuarioRepository;
+import com.feature5.pqrs.entities.*;
+import com.feature5.pqrs.repository.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,16 +42,22 @@ class PqrsServiceTest {
 
     @BeforeEach
     void setup() {
+        // Limpieza ordenada para evitar errores por FK
         pqrsRepository.deleteAll();
         usuarioRepository.deleteAll();
-        tipoRepository.deleteAll();
         estadoRepository.deleteAll();
+        tipoRepository.deleteAll();
         rolRepository.deleteAll();
 
-        Rol rol = new Rol();
-        rol.setDescripcion("USER");
-        rol = rolRepository.save(rol);
+        // Crear o reutilizar el rol USER
+        Rol rol = rolRepository.findByDescripcion("USER")
+                .orElseGet(() -> {
+                    Rol nuevo = new Rol();
+                    nuevo.setDescripcion("USER");
+                    return rolRepository.save(nuevo);
+                });
 
+        // Usuario base
         usuario = new Usuario();
         usuario.setNombre("Test");
         usuario.setApellido("User");
@@ -68,10 +66,12 @@ class PqrsServiceTest {
         usuario.setRol(rol);
         usuario = usuarioRepository.save(usuario);
 
+        // Tipo base
         tipo = new Tipo();
         tipo.setDescripcion("QUEJA");
         tipo = tipoRepository.save(tipo);
 
+        // Estados base
         estadoPendiente = new Estado();
         estadoPendiente.setDescripcion("PENDIENTE");
         estadoPendiente = estadoRepository.save(estadoPendiente);
@@ -96,7 +96,6 @@ class PqrsServiceTest {
         assertEquals(usuario.getIdUsuario(), resultado.getUsuario().getIdUsuario());
         assertEquals(tipo.getIdTipo(), resultado.getTipo().getIdTipo());
         assertEquals(estadoPendiente.getIdEstado(), resultado.getEstado().getIdEstado());
-
     }
 
     @Test
@@ -114,7 +113,7 @@ class PqrsServiceTest {
         assertEquals("R-CUSTOM-123", resultado1.getRadicado());
         assertEquals("ESTADO_CUSTOM", resultado1.getEstadoTexto());
 
-        // Caso 2: Si no hay radicado ni estadoTexto, deben mantenerse nulos (el servicio no los genera)
+        // Caso 2: Si no hay radicado ni estadoTexto, deben mantenerse nulos
         Pqrs pqrs2 = new Pqrs();
         pqrs2.setUsuario(usuario);
         pqrs2.setTipo(tipo);
@@ -130,7 +129,7 @@ class PqrsServiceTest {
     @Test
     void testCreatePqrs_ConFechaPreexistente_DebeRespetarla() {
         LocalDateTime fechaAnterior = LocalDateTime.now().minusDays(5);
-        
+
         Pqrs pqrs = new Pqrs();
         pqrs.setUsuario(usuario);
         pqrs.setTipo(tipo);
@@ -165,7 +164,6 @@ class PqrsServiceTest {
     @Test
     void testResponderPqrs_ConIdInexistente_DebeRetornarEmpty() {
         Optional<Pqrs> resultado = pqrsService.responderPqrs(99999L, "Respuesta");
-
         assertTrue(resultado.isEmpty());
     }
 }

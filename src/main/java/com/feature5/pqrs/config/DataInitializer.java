@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
 
 @Profile("!test")
@@ -39,25 +40,27 @@ public class DataInitializer implements CommandLineRunner {
         try {
             inicializarAdminSeguro();
             inicializarEstadosBasicos();
-        } catch (Exception e) {
-            log.warn(" Omitiendo inicialización de datos (ya existen o base protegida): {}", e.getMessage());
+        } catch (DataAccessException e) {
+            log.error("Error de acceso a datos durante la inicialización: {}", e.getMessage(), e);
+        } catch (RuntimeException e) {
+            log.error("Error inesperado durante la inicialización de datos", e);
         }
     }
 
     private void inicializarAdminSeguro() {
+        if (usuarioRepository.existsByEmail("admin@admin.com")) {
+            log.info("Usuario administrador ya existe. No se crea nuevamente.");
+            return;
+        }
+
+        Rol rolAdmin = rolRepository.findByDescripcion("ADMIN")
+                .orElseGet(() -> {
+                    Rol r = new Rol();
+                    r.setDescripcion("ADMIN");
+                    return rolRepository.save(r);
+                });
+
         try {
-            if (usuarioRepository.existsByEmail("admin@admin.com")) {
-                log.info("Usuario administrador ya existe. No se crea nuevamente.");
-                return;
-            }
-
-            Rol rolAdmin = rolRepository.findByDescripcion("ADMIN")
-                    .orElseGet(() -> {
-                        Rol r = new Rol();
-                        r.setDescripcion("ADMIN");
-                        return rolRepository.save(r);
-                    });
-
             UsuarioDTO admin = new UsuarioDTO();
             admin.setNombre("Administrador");
             admin.setApellido("Principal");
@@ -70,8 +73,10 @@ public class DataInitializer implements CommandLineRunner {
 
             usuarioService.registrarUsuario(admin);
             log.info("Usuario administrador creado correctamente.");
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             log.warn("No se pudo crear usuario administrador: {}", e.getMessage());
+        } catch (DataAccessException e) {
+            log.error("Error al guardar usuario administrador en la base de datos", e);
         }
     }
 
@@ -90,8 +95,8 @@ public class DataInitializer implements CommandLineRunner {
                 log.info("Estado '{}' asegurado con id {}", descripcion, saved.getIdEstado());
                 return saved;
             });
-        } catch (Exception e) {
-            log.warn("No se pudo asegurar el estado '{}': {}", descripcion, e.getMessage());
+        } catch (DataAccessException e) {
+            log.error("Error de base de datos al asegurar el estado '{}': {}", descripcion, e.getMessage(), e);
         }
     }
 }
