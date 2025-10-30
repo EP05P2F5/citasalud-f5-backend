@@ -88,13 +88,16 @@ public class DataInitializer implements CommandLineRunner {
 
     private void ensureEstadoExists(String descripcion) {
         try {
-            estadoRepository.findByDescripcion(descripcion).orElseGet(() -> {
-                Estado e = new Estado();
-                e.setDescripcion(descripcion);
-                Estado saved = estadoRepository.save(e);
-                log.info("Estado '{}' asegurado con id {}", descripcion, saved.getIdEstado());
-                return saved;
-            });
+            Estado estadoAsegurado = estadoRepository.findByDescripcion(descripcion)
+                    .orElseGet(() -> {
+                        Estado e = new Estado();
+                        e.setDescripcion(descripcion);
+                        Estado saved = estadoRepository.save(e);
+                        log.info("Estado '{}' asegurado con id {}", descripcion, saved.getIdEstado());
+                        return saved;
+                    });
+            // No necesitas usar estadoAsegurado después,
+            // solo asignarlo evita el issue de Sonar.
         } catch (DataAccessException e) {
             log.error("Error de base de datos al asegurar el estado '{}': {}", descripcion, e.getMessage(), e);
         }

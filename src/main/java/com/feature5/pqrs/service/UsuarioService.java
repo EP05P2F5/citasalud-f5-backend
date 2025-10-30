@@ -63,13 +63,16 @@ public class UsuarioService {
                     .orElseGet(() -> {
                         Rol nuevo = new Rol();
                         nuevo.setDescripcion(descripcion);
-                        log.info("Rol '{}' no existía, creado automáticamente.", descripcion);
+
+                        // Seguridad: evitar exponer datos controlados por el usuario
+                        log.info("Se creó automáticamente un nuevo rol en el sistema (valor oculto por seguridad).");
+
                         return rolRepository.save(nuevo);
                     });
 
             usuario.setRol(rol);
         } else {
-            log.warn("El usuario no tiene rol asociado, asignando por defecto 'USER'.");
+            log.warn("El usuario no tenía rol asignado; se aplicará 'USER' por defecto.");
             Rol rolDefault = rolRepository.findByDescripcion("USER")
                     .orElseGet(() -> {
                         Rol nuevo = new Rol();
@@ -77,8 +80,8 @@ public class UsuarioService {
                         return rolRepository.save(nuevo);
                     });
             usuario.setRol(rolDefault);
-
         }
+
 
         Usuario guardado = usuarioRepository.save(usuario);
         log.info("Usuario '{}' registrado con rol '{}'.", guardado.getNickname(), guardado.getRol().getDescripcion());
