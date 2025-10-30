@@ -31,10 +31,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Rutas públicas que no deben requerir token
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/auth/",
             "/auth/login",
             "/usuarios/register",
-            "/api/test/public"
+            "/api/test/public",
+            "/api/test/env",
+            "/v3/api-docs",
+            "/swagger-ui",
+            "/swagger-ui.html"
     );
 
 
@@ -98,8 +101,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    // Método auxiliar: verifica si el path es público
     private boolean isPublic(String path) {
-        return PUBLIC_ENDPOINTS.stream().anyMatch(path::startsWith);
+        if (path == null) return false;
+
+        // Normalizar: quitar barras finales y convertir a minúsculas
+        String normalized = path.toLowerCase().replaceAll("/+$", "");
+
+        return PUBLIC_ENDPOINTS.stream()
+                .map(p -> p.toLowerCase().replaceAll("/+$", ""))
+                .anyMatch(normalized::equals);
     }
+
 }

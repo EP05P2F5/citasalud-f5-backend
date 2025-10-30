@@ -37,7 +37,7 @@ public class SecurityConfig {
         http
                 // CORS + CSRF off (JWT stateless)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // NOSONAR - CSRF no aplica con JWT stateless
 
                 // Stateless (JWT)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -61,7 +61,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/**",
                                 "/usuarios/register",
-                                "/api/test/public"
+                                "/api/test/public",
+                                "/api/test/env"
                         ).permitAll()
 
                         // (Opcional) permitir raíz/health si quieres ver "it works"
@@ -117,14 +118,35 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.setAllowedOriginPatterns(List.of("*")); // ajusta si quieres restringir
+
+        // Detectar entorno automáticamente
+        String host = System.getenv("RENDER"); // Render define esta variable automáticamente
+        String azureEnv = System.getenv("WEBSITE_SITE_NAME"); // Azure define esta
+        boolean isRender = host != null;
+        boolean isAzure = azureEnv != null;
+
+        if (isRender) {
+            cfg.setAllowedOriginPatterns(List.of("https://citasalud-feature5.onrender.com"));
+        } else if (isAzure) {
+            cfg.setAllowedOriginPatterns(List.of("https://citasalud-feature5.azurewebsites.net"));
+        } else {
+            // Entorno local
+            cfg.setAllowedOriginPatterns(List.of(
+                    "http://localhost:8080",
+                    "http://127.0.0.1:8080",
+                    "http://localhost:3000",
+                    "http://127.0.0.1:5500"
+            ));
+        }
+
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         cfg.setExposedHeaders(List.of("Authorization"));
-        cfg.setAllowCredentials(false);
+        cfg.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", cfg);
         return source;
     }
+
 }

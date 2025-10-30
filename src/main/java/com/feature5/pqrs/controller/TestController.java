@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -53,6 +54,32 @@ public class TestController {
             );
         }
     }
+
+    @GetMapping("/api/test/env")
+    public Map<String, Object> checkEnv() {
+        try {
+            String render = System.getenv("RENDER");
+            String azure = System.getenv("WEBSITE_SITE_NAME");
+
+            String active = render != null ? "Render" :
+                    azure != null ? "Azure" : "Local";
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("render", render != null ? render : "null");
+            response.put("azure", azure != null ? azure : "null");
+            response.put("active", active);
+
+            return response;
+
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("error", e.getClass().getSimpleName() + ": " + e.getMessage());
+            return error;
+        }
+    }
+
 
     @GetMapping("/api/test/seguro")
     public Map<String, Object> verificarAccesoSeguro() {
