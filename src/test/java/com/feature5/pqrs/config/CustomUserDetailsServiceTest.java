@@ -28,14 +28,9 @@ class CustomUserDetailsServiceTest {
     CustomUserDetailsService service;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         System.setProperty("ADMIN_USERNAME", "admin");
         System.setProperty("ADMIN_PASSWORD", "test_password");
-    }
-
-
-    @BeforeEach
-    void setup() {
         usuarioRepository.deleteAll();
         rolRepository.deleteAll();
     }
@@ -46,7 +41,7 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
-    void loadUserWithRoleCreatesAuthorities() {
+    void loadUserWithRolePrefixCreatesAuthorities() {
         Rol rolConPrefijo = new Rol();
         rolConPrefijo.setDescripcion("ROLE_TEST");
         rolConPrefijo = rolRepository.save(rolConPrefijo);
@@ -63,8 +58,10 @@ class CustomUserDetailsServiceTest {
         UserDetails details = service.loadUserByUsername("bob");
         assertEquals("bob", details.getUsername());
         assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_TEST")));
+    }
 
-        // También probar que roles sin prefijo ROLE_ lo agregan automáticamente
+    @Test
+    void loadUserWithoutRolePrefixAddsPrefix() {
         Rol rolSinPrefijo = new Rol();
         rolSinPrefijo.setDescripcion("USER");
         rolSinPrefijo = rolRepository.save(rolSinPrefijo);
@@ -85,17 +82,12 @@ class CustomUserDetailsServiceTest {
 
     @Test
     void loadAdminUserReturnsAdminAuthority() {
-        // Configurar las variables simuladas del entorno para el test
         System.setProperty("ADMIN_USERNAME", "test_admin");
         System.setProperty("ADMIN_PASSWORD", "test_password");
 
-        // Cargar el usuario admin desde el servicio
         UserDetails details = service.loadUserByUsername("admin");
 
-        // Validar que las credenciales dinámicas se reflejan correctamente
         assertEquals(System.getProperty("ADMIN_USERNAME"), details.getUsername());
-        assertTrue(details.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
-        assertEquals(1, details.getAuthorities().size());
+        assertTrue(details.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
     }
 }

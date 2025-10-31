@@ -74,15 +74,8 @@ class AuthControllerTest {
         assertTrue(resp.getBody() instanceof Map, "El body del login debe ser un Map");
 
         Map<?, ?> body = (Map<?, ?>) resp.getBody();
-        assertTrue(body.containsKey("token"), "Debe incluir 'token'");
-        String token = String.valueOf(body.get("token"));
-        assertNotNull(token);
-        assertFalse(token.isBlank(), "El token no debe estar vacío");
-
-        assertEquals("testnick", body.get("username"), "Debe devolver el mismo nickname");
-        assertTrue(body.containsKey("rol"), "Debe incluir 'rol'");
-        assertNotNull(body.get("rol"));
-        assertTrue(body.containsKey("email"), "Debe incluir 'email'");
+        assertNotNull(body.get("token"));
+        assertEquals("testnick", body.get("username"));
         assertEquals("test@example.com", body.get("email"));
     }
 

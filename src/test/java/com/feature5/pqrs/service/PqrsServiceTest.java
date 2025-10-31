@@ -96,8 +96,7 @@ class PqrsServiceTest {
     }
 
     @Test
-    void testCreatePqrs_LogicaRadicadoYEstadoTexto() {
-        // Caso 1: Radicado custom debe respetarse
+    void testCreatePqrs_RadicadoCustomDebeRespetarse() {
         PqrsDTO pqrsDTO1 = new PqrsDTO();
         pqrsDTO1.setDescripcion("Test");
         pqrsDTO1.setRadicado("R-CUSTOM-123");
@@ -106,13 +105,14 @@ class PqrsServiceTest {
         PqrsDTO resultado1 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO1);
         assertEquals("R-CUSTOM-123", resultado1.getRadicado());
         assertEquals("ESTADO_CUSTOM", resultado1.getEstado());
+    }
 
-        // Caso 2: Si no hay radicado ni estadoTexto, deben mantenerse nulos
+    @Test
+    void testCreatePqrs_SinRadicadoNiEstadoTexto_DebenSerNulos() {
         PqrsDTO pqrsDTO2 = new PqrsDTO();
         pqrsDTO2.setDescripcion("Test sin radicado");
 
         PqrsDTO resultado2 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO2);
-
         assertNull(resultado2.getRadicado());
     }
 

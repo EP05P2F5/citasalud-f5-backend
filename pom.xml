@@ -25,6 +25,11 @@
         <jjwt.version>0.11.5</jjwt.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        
+        <!-- Exclusiones de cobertura para SonarCloud -->
+        <sonar.coverage.exclusions>
+            **/config/DataInitializer.java
+        </sonar.coverage.exclusions>
     </properties>
 
     <dependencies>

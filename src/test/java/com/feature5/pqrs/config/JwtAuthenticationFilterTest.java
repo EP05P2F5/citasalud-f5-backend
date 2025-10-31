@@ -63,7 +63,6 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void authenticatedUserCanAccessProtectedEndpoint() throws Exception {
-        // Crear usuario y generar token
         Rol rol = new Rol();
         rol.setDescripcion("ROLE_USER");
         rol = rolRepository.save(rol);
@@ -72,9 +71,7 @@ class JwtAuthenticationFilterTest {
         dto.setNombre("Test");
         dto.setApellido("User");
         dto.setFechaDeNacimiento(LocalDate.of(1990, 1, 1));
-        dto.setDireccion("Calle 123");
         dto.setEmail("test@example.com");
-        dto.setTelefono("555-0000");
         dto.setNickname("testuser");
         dto.setPassword("pass123");
         
@@ -84,10 +81,8 @@ class JwtAuthenticationFilterTest {
         dto.setRol(rolDTO);
 
         usuarioService.registrarUsuario(dto);
-
         String token = jwtUtils.generateToken("testuser");
 
-        // Acceder con token válido debe funcionar
         mockMvc.perform(get("/api/test/seguro")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());

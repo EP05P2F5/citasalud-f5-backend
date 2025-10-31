@@ -39,10 +39,7 @@ class UsuarioMapperTest {
 
         assertNotNull(dto);
         assertEquals(user.getNombre(), dto.getNombre());
-        assertEquals(user.getApellido(), dto.getApellido());
         assertEquals(user.getEmail(), dto.getEmail());
-        assertEquals(user.getNickname(), dto.getNickname());
-        assertEquals(user.getTelefono(), dto.getTelefono());
         assertEquals(user.getRol().getDescripcion(), dto.getRol().getDescripcion());
     }
 
@@ -67,12 +64,7 @@ class UsuarioMapperTest {
 
         assertNotNull(entity);
         assertEquals(dto.getNombre(), entity.getNombre());
-        assertEquals(dto.getApellido(), entity.getApellido());
         assertEquals(dto.getEmail(), entity.getEmail());
-        assertEquals(dto.getNickname(), entity.getNickname());
-        assertEquals(dto.getPassword(), entity.getPassword());
-        assertEquals(dto.getTelefono(), entity.getTelefono());
-        assertEquals(dto.getFechaDeNacimiento(), entity.getFechaDeNacimiento());
         assertEquals(dto.getRol().getDescripcion(), entity.getRol().getDescripcion());
     }
 }

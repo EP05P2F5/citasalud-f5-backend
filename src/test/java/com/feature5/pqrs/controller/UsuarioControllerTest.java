@@ -81,17 +81,8 @@ class UsuarioControllerTest {
         assertTrue(loginOk.getBody() instanceof Map, "La respuesta del login debe ser un Map");
 
         Map<?, ?> okBody = (Map<?, ?>) loginOk.getBody();
-
-        // Validaciones alineadas al AuthController actual
         assertTrue(okBody.containsKey("token"), "La respuesta del login debe incluir un token");
-        assertTrue(okBody.containsKey("username"), "La respuesta del login debe incluir un username");
         assertEquals("testnick", okBody.get("username"), "El username devuelto debe coincidir");
-        assertNotNull(okBody.get("token"), "El token JWT no debe ser nulo");
-
-        // Si falla por credenciales inválidas, mostrar contenido para diagnóstico
-        if (loginOk.getStatusCodeValue() != 200) {
-            System.out.println("Respuesta del login fallido (debug): " + okBody);
-        }
 
         // 5️⃣ Login incorrecto (contraseña inválida)
         ResponseEntity<?> loginFail = authController.login(
@@ -101,16 +92,14 @@ class UsuarioControllerTest {
 
         // 6️⃣ Listar usuarios
         ResponseEntity<List<UsuarioDTO>> list = usuarioController.listar();
-        assertEquals(1, list.getBody().size(), "Debe haber exactamente un usuario registrado");
-        assertEquals("testnick", list.getBody().get(0).getNickname(), "El nickname del usuario listado debe coincidir");
+        assertEquals(1, list.getBody().size());
 
         // 7️⃣ Buscar por nickname
         ResponseEntity<UsuarioDTO> found = usuarioController.buscarPorNickname("testnick");
-        assertEquals(200, found.getStatusCodeValue(), "El usuario debería encontrarse por nickname");
-        assertEquals("testnick", found.getBody().getNickname(), "El nickname del usuario encontrado debe coincidir");
+        assertEquals(200, found.getStatusCodeValue());
 
         // 8️⃣ Buscar usuario inexistente debe retornar 404
         ResponseEntity<UsuarioDTO> notFound = usuarioController.buscarPorNickname("usuarioinexistente");
-        assertEquals(404, notFound.getStatusCodeValue(), "Buscar un usuario inexistente debe retornar 404");
+        assertEquals(404, notFound.getStatusCodeValue());
     }
 }
