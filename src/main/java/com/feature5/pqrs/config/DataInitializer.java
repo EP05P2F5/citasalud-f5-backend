@@ -70,7 +70,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setNickname("admin");
             admin.setDireccion("N/A");
             admin.setTelefono("0000000000");
-            
+
             // Convertir Rol a RolDTO
             RolDTO rolAdminDTO = new RolDTO();
             rolAdminDTO.setIdRol(rolAdmin.getIdRol());
@@ -94,7 +94,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private void ensureEstadoExists(String descripcion) {
         try {
-            estadoRepository.findByDescripcion(descripcion)
+            Estado estadoAsegurado = estadoRepository.findByDescripcion(descripcion)
                     .orElseGet(() -> {
                         Estado e = new Estado();
                         e.setDescripcion(descripcion);
@@ -102,6 +102,9 @@ public class DataInitializer implements CommandLineRunner {
                         log.info("Estado '{}' asegurado con id {}", descripcion, saved.getIdEstado());
                         return saved;
                     });
+            //uso de debug para estados ya existentes
+            log.debug("Estado verificado: {}", estadoAsegurado.getDescripcion());
+
         } catch (DataAccessException e) {
             log.error("Error de base de datos al asegurar el estado '{}': {}", descripcion, e.getMessage(), e);
         }
