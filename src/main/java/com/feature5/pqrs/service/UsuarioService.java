@@ -98,14 +98,16 @@ public class UsuarioService {
         return usuarioRepository.findByNickname(nickname)
                 .filter(usuario -> passwordEncoder.matches(password, usuario.getPassword()))
                 .map(usuario -> {
-                    log.info("Inicio de sesión exitoso para '{}'.", nickname);
+                    // Seguridad: no loguear datos controlados por el usuario
+                    log.info("Inicio de sesión exitoso (usuario autenticado).");
                     return usuarioMapper.toDto(usuario);
                 })
                 .orElseGet(() -> {
-                    log.warn("Intento de login fallido para '{}'.", nickname);
+                    log.warn("Intento de inicio de sesión fallido (credenciales inválidas).");
                     return null;
                 });
     }
+
 
     /**
      * Lista todos los usuarios registrados.

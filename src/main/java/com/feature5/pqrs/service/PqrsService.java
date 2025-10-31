@@ -90,40 +90,58 @@ public class PqrsService {
     @Transactional
     public Optional<PqrsDTO> actualizarPqrs(Long id, Long usuarioId, Integer tipoId, Integer estadoId, PqrsDTO dto) {
         return pqrsRepository.findById(id).map(pqrsExistente -> {
-            // Actualizar usuario si se proporciona
-            if (usuarioId != null) {
-                Usuario usuario = usuarioRepository.findById(usuarioId)
-                        .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-                pqrsExistente.setUsuario(usuario);
-            }
-
-            // Actualizar tipo si se proporciona
-            if (tipoId != null) {
-                Tipo tipo = tipoRepository.findById(tipoId)
-                        .orElseThrow(() -> new IllegalArgumentException("Tipo no encontrado"));
-                pqrsExistente.setTipo(tipo);
-            }
-
-            // Actualizar estado si se proporciona
-            if (estadoId != null) {
-                Estado estado = estadoRepository.findById(estadoId)
-                        .orElseThrow(() -> new IllegalArgumentException("Estado no encontrado"));
-                pqrsExistente.setEstado(estado);
-            }
-
-            // Actualizar campos simples
-            if (dto.getEstado() != null) pqrsExistente.setEstadoTexto(dto.getEstado());
-            if (dto.getDescripcion() != null) pqrsExistente.setDescripcion(dto.getDescripcion());
-            if (dto.getFechaDeGeneracion() != null) pqrsExistente.setFechaDeGeneracion(dto.getFechaDeGeneracion().atStartOfDay());
-            if (dto.getRadicado() != null) pqrsExistente.setRadicado(dto.getRadicado());
-            if (dto.getFechaDeRespuesta() != null) pqrsExistente.setFechaDeRespuesta(dto.getFechaDeRespuesta().atStartOfDay());
-            if (dto.getRespuesta() != null) pqrsExistente.setRespuesta(dto.getRespuesta());
+            actualizarEntidadesAsociadas(pqrsExistente, usuarioId, tipoId, estadoId);
+            actualizarCamposSimples(pqrsExistente, dto);
 
             Pqrs actualizado = pqrsRepository.save(pqrsExistente);
-            log.info("PQRS con ID {} actualizado", id);
+            log.info("PQRS con ID {} actualizado correctamente.", id);
+
             return pqrsMapper.toDTO(actualizado);
         });
     }
+
+
+    private void actualizarEntidadesAsociadas(Pqrs pqrs, Long usuarioId, Integer tipoId, Integer estadoId) {
+        if (usuarioId != null) {
+            Usuario usuario = usuarioRepository.findById(usuarioId)
+                    .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+            pqrs.setUsuario(usuario);
+        }
+
+        if (tipoId != null) {
+            Tipo tipo = tipoRepository.findById(tipoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Tipo no encontrado"));
+            pqrs.setTipo(tipo);
+        }
+
+        if (estadoId != null) {
+            Estado estado = estadoRepository.findById(estadoId)
+                    .orElseThrow(() -> new IllegalArgumentException("Estado no encontrado"));
+            pqrs.setEstado(estado);
+        }
+    }
+
+    private void actualizarCamposSimples(Pqrs pqrs, PqrsDTO dto) {
+        if (dto.getEstado() != null) {
+            pqrs.setEstadoTexto(dto.getEstado());
+        }
+        if (dto.getDescripcion() != null) {
+            pqrs.setDescripcion(dto.getDescripcion());
+        }
+        if (dto.getFechaDeGeneracion() != null) {
+            pqrs.setFechaDeGeneracion(dto.getFechaDeGeneracion().atStartOfDay());
+        }
+        if (dto.getRadicado() != null) {
+            pqrs.setRadicado(dto.getRadicado());
+        }
+        if (dto.getFechaDeRespuesta() != null) {
+            pqrs.setFechaDeRespuesta(dto.getFechaDeRespuesta().atStartOfDay());
+        }
+        if (dto.getRespuesta() != null) {
+            pqrs.setRespuesta(dto.getRespuesta());
+        }
+    }
+
 
     @Transactional
     public boolean eliminarPqrs(Long id) {

@@ -67,6 +67,7 @@ public class PqrsController {
             pqrsDTO.setEstado(dto.estadoTexto);
             pqrsDTO.setRadicado(dto.radicado);
             pqrsDTO.setRespuesta(dto.respuesta);
+
             if (dto.fechaDeGeneracion != null) {
                 pqrsDTO.setFechaDeGeneracion(dto.fechaDeGeneracion.toLocalDate());
             }
@@ -75,12 +76,14 @@ public class PqrsController {
             }
 
             return pqrsService.actualizarPqrs(id, dto.usuarioId, dto.tipoId, dto.estadoId, pqrsDTO)
-                    .map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
+                    .map(actualizado -> ResponseEntity.status(HttpStatus.OK).body(actualizado))
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
+
 
     // Eliminar PQRS
     @DeleteMapping("/{id}")
