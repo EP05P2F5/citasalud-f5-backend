@@ -181,6 +181,12 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludes>
+                        <!-- Excluir DataInitializer: solo se ejecuta en producción, no en tests -->
+                        <exclude>**/config/DataInitializer.class</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
 
             <!-- Compiler plugin -->
