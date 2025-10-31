@@ -1,7 +1,6 @@
 package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
-import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.mapper.RolMapper;
@@ -71,7 +70,7 @@ class AuthControllerTest {
 
         // Login OK
         ResponseEntity<?> resp = authController.login(new LoginRequestDTO("testnick", "pass123"));
-        assertEquals(200, resp.getStatusCodeValue(), "El login debería responder 200 OK");
+        assertEquals(200, resp.getStatusCode().value(), "El login debería responder 200 OK");
         assertTrue(resp.getBody() instanceof Map, "El body del login debe ser un Map");
 
         Map<?, ?> body = (Map<?, ?>) resp.getBody();
@@ -109,15 +108,15 @@ class AuthControllerTest {
 
         // Contraseña errónea
         ResponseEntity<?> resp = authController.login(new LoginRequestDTO("failnick", "wrongpass"));
-        assertEquals(401, resp.getStatusCodeValue(), "Con password errónea debe responder 401");
+        assertEquals(401, resp.getStatusCode().value(), "Con password errónea debe responder 401");
     }
 
     @Test
     void login_fail_userNotFound_returns401() {
         // Intentar login con usuario inexistente
         ResponseEntity<?> resp = authController.login(new LoginRequestDTO("noexiste", "pass123"));
-        assertEquals(401, resp.getStatusCodeValue(), "Usuario no encontrado debe responder 401");
-        
+        assertEquals(401, resp.getStatusCode().value(), "Usuario no encontrado debe responder 401");
+
         assertTrue(resp.getBody() instanceof Map, "El body debe ser un Map");
         Map<?, ?> body = (Map<?, ?>) resp.getBody();
         assertTrue(body.containsKey("error"), "Debe incluir mensaje de error");

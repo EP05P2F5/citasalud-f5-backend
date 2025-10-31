@@ -65,10 +65,8 @@ public class SecurityConfig {
                                 "/api/test/env"
                         ).permitAll()
 
-                        // (Opcional) permitir raíz/health si quieres ver "it works"
-                        .requestMatchers("/", "/actuator/health").permitAll()
 
-                        // Todo lo demás protegido
+                        // Resto requiere autenticación
                         .anyRequest().authenticated()
                 )
 

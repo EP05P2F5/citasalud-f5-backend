@@ -83,12 +83,12 @@ class PqrsControllerTest {
         dto.radicado = "R-123";
 
         ResponseEntity<PqrsDTO> createdResp = pqrsController.crearPqrs(dto);
-        assertEquals(201, createdResp.getStatusCodeValue());
+        assertEquals(201, createdResp.getStatusCode().value());
         assertNotNull(createdResp.getBody());
         Long id = createdResp.getBody().getIdPqrs();
 
         ResponseEntity<PqrsDTO> fetched = pqrsController.obtenerPqrsPorId(id);
-        assertEquals(200, fetched.getStatusCodeValue());
+        assertEquals(200, fetched.getStatusCode().value());
         assertEquals("Descripcion test", fetched.getBody().getDescripcion());
     }
 
@@ -109,7 +109,7 @@ class PqrsControllerTest {
         upd.estadoTexto = "ACTUALIZADO";
         upd.radicado = "R-51";
         ResponseEntity<PqrsDTO> updated = pqrsController.actualizarPqrs(id, upd);
-        assertEquals(200, updated.getStatusCodeValue());
+        assertEquals(200, updated.getStatusCode().value());
         assertEquals("Modificado", updated.getBody().getDescripcion());
         assertEquals("ACTUALIZADO", updated.getBody().getEstado());
         assertEquals("R-51", updated.getBody().getRadicado());
@@ -163,15 +163,15 @@ class PqrsControllerTest {
         respuesta.put("respuesta", "Esta es la respuesta");
 
         ResponseEntity<PqrsDTO> response = pqrsController.responderPqrs(id, respuesta);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         assertEquals("Esta es la respuesta", response.getBody().getRespuesta());
     }
 
     @Test
     void testErroresBasicos() {
-        assertEquals(404, pqrsController.obtenerPqrsPorId(99999L).getStatusCodeValue());
-        assertEquals(404, pqrsController.eliminarPqrs(99999L).getStatusCodeValue());
-        assertEquals(404, pqrsController.actualizarPqrs(99999L, new PqrsRequestDTO()).getStatusCodeValue());
+        assertEquals(404, pqrsController.obtenerPqrsPorId(99999L).getStatusCode().value());
+        assertEquals(404, pqrsController.eliminarPqrs(99999L).getStatusCode().value());
+        assertEquals(404, pqrsController.actualizarPqrs(99999L, new PqrsRequestDTO()).getStatusCode().value());
     }
 
     @Test
@@ -181,21 +181,21 @@ class PqrsControllerTest {
         dto.tipoId = tipoId;
         dto.estadoId = estadoId;
         dto.descripcion = "Test";
-        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCodeValue());
+        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCode().value());
 
         dto = new PqrsRequestDTO();
         dto.usuarioId = usuarioId;
         dto.tipoId = 99999;
         dto.estadoId = estadoId;
         dto.descripcion = "Test";
-        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCodeValue());
+        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCode().value());
 
         dto = new PqrsRequestDTO();
         dto.usuarioId = usuarioId;
         dto.tipoId = tipoId;
         dto.estadoId = 99999;
         dto.descripcion = "Test";
-        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCodeValue());
+        assertEquals(400, pqrsController.crearPqrs(dto).getStatusCode().value());
     }
 
     @Test
@@ -240,9 +240,9 @@ class PqrsControllerTest {
         upd.respuesta = "Respuesta actualizada";
 
         ResponseEntity<PqrsDTO> response = pqrsController.actualizarPqrs(id, upd);
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(200, response.getStatusCode().value());
         PqrsDTO actualizado = response.getBody();
-        
+
         assertEquals(nuevoUsuario.getIdUsuario(), actualizado.getIdUsuario());
         assertEquals(nuevoTipo.getIdTipo(), actualizado.getIdTipo());
         assertEquals("RESUELTO_TEXTO", actualizado.getEstado());
@@ -262,15 +262,15 @@ class PqrsControllerTest {
 
         PqrsRequestDTO invalido = new PqrsRequestDTO();
         invalido.usuarioId = 99999L;
-        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCode().value());
 
         invalido = new PqrsRequestDTO();
         invalido.tipoId = 99999;
-        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCode().value());
 
         invalido = new PqrsRequestDTO();
         invalido.estadoId = 99999;
-        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCodeValue());
+        assertEquals(400, pqrsController.actualizarPqrs(id, invalido).getStatusCode().value());
     }
 
     @Test
@@ -284,15 +284,14 @@ class PqrsControllerTest {
 
         java.util.Map<String, String> respuestaVacia = new java.util.HashMap<>();
         respuestaVacia.put("respuesta", "   ");
-        assertEquals(400, pqrsController.responderPqrs(id, respuestaVacia).getStatusCodeValue());
+        assertEquals(400, pqrsController.responderPqrs(id, respuestaVacia).getStatusCode().value());
 
         java.util.Map<String, String> respuestaNull = new java.util.HashMap<>();
         respuestaNull.put("respuesta", null);
-        assertEquals(400, pqrsController.responderPqrs(id, respuestaNull).getStatusCodeValue());
+        assertEquals(400, pqrsController.responderPqrs(id, respuestaNull).getStatusCode().value());
 
         java.util.Map<String, String> respuestaValida = new java.util.HashMap<>();
         respuestaValida.put("respuesta", "Respuesta valida");
-        assertEquals(404, pqrsController.responderPqrs(99999L, respuestaValida).getStatusCodeValue());
+        assertEquals(404, pqrsController.responderPqrs(99999L, respuestaValida).getStatusCode().value());
     }
 }
-
