@@ -1,6 +1,7 @@
 package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
+import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.repository.RolRepository;
@@ -59,7 +60,12 @@ class UsuarioControllerTest {
         dto.setTelefono("123456");
         dto.setNickname("testnick");
         dto.setPassword("pass123");
-        dto.setRol(rol);
+        
+        // Crear RolDTO a partir del rol guardado
+        RolDTO rolDTO = new RolDTO();
+        rolDTO.setIdRol(rol.getIdRol());
+        rolDTO.setDescripcion(rol.getDescripcion());
+        dto.setRol(rolDTO);
 
         // 3️⃣ Registrar usuario
         ResponseEntity<UsuarioDTO> created = usuarioController.registrar(dto);

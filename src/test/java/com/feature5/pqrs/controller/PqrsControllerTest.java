@@ -1,8 +1,8 @@
 package com.feature5.pqrs.controller;
 
+import com.feature5.pqrs.DTO.PqrsDTO;
 import com.feature5.pqrs.DTO.PqrsRequestDTO;
 import com.feature5.pqrs.entities.Estado;
-import com.feature5.pqrs.entities.Pqrs;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.entities.Tipo;
 import com.feature5.pqrs.entities.Usuario;
@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -81,12 +82,12 @@ class PqrsControllerTest {
         dto.fechaDeGeneracion = LocalDateTime.now();
         dto.radicado = "R-123";
 
-        ResponseEntity<Pqrs> createdResp = pqrsController.crearPqrs(dto);
+        ResponseEntity<PqrsDTO> createdResp = pqrsController.crearPqrs(dto);
         assertEquals(201, createdResp.getStatusCodeValue());
         assertNotNull(createdResp.getBody());
         Long id = createdResp.getBody().getIdPqrs();
 
-        ResponseEntity<Pqrs> fetched = pqrsController.obtenerPqrsPorId(id);
+        ResponseEntity<PqrsDTO> fetched = pqrsController.obtenerPqrsPorId(id);
         assertEquals(200, fetched.getStatusCodeValue());
         assertEquals("Descripcion test", fetched.getBody().getDescripcion());
     }
@@ -107,10 +108,10 @@ class PqrsControllerTest {
         upd.descripcion = "Modificado";
         upd.estadoTexto = "ACTUALIZADO";
         upd.radicado = "R-51";
-        ResponseEntity<Pqrs> updated = pqrsController.actualizarPqrs(id, upd);
+        ResponseEntity<PqrsDTO> updated = pqrsController.actualizarPqrs(id, upd);
         assertEquals(200, updated.getStatusCodeValue());
         assertEquals("Modificado", updated.getBody().getDescripcion());
-        assertEquals("ACTUALIZADO", updated.getBody().getEstadoTexto());
+        assertEquals("ACTUALIZADO", updated.getBody().getEstado());
         assertEquals("R-51", updated.getBody().getRadicado());
 
         pqrsController.eliminarPqrs(id);
@@ -127,9 +128,8 @@ class PqrsControllerTest {
         dto.descripcion = "PQRS 1";
         pqrsController.crearPqrs(dto);
 
-        ResponseEntity<java.util.List<Pqrs>> response = pqrsController.listarPqrs();
-        assertEquals(200, response.getStatusCodeValue());
-        assertTrue(response.getBody().size() >= 1);
+        List<PqrsDTO> response = pqrsController.listarPqrs();
+        assertTrue(response.size() >= 1);
     }
 
     @Test
@@ -142,13 +142,11 @@ class PqrsControllerTest {
         dto.descripcion = "Test";
         pqrsController.crearPqrs(dto);
 
-        ResponseEntity<java.util.List<Pqrs>> porEstado = pqrsController.buscarPorEstado("ESPECIAL");
-        assertEquals(200, porEstado.getStatusCodeValue());
-        assertTrue(porEstado.getBody().size() >= 1);
+        List<PqrsDTO> porEstado = pqrsController.buscarPorEstado("ESPECIAL");
+        assertTrue(porEstado.size() >= 1);
 
-        ResponseEntity<java.util.List<Pqrs>> porUsuario = pqrsController.buscarPorUsuario(usuarioId);
-        assertEquals(200, porUsuario.getStatusCodeValue());
-        assertTrue(porUsuario.getBody().size() >= 1);
+        List<PqrsDTO> porUsuario = pqrsController.buscarPorUsuario(usuarioId);
+        assertTrue(porUsuario.size() >= 1);
     }
 
     @Test
@@ -164,7 +162,7 @@ class PqrsControllerTest {
         java.util.Map<String, String> respuesta = new java.util.HashMap<>();
         respuesta.put("respuesta", "Esta es la respuesta");
 
-        ResponseEntity<Pqrs> response = pqrsController.responderPqrs(id, respuesta);
+        ResponseEntity<PqrsDTO> response = pqrsController.responderPqrs(id, respuesta);
         assertEquals(200, response.getStatusCodeValue());
         assertEquals("Esta es la respuesta", response.getBody().getRespuesta());
     }
@@ -241,14 +239,13 @@ class PqrsControllerTest {
         upd.fechaDeRespuesta = LocalDateTime.now().plusDays(2);
         upd.respuesta = "Respuesta actualizada";
 
-        ResponseEntity<Pqrs> response = pqrsController.actualizarPqrs(id, upd);
+        ResponseEntity<PqrsDTO> response = pqrsController.actualizarPqrs(id, upd);
         assertEquals(200, response.getStatusCodeValue());
-        Pqrs actualizado = response.getBody();
+        PqrsDTO actualizado = response.getBody();
         
-        assertEquals(nuevoUsuario.getIdUsuario(), actualizado.getUsuario().getIdUsuario());
-        assertEquals(nuevoTipo.getIdTipo(), actualizado.getTipo().getIdTipo());
-        assertEquals(nuevoEstado.getIdEstado(), actualizado.getEstado().getIdEstado());
-        assertEquals("RESUELTO_TEXTO", actualizado.getEstadoTexto());
+        assertEquals(nuevoUsuario.getIdUsuario(), actualizado.getIdUsuario());
+        assertEquals(nuevoTipo.getIdTipo(), actualizado.getIdTipo());
+        assertEquals("RESUELTO_TEXTO", actualizado.getEstado());
         assertEquals("Descripcion actualizada", actualizado.getDescripcion());
         assertEquals("R-999", actualizado.getRadicado());
         assertEquals("Respuesta actualizada", actualizado.getRespuesta());

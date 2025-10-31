@@ -1,5 +1,6 @@
 package com.feature5.pqrs.service;
 
+import com.feature5.pqrs.DTO.PqrsDTO;
 import com.feature5.pqrs.entities.*;
 import com.feature5.pqrs.repository.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -83,87 +84,69 @@ class PqrsServiceTest {
 
     @Test
     void testCreatePqrs_DebeGenerarFechaYRadicado() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("Descripción de prueba");
+        PqrsDTO pqrsDTO = new PqrsDTO();
+        pqrsDTO.setDescripcion("Descripción de prueba");
 
-        Pqrs resultado = pqrsService.createPqrs(pqrs);
+        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
 
         assertNotNull(resultado);
         assertEquals("Descripción de prueba", resultado.getDescripcion());
-        assertEquals(usuario.getIdUsuario(), resultado.getUsuario().getIdUsuario());
-        assertEquals(tipo.getIdTipo(), resultado.getTipo().getIdTipo());
-        assertEquals(estadoPendiente.getIdEstado(), resultado.getEstado().getIdEstado());
+        assertEquals(usuario.getIdUsuario(), resultado.getIdUsuario());
+        assertEquals(tipo.getIdTipo(), resultado.getIdTipo());
     }
 
     @Test
     void testCreatePqrs_LogicaRadicadoYEstadoTexto() {
         // Caso 1: Radicado custom debe respetarse
-        Pqrs pqrs1 = new Pqrs();
-        pqrs1.setUsuario(usuario);
-        pqrs1.setTipo(tipo);
-        pqrs1.setEstado(estadoPendiente);
-        pqrs1.setDescripcion("Test");
-        pqrs1.setRadicado("R-CUSTOM-123");
-        pqrs1.setEstadoTexto("ESTADO_CUSTOM");
+        PqrsDTO pqrsDTO1 = new PqrsDTO();
+        pqrsDTO1.setDescripcion("Test");
+        pqrsDTO1.setRadicado("R-CUSTOM-123");
+        pqrsDTO1.setEstado("ESTADO_CUSTOM");
 
-        Pqrs resultado1 = pqrsService.createPqrs(pqrs1);
+        PqrsDTO resultado1 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO1);
         assertEquals("R-CUSTOM-123", resultado1.getRadicado());
-        assertEquals("ESTADO_CUSTOM", resultado1.getEstadoTexto());
+        assertEquals("ESTADO_CUSTOM", resultado1.getEstado());
 
         // Caso 2: Si no hay radicado ni estadoTexto, deben mantenerse nulos
-        Pqrs pqrs2 = new Pqrs();
-        pqrs2.setUsuario(usuario);
-        pqrs2.setTipo(tipo);
-        pqrs2.setEstado(estadoPendiente);
-        pqrs2.setDescripcion("Test sin radicado");
+        PqrsDTO pqrsDTO2 = new PqrsDTO();
+        pqrsDTO2.setDescripcion("Test sin radicado");
 
-        Pqrs resultado2 = pqrsService.createPqrs(pqrs2);
+        PqrsDTO resultado2 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO2);
 
         assertNull(resultado2.getRadicado());
-        assertNull(resultado2.getEstadoTexto());
     }
 
     @Test
     void testCreatePqrs_ConFechaPreexistente_DebeRespetarla() {
-        LocalDateTime fechaAnterior = LocalDateTime.now().minusDays(5);
+        LocalDate fechaAnterior = LocalDate.now().minusDays(5);
 
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("Test");
-        pqrs.setFechaDeGeneracion(fechaAnterior);
+        PqrsDTO pqrsDTO = new PqrsDTO();
+        pqrsDTO.setDescripcion("Test");
+        pqrsDTO.setFechaDeGeneracion(fechaAnterior);
 
-        Pqrs resultado = pqrsService.createPqrs(pqrs);
+        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
 
         assertEquals(fechaAnterior, resultado.getFechaDeGeneracion());
     }
 
     @Test
     void testResponderPqrs_DebeActualizarRespuestaYEstado() {
-        Pqrs pqrs = new Pqrs();
-        pqrs.setUsuario(usuario);
-        pqrs.setTipo(tipo);
-        pqrs.setEstado(estadoPendiente);
-        pqrs.setDescripcion("PQRS para responder");
-        pqrs = pqrsService.createPqrs(pqrs);
+        PqrsDTO pqrsDTO = new PqrsDTO();
+        pqrsDTO.setDescripcion("PQRS para responder");
+        PqrsDTO creado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
 
         String respuesta = "Esta es la respuesta";
-        Optional<Pqrs> resultado = pqrsService.responderPqrs(pqrs.getIdPqrs(), respuesta);
+        Optional<PqrsDTO> resultado = pqrsService.responderPqrs(creado.getIdPqrs(), respuesta);
 
         assertTrue(resultado.isPresent());
         assertEquals(respuesta, resultado.get().getRespuesta());
         assertNotNull(resultado.get().getFechaDeRespuesta());
-        assertEquals("RESPONDIDO", resultado.get().getEstadoTexto());
-        assertEquals(estadoRespondido.getIdEstado(), resultado.get().getEstado().getIdEstado());
+        assertEquals("RESPONDIDO", resultado.get().getEstado());
     }
 
     @Test
     void testResponderPqrs_ConIdInexistente_DebeRetornarEmpty() {
-        Optional<Pqrs> resultado = pqrsService.responderPqrs(99999L, "Respuesta");
+        Optional<PqrsDTO> resultado = pqrsService.responderPqrs(99999L, "Respuesta");
         assertTrue(resultado.isEmpty());
     }
 }

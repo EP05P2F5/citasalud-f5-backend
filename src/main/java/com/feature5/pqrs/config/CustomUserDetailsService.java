@@ -3,6 +3,7 @@ package com.feature5.pqrs.config;
 import com.feature5.pqrs.entities.Usuario;
 import com.feature5.pqrs.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.*;
@@ -18,6 +19,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    
+    @Value("${admin.username}")
+    private String adminUsername;
+    
+    @Value("${admin.password}")
+    private String adminPassword;
 
     @Override
     @Transactional(readOnly = true)
@@ -26,29 +33,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         // =========================================================
         //  ADMIN TEMPORAL PARA PRUEBAS LOCALES Y AUTOMATIZADAS
         // =========================================================
-        // No contiene credenciales hardcodeadas.
-        // Permite lectura tanto de variables de entorno como de system properties.
         if ("admin".equalsIgnoreCase(username)) {
-
-            // Intenta obtener usuario y contraseña desde entorno o properties
-            String adminUser = System.getenv("ADMIN_USERNAME");
-            String adminPassword = System.getenv("ADMIN_PASSWORD");
-
-            // Fallback para entornos de test (JUnit usa System properties)
-            if (adminUser == null) {
-                adminUser = System.getProperty("ADMIN_USERNAME");
-            }
-            if (adminPassword == null) {
-                adminPassword = System.getProperty("ADMIN_PASSWORD");
-            }
-
-            // Si aún no existen, lanza excepción informativa
-            if (adminUser == null || adminPassword == null) {
-                throw new IllegalStateException("ADMIN_USERNAME or ADMIN_PASSWORD not configured in environment or test properties");
-            }
-
             return User.builder()
-                    .username(adminUser)
+                    .username(adminUsername)
                     .password(passwordEncoder.encode(adminPassword))
                     .authorities(List.of(new SimpleGrantedAuthority("ROLE_ADMIN")))
                     .build();

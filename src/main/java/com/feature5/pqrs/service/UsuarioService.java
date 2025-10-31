@@ -8,6 +8,7 @@ import com.feature5.pqrs.repository.RolRepository;
 import com.feature5.pqrs.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,6 +93,7 @@ public class UsuarioService {
     /**
      * Valida credenciales de acceso.
      */
+    @Transactional(readOnly = true)
     public UsuarioDTO login(String nickname, String password) {
         return usuarioRepository.findByNickname(nickname)
                 .filter(usuario -> passwordEncoder.matches(password, usuario.getPassword()))
@@ -108,6 +110,7 @@ public class UsuarioService {
     /**
      * Lista todos los usuarios registrados.
      */
+    @Transactional(readOnly = true)
     public List<UsuarioDTO> listarUsuarios() {
         List<UsuarioDTO> usuarios = usuarioRepository.findAll()
                 .stream()
@@ -121,6 +124,7 @@ public class UsuarioService {
     /**
      * Busca un usuario por su nickname.
      */
+    @Transactional(readOnly = true)
     public UsuarioDTO buscarPorNickname(String nickname) {
         return usuarioRepository.findByNickname(nickname)
                 .map(usuarioMapper::toDto)

@@ -20,7 +20,7 @@ class RolMapperTest {
         rol.setIdRol(1L);
         rol.setDescripcion("ADMIN");
 
-        RolDTO resultado = rolMapper.toDTO(rol);
+        RolDTO resultado = rolMapper.toDto(rol);
 
         assertNotNull(resultado);
         assertEquals(1L, resultado.getIdRol());

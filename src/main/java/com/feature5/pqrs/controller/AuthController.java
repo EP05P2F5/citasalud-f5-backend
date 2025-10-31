@@ -1,15 +1,12 @@
 package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
+import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.config.JwtUtils;
-import com.feature5.pqrs.entities.Rol;
-import com.feature5.pqrs.entities.Usuario;
-import com.feature5.pqrs.repository.UsuarioRepository;
+import com.feature5.pqrs.service.UsuarioService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -27,44 +24,36 @@ import static com.feature5.pqrs.constants.ResponseKeys.*;
 public class AuthController {
 
     private final JwtUtils jwtUtils;
-    private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UsuarioService usuarioService;
 
     public AuthController(JwtUtils jwtUtils,
-                          UsuarioRepository usuarioRepository,
-                          PasswordEncoder passwordEncoder) {
+                          UsuarioService usuarioService) {
         this.jwtUtils = jwtUtils;
-        this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.usuarioService = usuarioService;
     }
 
     /**
      * Endpoint de login: valida las credenciales y genera un token JWT.
      */
     @PostMapping("/login")
-    @Transactional(readOnly = true)
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
         try {
-            // Buscar usuario por nickname
-            Usuario usuario = usuarioRepository.findByNickname(loginRequest.getNickname())
-                    .orElse(null);
+            // Autenticar usuario usando el servicio
+            UsuarioDTO usuario = usuarioService.login(
+                    loginRequest.getNickname(), 
+                    loginRequest.getPassword()
+            );
 
             if (usuario == null) {
                 log.warn("Intento de login con usuario inexistente: {}", loginRequest.getNickname());
                 return ResponseEntity.status(401)
-                        .body(Map.of(ERROR, "Usuario no encontrado"));
-            }
-
-            // Validar contraseña
-            if (!passwordEncoder.matches(loginRequest.getPassword(), usuario.getPassword())) {
-                log.warn("Credenciales inválidas para usuario: {}", usuario.getNickname());
-                return ResponseEntity.status(401)
                         .body(Map.of(ERROR, "Credenciales inválidas"));
             }
 
-            // Inicializar rol para evitar LazyInitializationException
-            Rol rol = usuario.getRol();
-            String rolDescripcion = (rol != null) ? rol.getDescripcion() : "USER";
+            // Obtener descripción del rol de forma segura
+            String rolDescripcion = (usuario.getRol() != null) 
+                    ? usuario.getRol().getDescripcion() 
+                    : "USER";
 
             // Generar token JWT
             String token = jwtUtils.generateToken(usuario.getNickname());

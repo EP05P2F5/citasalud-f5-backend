@@ -1,6 +1,6 @@
 package com.feature5.pqrs.controller;
 
-import com.feature5.pqrs.entities.Rol;
+import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.repository.RolRepository;
 import com.feature5.pqrs.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;
@@ -28,10 +28,10 @@ class RolControllerTest {
         usuarioRepository.deleteAll();
         rolRepository.deleteAll();
 
-        Rol r = new Rol();
+        RolDTO r = new RolDTO();
         r.setDescripcion("Admin role");
 
-        Rol creado = rolController.crearRol(r);
+        RolDTO creado = rolController.crearRol(r);
         assertNotNull(creado);
         assertNotNull(creado.getIdRol());
 
@@ -39,13 +39,13 @@ class RolControllerTest {
 
         assertEquals("Admin role", rolController.obtenerRolPorId(id).getBody().getDescripcion());
 
-        Rol actualizado = new Rol();
+        RolDTO actualizado = new RolDTO();
         actualizado.setDescripcion("User role");
 
         assertEquals(200, rolController.actualizarRol(id, actualizado).getStatusCodeValue());
         assertEquals("User role", rolRepository.findById(id).get().getDescripcion());
 
-        List<Rol> all = rolController.listarRoles();
+        List<RolDTO> all = rolController.listarRoles();
         assertFalse(all.isEmpty());
 
         assertEquals(200, rolController.eliminarRol(id).getStatusCodeValue());
@@ -59,7 +59,10 @@ class RolControllerTest {
 
         // 404s: obtener, actualizar, eliminar inexistente
         assertEquals(404, rolController.obtenerRolPorId(99999L).getStatusCodeValue());
-        assertEquals(404, rolController.actualizarRol(99999L, new Rol()).getStatusCodeValue());
+        
+        RolDTO rolInexistente = new RolDTO();
+        rolInexistente.setDescripcion("Inexistente");
+        assertEquals(404, rolController.actualizarRol(99999L, rolInexistente).getStatusCodeValue());
         assertEquals(404, rolController.eliminarRol(99999L).getStatusCodeValue());
     }
 }

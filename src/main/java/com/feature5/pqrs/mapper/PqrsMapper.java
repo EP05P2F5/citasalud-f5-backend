@@ -13,7 +13,7 @@ public interface PqrsMapper {
     // Entity → DTO
     @Mapping(source = "usuario.idUsuario", target = "idUsuario")
     @Mapping(source = "tipo.idTipo", target = "idTipo")
-    @Mapping(source = "estado", target = "estado", qualifiedByName = "estadoToString")
+    @Mapping(target = "estado", expression = "java(pqrs.getEstadoTexto() != null ? pqrs.getEstadoTexto() : (pqrs.getEstado() != null ? pqrs.getEstado().getDescripcion() : null))")
     PqrsDTO toDTO(Pqrs pqrs);
 
     // DTO → Entity

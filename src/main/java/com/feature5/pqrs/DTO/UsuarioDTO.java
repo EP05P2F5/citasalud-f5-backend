@@ -1,6 +1,5 @@
 package com.feature5.pqrs.DTO;
 
-import com.feature5.pqrs.entities.Rol;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.validation.constraints.Email;
@@ -36,7 +35,7 @@ public class UsuarioDTO {
     private String password;
 
     @NotNull(message = "rol es obligatorio")
-    private Rol rol;
+    private RolDTO rol;
 
     // Getters y setters
     public Long getIdUsuario() { return idUsuario; }
@@ -66,6 +65,6 @@ public class UsuarioDTO {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public Rol getRol() { return rol; }
-    public void setRol(Rol rol) { this.rol = rol; }
+    public RolDTO getRol() { return rol; }
+    public void setRol(RolDTO rol) { this.rol = rol; }
 }

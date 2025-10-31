@@ -1,8 +1,10 @@
 package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
+import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
+import com.feature5.pqrs.mapper.RolMapper;
 import com.feature5.pqrs.repository.RolRepository;
 import com.feature5.pqrs.repository.UsuarioRepository;
 import com.feature5.pqrs.service.UsuarioService;
@@ -36,6 +38,9 @@ class AuthControllerTest {
     @Autowired
     private RolRepository rolRepository;
 
+    @Autowired
+    private RolMapper rolMapper;
+
     @BeforeEach
     void setup() {
         // Importante: eliminar primero los que referencian (usuarios) y luego roles.
@@ -60,7 +65,7 @@ class AuthControllerTest {
         dto.setTelefono("555-0000");
         dto.setNickname("testnick");
         dto.setPassword("pass123");
-        dto.setRol(rol);
+        dto.setRol(rolMapper.toDto(rol));
 
         usuarioService.registrarUsuario(dto);
 
@@ -98,7 +103,7 @@ class AuthControllerTest {
         dto.setTelefono("555-1111");
         dto.setNickname("failnick");
         dto.setPassword("rightpass");
-        dto.setRol(rol);
+        dto.setRol(rolMapper.toDto(rol));
 
         usuarioService.registrarUsuario(dto);
 

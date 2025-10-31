@@ -1,5 +1,6 @@
 package com.feature5.pqrs.config;
 
+import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.repository.RolRepository;
@@ -76,7 +77,11 @@ class JwtAuthenticationFilterTest {
         dto.setTelefono("555-0000");
         dto.setNickname("testuser");
         dto.setPassword("pass123");
-        dto.setRol(rol);
+        
+        RolDTO rolDTO = new RolDTO();
+        rolDTO.setIdRol(rol.getIdRol());
+        rolDTO.setDescripcion(rol.getDescripcion());
+        dto.setRol(rolDTO);
 
         usuarioService.registrarUsuario(dto);
 

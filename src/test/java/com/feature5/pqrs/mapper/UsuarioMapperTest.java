@@ -1,24 +1,22 @@
 package com.feature5.pqrs.mapper;
 
+import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.entities.Usuario;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class UsuarioMapperTest {
 
+    @Autowired
     private UsuarioMapper mapper;
-
-    @BeforeEach
-    void setUp() {
-        mapper = Mappers.getMapper(UsuarioMapper.class);
-    }
 
     @Test
     void testToDTO() {
@@ -50,7 +48,7 @@ class UsuarioMapperTest {
 
     @Test
     void testToEntity() {
-        Rol rol = new Rol();
+        RolDTO rol = new RolDTO();
         rol.setIdRol(3L);
         rol.setDescripcion("ADMIN");
 

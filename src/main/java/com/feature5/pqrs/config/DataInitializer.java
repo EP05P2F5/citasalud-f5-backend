@@ -1,5 +1,6 @@
 package com.feature5.pqrs.config;
 
+import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Estado;
 import com.feature5.pqrs.entities.Rol;
@@ -69,7 +70,12 @@ public class DataInitializer implements CommandLineRunner {
             admin.setNickname("admin");
             admin.setDireccion("N/A");
             admin.setTelefono("0000000000");
-            admin.setRol(rolAdmin);
+            
+            // Convertir Rol a RolDTO
+            RolDTO rolAdminDTO = new RolDTO();
+            rolAdminDTO.setIdRol(rolAdmin.getIdRol());
+            rolAdminDTO.setDescripcion(rolAdmin.getDescripcion());
+            admin.setRol(rolAdminDTO);
 
             usuarioService.registrarUsuario(admin);
             log.info("Usuario administrador creado correctamente.");
