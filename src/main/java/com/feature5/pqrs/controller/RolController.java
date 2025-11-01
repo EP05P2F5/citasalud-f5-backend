@@ -1,11 +1,9 @@
 package com.feature5.pqrs.controller;
 
-import com.feature5.pqrs.DTO.ErrorResponseDTO;
 import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.service.RolService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +32,7 @@ public class RolController {
     @Operation(summary = "Obtener rol por ID", description = "Obtiene la información de un rol específico mediante su ID")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Rol encontrado"),
-        @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content())
     })
     @GetMapping("/{id}")
     public ResponseEntity<RolDTO> obtenerRolPorId(@PathVariable Long id) {
@@ -53,7 +51,7 @@ public class RolController {
     @Operation(summary = "Actualizar rol existente", description = "Modifica la información de un rol existente")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Rol actualizado exitosamente"),
-        @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content())
     })
     @PutMapping("/{id}")
     public ResponseEntity<RolDTO> actualizarRol(@PathVariable Long id, @RequestBody RolDTO rolActualizado) {
@@ -65,7 +63,7 @@ public class RolController {
     @Operation(summary = "Eliminar rol", description = "Elimina un rol del sistema de forma permanente")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Rol eliminado exitosamente"),
-        @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content())
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminarRol(@PathVariable Long id) {

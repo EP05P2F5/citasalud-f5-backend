@@ -1,13 +1,11 @@
 package com.feature5.pqrs.controller;
 
-import com.feature5.pqrs.DTO.ErrorResponseDTO;
 import com.feature5.pqrs.DTO.PqrsDTO;
 import com.feature5.pqrs.DTO.PqrsRequestDTO;
 import com.feature5.pqrs.service.PqrsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -40,7 +38,7 @@ public class PqrsController {
     @Operation(summary = "Obtener PQRS por ID", description = "Obtiene la información detallada de una PQRS específica mediante su ID")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "PQRS encontrada"),
-        @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content())
     })
     @GetMapping("/{id}")
     public ResponseEntity<PqrsDTO> obtenerPqrsPorId(
@@ -54,7 +52,7 @@ public class PqrsController {
     @Operation(summary = "Crear nueva PQRS", description = "Registra una nueva Petición, Queja, Reclamo o Sugerencia en el sistema")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "PQRS creada exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos o IDs no encontrados", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "400", description = "Datos inválidos o IDs no encontrados", content = @Content())
     })
     @PostMapping
     public ResponseEntity<PqrsDTO> crearPqrs(@Valid @RequestBody PqrsRequestDTO dto) {
@@ -81,8 +79,8 @@ public class PqrsController {
     @Operation(summary = "Actualizar PQRS existente", description = "Modifica los datos de una PQRS existente en el sistema")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "PQRS actualizada exitosamente"),
-        @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content()),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos", content = @Content())
     })
     @PutMapping("/{id}")
     public ResponseEntity<PqrsDTO> actualizarPqrs(@PathVariable Long id, @RequestBody PqrsRequestDTO dto) {
@@ -112,7 +110,7 @@ public class PqrsController {
     @Operation(summary = "Eliminar PQRS", description = "Elimina una PQRS del sistema de forma permanente")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "PQRS eliminada exitosamente"),
-        @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content())
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarPqrs(@PathVariable Long id) {
@@ -140,8 +138,8 @@ public class PqrsController {
     @Operation(summary = "Responder PQRS", description = "Registra la respuesta oficial a una PQRS y actualiza su fecha de respuesta")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Respuesta registrada exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Respuesta vacía o inválida", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
-        @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "400", description = "Respuesta vacía o inválida", content = @Content()),
+        @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content())
     })
     @PutMapping("/{id}/responder")
     public ResponseEntity<PqrsDTO> responderPqrs(@PathVariable Long id, @RequestBody Map<String, String> body) {

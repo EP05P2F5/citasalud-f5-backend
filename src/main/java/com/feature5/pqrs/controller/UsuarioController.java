@@ -1,11 +1,9 @@
 package com.feature5.pqrs.controller;
 
-import com.feature5.pqrs.DTO.ErrorResponseDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,7 +31,7 @@ public class UsuarioController {
     @Operation(summary = "Registrar nuevo usuario", description = "Crea un nuevo usuario en el sistema con credenciales encriptadas y rol asignado")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
-        @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya existe", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya existe", content = @Content())
     })
     @PostMapping("/register")
     public ResponseEntity<UsuarioDTO> registrar(@Valid @RequestBody UsuarioDTO usuarioDTO) {
@@ -58,7 +56,7 @@ public class UsuarioController {
     @Operation(summary = "Buscar usuario por nickname", description = "Obtiene la información de un usuario específico mediante su nickname")
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
-        @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
     })
     @GetMapping("/{nickname}")
     public ResponseEntity<UsuarioDTO> buscarPorNickname(@PathVariable String nickname) {
