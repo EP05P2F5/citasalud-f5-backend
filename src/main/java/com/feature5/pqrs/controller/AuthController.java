@@ -1,13 +1,12 @@
 package com.feature5.pqrs.controller;
 
+import com.feature5.pqrs.DTO.ErrorResponseDTO;
 import com.feature5.pqrs.DTO.LoginRequestDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.config.JwtUtils;
 import com.feature5.pqrs.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -41,47 +40,14 @@ public class AuthController {
         this.usuarioService = usuarioService;
     }
 
-    /**
-     * Endpoint de login: valida las credenciales y genera un token JWT.
-     */
-    @Operation(
-        summary = "Iniciar sesión",
-        description = "Autentica al usuario con nickname y password, retorna token JWT válido por 24 horas"
-    )
+    @Operation(summary = "Iniciar sesión", description = "Autentica al usuario con nickname y password, retorna token JWT válido por 24 horas")
     @ApiResponses({
-        @ApiResponse(
-            responseCode = "200",
-            description = "Autenticación exitosa, retorna token JWT y datos del usuario",
-            content = @Content(
-                schema = @Schema(implementation = Map.class),
-                examples = @ExampleObject(
-                    value = "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5...\",\"username\":\"juan123\",\"role\":\"ADMIN\",\"email\":\"juan@example.com\"}"
-                )
-            )
-        ),
-        @ApiResponse(
-            responseCode = "401",
-            description = "Credenciales inválidas",
-            content = @Content(
-                examples = @ExampleObject(value = "{\"error\":\"Credenciales inválidas\"}")
-            )
-        ),
-        @ApiResponse(
-            responseCode = "500",
-            description = "Error interno del servidor",
-            content = @Content(
-                examples = @ExampleObject(value = "{\"error\":\"Error interno del servidor\"}")
-            )
-        )
+        @ApiResponse(responseCode = "200", description = "Autenticación exitosa, retorna token JWT y datos del usuario"),
+        @ApiResponse(responseCode = "401", description = "Credenciales inválidas", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class))),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor", content = @Content(schema = @Schema(implementation = ErrorResponseDTO.class)))
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(
-            @Parameter(
-                description = "Credenciales de acceso (nickname y password)",
-                required = true,
-                schema = @Schema(implementation = LoginRequestDTO.class)
-            )
-            @RequestBody LoginRequestDTO loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginRequestDTO loginRequest) {
         try {
             // Autenticar usuario usando el servicio
             UsuarioDTO usuario = usuarioService.login(
