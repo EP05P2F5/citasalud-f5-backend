@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -23,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * token no vacío, username, rol y email.
  */
 @SpringBootTest
+@Sql(scripts = "/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class AuthControllerTest {
 
     @Autowired
@@ -44,17 +46,13 @@ class AuthControllerTest {
     void setup() {
         // Importante: eliminar primero los que referencian (usuarios) y luego roles.
         usuarioRepository.deleteAllInBatch();
-        rolRepository.deleteAllInBatch();
+        // No borramos roles porque vienen del script SQL con IDs específicos
     }
 
     @Test
     void login_success_returnsTokenAndUser() {
-        // Crear rol base
-        Rol rol = new Rol();
-        rol.setDescripcion("ROLE_USER");
-        rol = rolRepository.save(rol);
-
         // Registrar usuario con password encriptada (vía servicio)
+        // El rol se asigna automáticamente (ID 3)
         UsuarioDTO dto = new UsuarioDTO();
         dto.setNombre("Test");
         dto.setApellido("User");
@@ -64,7 +62,7 @@ class AuthControllerTest {
         dto.setTelefono("555-0000");
         dto.setNickname("testnick");
         dto.setPassword("pass123");
-        dto.setRol(rolMapper.toDto(rol));
+        // No se asigna rol, el sistema asigna automáticamente ID 3
 
         usuarioService.registrarUsuario(dto);
 
@@ -81,11 +79,7 @@ class AuthControllerTest {
 
     @Test
     void login_fail_wrongPassword_returns401() {
-        // Crear rol y usuario
-        Rol rol = new Rol();
-        rol.setDescripcion("ROLE_USER");
-        rolRepository.save(rol);
-
+        // Registrar usuario (rol ID 3 asignado automáticamente)
         UsuarioDTO dto = new UsuarioDTO();
         dto.setNombre("Fail");
         dto.setApellido("Case");
@@ -95,7 +89,7 @@ class AuthControllerTest {
         dto.setTelefono("555-1111");
         dto.setNickname("failnick");
         dto.setPassword("rightpass");
-        dto.setRol(rolMapper.toDto(rol));
+        // No se asigna rol, el sistema asigna automáticamente ID 3
 
         usuarioService.registrarUsuario(dto);
 

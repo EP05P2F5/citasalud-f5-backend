@@ -1,7 +1,6 @@
 package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
-import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.repository.RolRepository;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Registrar -> Login exitoso -> Login fallido -> Listar -> Buscar.
  */
 @SpringBootTest
+@Sql(scripts = "/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UsuarioControllerTest {
 
     @Autowired
@@ -40,17 +41,12 @@ class UsuarioControllerTest {
     @BeforeEach
     void setup() {
         usuarioRepository.deleteAll();
-        rolRepository.deleteAll();
+        // No borramos roles porque vienen del script SQL con IDs específicos
     }
 
     @Test
     void registerLoginListAndFind() {
-        // 1️⃣ Crear y guardar rol base
-        Rol rol = new Rol();
-        rol.setDescripcion("USER");
-        rol = rolRepository.save(rol);
-
-        // 2️⃣ Crear DTO del nuevo usuario
+        // 2️⃣ Crear DTO del nuevo usuario (el rol se ignora, siempre asigna ID 3)
         UsuarioDTO dto = new UsuarioDTO();
         dto.setNombre("Test");
         dto.setApellido("User");
@@ -60,12 +56,7 @@ class UsuarioControllerTest {
         dto.setTelefono("123456");
         dto.setNickname("testnick");
         dto.setPassword("pass123");
-        
-        // Crear RolDTO a partir del rol guardado
-        RolDTO rolDTO = new RolDTO();
-        rolDTO.setIdRol(rol.getIdRol());
-        rolDTO.setDescripcion(rol.getDescripcion());
-        dto.setRol(rolDTO);
+        // No es necesario asignar rol, el sistema asigna automáticamente ID 3
 
         // 3️⃣ Registrar usuario
         ResponseEntity<UsuarioDTO> created = usuarioController.registrar(dto);

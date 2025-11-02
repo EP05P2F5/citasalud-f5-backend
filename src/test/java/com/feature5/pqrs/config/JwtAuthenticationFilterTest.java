@@ -1,6 +1,5 @@
 package com.feature5.pqrs.config;
 
-import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.repository.RolRepository;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Sql(scripts = "/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class JwtAuthenticationFilterTest {
 
     @Autowired
@@ -44,7 +45,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setup() {
         usuarioRepository.deleteAll();
-        rolRepository.deleteAll();
+        // No borramos roles porque vienen del script SQL con IDs específicos
     }
 
     @Test
@@ -63,10 +64,6 @@ class JwtAuthenticationFilterTest {
 
     @Test
     void authenticatedUserCanAccessProtectedEndpoint() throws Exception {
-        Rol rol = new Rol();
-        rol.setDescripcion("ROLE_USER");
-        rol = rolRepository.save(rol);
-
         UsuarioDTO dto = new UsuarioDTO();
         dto.setNombre("Test");
         dto.setApellido("User");
@@ -74,11 +71,7 @@ class JwtAuthenticationFilterTest {
         dto.setEmail("test@example.com");
         dto.setNickname("testuser");
         dto.setPassword("pass123");
-        
-        RolDTO rolDTO = new RolDTO();
-        rolDTO.setIdRol(rol.getIdRol());
-        rolDTO.setDescripcion(rol.getDescripcion());
-        dto.setRol(rolDTO);
+        // No se asigna rol, el sistema asigna automáticamente ID 3
 
         usuarioService.registrarUsuario(dto);
         String token = jwtUtils.generateToken("testuser");
