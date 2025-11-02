@@ -57,13 +57,15 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
 
-                        // Endpoints públicos
-                        .requestMatchers(
-                                "/auth/**",
-                                "/usuarios/register",
-                                "/api/test/public",
-                                "/api/test/env"
-                        ).permitAll()
+            // Endpoints públicos (auth y pruebas)
+            .requestMatchers(
+                "/auth/**",
+                "/api/test/public",
+                "/api/test/env"
+            ).permitAll()
+
+            // Permitir registro de usuario mediante POST /usuarios
+            .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuarios").permitAll()
 
 
                         // Resto requiere autenticación

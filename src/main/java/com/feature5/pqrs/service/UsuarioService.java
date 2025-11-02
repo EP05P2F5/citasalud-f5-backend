@@ -56,32 +56,11 @@ public class UsuarioService {
         // Encriptar contraseña
         usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
 
-        // Asociar rol (crear si no existe)
-        if (dto.getRol() != null && dto.getRol().getDescripcion() != null) {
-            String descripcion = dto.getRol().getDescripcion().trim();
-
-            Rol rol = rolRepository.findByDescripcion(descripcion)
-                    .orElseGet(() -> {
-                        Rol nuevo = new Rol();
-                        nuevo.setDescripcion(descripcion);
-
-                        // Seguridad: evitar exponer datos controlados por el usuario
-                        log.info("Se creó automáticamente un nuevo rol en el sistema (valor oculto por seguridad).");
-
-                        return rolRepository.save(nuevo);
-                    });
-
-            usuario.setRol(rol);
-        } else {
-            log.warn("El usuario no tenía rol asignado; se aplicará 'USER' por defecto.");
-            Rol rolDefault = rolRepository.findByDescripcion("USER")
-                    .orElseGet(() -> {
-                        Rol nuevo = new Rol();
-                        nuevo.setDescripcion("USER");
-                        return rolRepository.save(nuevo);
-                    });
-            usuario.setRol(rolDefault);
-        }
+        // SEGURIDAD: Todos los usuarios registrados públicamente tienen rol ID 3 (ROLE_USER)
+        // Solo los administradores pueden cambiar roles mediante PUT
+        Rol rolUser = rolRepository.findById(3L)
+                .orElseThrow(() -> new IllegalStateException("Rol con ID 3 (ROLE_USER) no existe en la base de datos"));
+        usuario.setRol(rolUser);
 
 
         Usuario guardado = usuarioRepository.save(usuario);

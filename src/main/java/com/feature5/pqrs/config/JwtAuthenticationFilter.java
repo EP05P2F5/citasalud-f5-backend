@@ -31,15 +31,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
-    // Endpoints públicos (sin autenticación)
+    // Endpoints públicos (sin autenticación) - rutas sin método específico
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
-            "/auth/login",
-            "/usuarios/register",
-            "/api/test/public",
-            "/api/test/env",
-            "/v3/api-docs",
-            "/swagger-ui",
-            "/swagger-ui.html"
+        "/auth/login",
+        "/api/test/public",
+        "/api/test/env",
+        "/v3/api-docs",
+        "/swagger-ui",
+        "/swagger-ui.html"
     );
 
     // Precalcular lista normalizada una vez
@@ -59,8 +58,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
+        String method = request.getMethod();
 
-        // Permitir rutas públicas sin autenticación
+        // Permitir POST /usuarios como endpoint público de registro
+        String normalizedForCheck = normalizePath(path);
+        if ("/usuarios".equals(normalizedForCheck) && "POST".equalsIgnoreCase(method)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // Permitir rutas públicas sin autenticación (otras rutas)
         if (isPublic(path)) {
             filterChain.doFilter(request, response);
             return;
