@@ -1,7 +1,7 @@
 package com.feature5.pqrs.DTO;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -31,7 +31,7 @@ public class UsuarioDTO {
     @NotBlank(message = "nickname es obligatorio")
     private String nickname;
 
-    @JsonIgnore // No se devolverá en respuestas JSON
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @NotNull(message = "rol es obligatorio")

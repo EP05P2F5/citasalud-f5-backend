@@ -33,7 +33,7 @@ public class UsuarioController {
         @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya existe", content = @Content())
     })
-    @PostMapping("/register")
+    @PostMapping
     public ResponseEntity<UsuarioDTO> registrar(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         UsuarioDTO nuevoUsuario = usuarioService.registrarUsuario(usuarioDTO);
         return ResponseEntity.ok(nuevoUsuario);
