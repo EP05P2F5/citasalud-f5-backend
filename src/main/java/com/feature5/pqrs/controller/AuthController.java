@@ -92,7 +92,6 @@ public class AuthController {
             response.put(USERNAME, usuario.getNickname());
             response.put(ROLE, rolDescripcion);
             response.put(EMAIL, usuario.getEmail());
-            response.put(ID_USER, usuario.getIdUsuario());
 
             log.info("Usuario autenticado correctamente: {}", usuario.getNickname());
             return ResponseEntity.ok(response);
