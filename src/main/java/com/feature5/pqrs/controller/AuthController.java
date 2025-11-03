@@ -28,7 +28,6 @@ import static com.feature5.pqrs.constants.ResponseKeys.*;
 @Tag(name = "Autenticación", description = "Microservicio de autenticación y gestión de tokens JWT")
 @Slf4j
 @RestController
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/auth")
 public class AuthController {
 
