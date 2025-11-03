@@ -112,39 +112,51 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    // CORS básico para pruebas locales (ajusta origins según necesites)
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration cfg = new CorsConfiguration();
+    // Configuración CORS para entornos local, Azure y producción (Vercel)
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfiguration cfg = new CorsConfiguration();
 
-        // Detectar entorno automáticamente
-        String host = System.getenv("RENDER"); // Render define esta variable automáticamente
-        String azureEnv = System.getenv("WEBSITE_SITE_NAME"); // Azure define esta
-        boolean isRender = host != null;
-        boolean isAzure = azureEnv != null;
+    // Detectar entorno automáticamente
+    String host = System.getenv("RENDER");
+    String azureEnv = System.getenv("WEBSITE_SITE_NAME");
+    boolean isRender = host != null;
+    boolean isAzure = azureEnv != null;
 
-        if (isRender) {
-            cfg.setAllowedOriginPatterns(List.of("https://citasalud-feature5.onrender.com"));
-        } else if (isAzure) {
-            cfg.setAllowedOriginPatterns(List.of("https://citasalud-feature5.azurewebsites.net"));
-        } else {
-            // Entorno local
-            cfg.setAllowedOriginPatterns(List.of(
-                    "http://localhost:8080",
-                    "http://127.0.0.1:8080",
-                    "http://localhost:3000",
-                    "http://127.0.0.1:5500"
-            ));
-        }
-
-        cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
-        cfg.setExposedHeaders(List.of("Authorization"));
-        cfg.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", cfg);
-        return source;
+    if (isRender) {
+        cfg.setAllowedOriginPatterns(List.of(
+            "https://citasalud-feature5.onrender.com"
+        ));
+    } else if (isAzure) {
+        // 💡 Azure (API en la nube)
+        // Permite acceso desde el frontend en producción y desde local para pruebas
+        cfg.setAllowedOriginPatterns(List.of(
+            "https://citasalud-pqrs-flow.vercel.app/",  // 🌐 frontend en producción (Vercel)
+            "http://localhost:8080",  // 🧪 Lovable/Vite local
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000"
+        ));
+    } else {
+        // 💻 Entorno local (backend corriendo en tu máquina)
+        cfg.setAllowedOriginPatterns(List.of(
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:8080",
+            "http://127.0.0.1:8080",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000"
+        ));
     }
+
+    cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+    cfg.setExposedHeaders(List.of("Authorization"));
+    cfg.setAllowCredentials(true);
+
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", cfg);
+    return source;
+}
 
 }
