@@ -11,7 +11,7 @@ public class Rol {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idrol")
-    private Long idRol;
+    private Integer idRol;
 
     @Column(name = "descripcion", nullable = false, unique = true, length = 100)
     private String descripcion;
@@ -19,11 +19,11 @@ public class Rol {
     public Rol() {
     }
 
-    public Rol(Long idRol) {
+    public Rol(Integer idRol) {
         this.idRol = idRol;
     }
 
-    public Rol(Long idRol, String descripcion) {
+    public Rol(Integer idRol, String descripcion) {
         this.idRol = idRol;
         this.descripcion = descripcion;
     }
@@ -32,11 +32,11 @@ public class Rol {
         this.descripcion = descripcion;
     }
 
-    public Long getIdRol() {
+    public Integer getIdRol() {
         return idRol;
     }
 
-    public void setIdRol(Long idRol) {
+    public void setIdRol(Integer idRol) {
         this.idRol = idRol;
     }
 

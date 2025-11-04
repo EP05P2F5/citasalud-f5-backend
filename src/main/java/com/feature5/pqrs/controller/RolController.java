@@ -35,7 +35,7 @@ public class RolController {
         @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content())
     })
     @GetMapping("/{id}")
-    public ResponseEntity<RolDTO> obtenerRolPorId(@PathVariable Long id) {
+    public ResponseEntity<RolDTO> obtenerRolPorId(@PathVariable Integer id) {
         return rolService.obtenerRolPorId(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -54,7 +54,7 @@ public class RolController {
         @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content())
     })
     @PutMapping("/{id}")
-    public ResponseEntity<RolDTO> actualizarRol(@PathVariable Long id, @RequestBody RolDTO rolActualizado) {
+    public ResponseEntity<RolDTO> actualizarRol(@PathVariable Integer id, @RequestBody RolDTO rolActualizado) {
         return rolService.actualizarRol(id, rolActualizado)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -66,7 +66,7 @@ public class RolController {
         @ApiResponse(responseCode = "404", description = "Rol no encontrado", content = @Content())
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminarRol(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarRol(@PathVariable Integer id) {
         if (rolService.eliminarRol(id)) {
             return ResponseEntity.ok().build();
         } else {

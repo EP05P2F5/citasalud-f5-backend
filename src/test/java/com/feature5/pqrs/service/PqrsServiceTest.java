@@ -87,7 +87,7 @@ class PqrsServiceTest {
         PqrsDTO pqrsDTO = new PqrsDTO();
         pqrsDTO.setDescripcion("Descripción de prueba");
 
-        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
+        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO);
 
         assertNotNull(resultado);
         assertEquals("Descripción de prueba", resultado.getDescripcion());
@@ -100,11 +100,11 @@ class PqrsServiceTest {
         PqrsDTO pqrsDTO1 = new PqrsDTO();
         pqrsDTO1.setDescripcion("Test");
         pqrsDTO1.setRadicado("R-CUSTOM-123");
-        pqrsDTO1.setEstado("ESTADO_CUSTOM");
+        pqrsDTO1.setEstado("PENDIENTE"); // Usar estado que existe en la BD
 
-        PqrsDTO resultado1 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO1);
+        PqrsDTO resultado1 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO1);
         assertEquals("R-CUSTOM-123", resultado1.getRadicado());
-        assertEquals("ESTADO_CUSTOM", resultado1.getEstado());
+        assertEquals("PENDIENTE", resultado1.getEstado()); // Esperar el estado que existe
     }
 
     @Test
@@ -112,7 +112,7 @@ class PqrsServiceTest {
         PqrsDTO pqrsDTO2 = new PqrsDTO();
         pqrsDTO2.setDescripcion("Test sin radicado");
 
-        PqrsDTO resultado2 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO2);
+        PqrsDTO resultado2 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO2);
         assertNull(resultado2.getRadicado());
     }
 
@@ -124,7 +124,7 @@ class PqrsServiceTest {
         pqrsDTO.setDescripcion("Test");
         pqrsDTO.setFechaDeGeneracion(fechaAnterior);
 
-        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
+        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO);
 
         assertEquals(fechaAnterior, resultado.getFechaDeGeneracion());
     }
@@ -133,7 +133,7 @@ class PqrsServiceTest {
     void testResponderPqrs_DebeActualizarRespuestaYEstado() {
         PqrsDTO pqrsDTO = new PqrsDTO();
         pqrsDTO.setDescripcion("PQRS para responder");
-        PqrsDTO creado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
+        PqrsDTO creado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO);
 
         String respuesta = "Esta es la respuesta";
         Optional<PqrsDTO> resultado = pqrsService.responderPqrs(creado.getIdPqrs(), respuesta);

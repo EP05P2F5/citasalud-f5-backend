@@ -8,9 +8,12 @@ import java.util.List;
 
 @Repository
 public interface PqrsRepository extends JpaRepository<Pqrs, Long> {
-    // Antes: findByEstado(String) -> ahora el campo texto se llama estadoTexto
-    List<Pqrs> findByEstadoTexto(String estadoTexto);
+    // Buscar por la ID del estado (a través de la FK)
+    List<Pqrs> findByEstado_IdEstado(Integer idEstado);
 
-    // Antes: findByIdUsuario(Long) -> ahora es relación: usuario.idUsuario
+    // Buscar por usuario (a través de la FK)
     List<Pqrs> findByUsuario_IdUsuario(Long idUsuario);
+    
+    // Buscar por tipo (a través de la FK)
+    List<Pqrs> findByTipo_IdTipo(Integer idTipo);
 }

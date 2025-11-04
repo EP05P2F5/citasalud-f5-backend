@@ -40,7 +40,7 @@ public class RolService {
      * Obtiene un rol por su ID.
      */
     @Transactional(readOnly = true)
-    public Optional<RolDTO> obtenerRolPorId(Long id) {
+    public Optional<RolDTO> obtenerRolPorId(Integer id) {
         return rolRepository.findById(id)
                 .map(rolMapper::toDto);
     }
@@ -64,7 +64,7 @@ public class RolService {
     /**
      * Actualiza un rol existente.
      */
-    public Optional<RolDTO> actualizarRol(Long id, RolDTO rolDTO) {
+    public Optional<RolDTO> actualizarRol(Integer id, RolDTO rolDTO) {
         return rolRepository.findById(id)
                 .map(rolExistente -> {
                     rolExistente.setDescripcion(rolDTO.getDescripcion());
@@ -77,7 +77,7 @@ public class RolService {
     /**
      * Elimina un rol por su ID.
      */
-    public boolean eliminarRol(Long id) {
+    public boolean eliminarRol(Integer id) {
         if (rolRepository.existsById(id)) {
             rolRepository.deleteById(id);
             log.info("Rol con ID {} eliminado", id);

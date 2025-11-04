@@ -58,7 +58,7 @@ public class UsuarioService {
 
         // SEGURIDAD: Todos los usuarios registrados públicamente tienen rol ID 3 (usuario)
         // Solo los administradores pueden cambiar roles mediante PUT
-        Rol rolUser = rolRepository.findById(3L)
+        Rol rolUser = rolRepository.findById(3)
                 .orElseThrow(() -> new IllegalStateException("Rol con ID 3 no existe en la base de datos"));
         usuario.setRol(rolUser);
 

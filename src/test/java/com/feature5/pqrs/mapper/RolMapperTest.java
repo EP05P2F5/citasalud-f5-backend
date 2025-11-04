@@ -17,26 +17,26 @@ class RolMapperTest {
     @Test
     void testToDTO_DebeConvertirRolADTO() {
         Rol rol = new Rol();
-        rol.setIdRol(1L);
+        rol.setIdRol(1);
         rol.setDescripcion("ADMIN");
 
         RolDTO resultado = rolMapper.toDto(rol);
 
         assertNotNull(resultado);
-        assertEquals(1L, resultado.getIdRol());
+        assertEquals(1, resultado.getIdRol().intValue());
         assertEquals("ADMIN", resultado.getDescripcion());
     }
 
     @Test
     void testToEntity_DebeConvertirDTOARol() {
         RolDTO dto = new RolDTO();
-        dto.setIdRol(2L);
+        dto.setIdRol(2);
         dto.setDescripcion("USER");
 
         Rol resultado = rolMapper.toEntity(dto);
 
         assertNotNull(resultado);
-        assertEquals(2L, resultado.getIdRol());
+        assertEquals(2, resultado.getIdRol().intValue());
         assertEquals("USER", resultado.getDescripcion());
     }
 }

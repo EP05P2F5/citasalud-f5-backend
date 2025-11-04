@@ -1,15 +1,23 @@
 package com.feature5.pqrs.DTO;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 public class PqrsRequestDTO {
-    public Long usuarioId;              // FK usuario
+    // NO incluye usuarioId - se obtiene automáticamente del usuario autenticado
+    
+    @NotNull(message = "El tipo es obligatorio")
     public Integer tipoId;              // FK tipo
-    public Integer estadoId;            // FK estado (obligatoria)
-    public String estadoTexto;          // Texto opcional (coexiste con idestado)
+    
+    @NotBlank(message = "El estado es obligatorio")
+    public String estado;               // Nombre del estado (ej: "PENDIENTE", "EN_PROCESO")
+    
+    @NotBlank(message = "La descripción es obligatoria")
     public String descripcion;
+    
     public LocalDateTime fechaDeGeneracion;
     public String radicado;
-    public LocalDateTime fechaDeRespuesta;
-    public String respuesta;
+    
+    // REMOVIDO: fechaDeRespuesta y respuesta - solo los gestores pueden responder
 }

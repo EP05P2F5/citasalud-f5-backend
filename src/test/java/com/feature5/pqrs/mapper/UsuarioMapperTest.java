@@ -31,7 +31,7 @@ class UsuarioMapperTest {
         user.setFechaDeNacimiento(LocalDate.of(1990, 1, 1));
 
         Rol rol = new Rol();
-        rol.setIdRol(2L);
+        rol.setIdRol(2);
         rol.setDescripcion("ROLE_USER");
         user.setRol(rol);
 
@@ -46,7 +46,7 @@ class UsuarioMapperTest {
     @Test
     void testToEntity() {
         RolDTO rol = new RolDTO();
-        rol.setIdRol(3L);
+        rol.setIdRol(3);
         rol.setDescripcion("ADMIN");
 
         UsuarioDTO dto = new UsuarioDTO();

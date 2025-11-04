@@ -61,6 +61,5 @@ class PqrsMapperTest {
         assertEquals("RAD-999", entity.getRadicado());
         assertNotNull(entity.getEstado());
         assertEquals("CERRADO", entity.getEstado().getDescripcion());
-        assertEquals("CERRADO", entity.getEstadoTexto());
     }
 }

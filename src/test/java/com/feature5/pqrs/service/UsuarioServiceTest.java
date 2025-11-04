@@ -66,7 +66,7 @@ class UsuarioServiceTest {
 
         // Verifica que se asignó rol ID 3 (Usuario), no el rol enviado
         assertEquals("Usuario", resultado.getRol().getDescripcion());
-        assertEquals(3L, resultado.getRol().getIdRol());
+        assertEquals(3, resultado.getRol().getIdRol());
     }
 
     @Test
@@ -75,7 +75,7 @@ class UsuarioServiceTest {
         UsuarioDTO resultado = usuarioService.registrarUsuario(usuario);
 
         assertEquals("Usuario", resultado.getRol().getDescripcion());
-        assertEquals(3L, resultado.getRol().getIdRol());
+        assertEquals(3, resultado.getRol().getIdRol());
     }
 
     private UsuarioDTO crearUsuarioDTO(String email, String nickname, RolDTO rol) {

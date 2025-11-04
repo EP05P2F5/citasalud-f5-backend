@@ -37,10 +37,6 @@ public class Pqrs {
     @Column(name = "radicado", unique = true)
     private String radicado;
 
-    // Texto libre "estado" (coexiste con idestado)
-    @Column(name = "estado")
-    private String estadoTexto;
-
     // FK obligatoria -> estado.idestado
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -91,13 +87,6 @@ public class Pqrs {
     }
     public void setRadicado(String radicado) {
         this.radicado = radicado;
-    }
-
-    public String getEstadoTexto() {
-        return estadoTexto;
-    }
-    public void setEstadoTexto(String estadoTexto) {
-        this.estadoTexto = estadoTexto;
     }
 
     public Estado getEstado() {

@@ -35,7 +35,7 @@ class RolControllerTest {
         assertNotNull(creado);
         assertNotNull(creado.getIdRol());
 
-        Long id = creado.getIdRol();
+        Integer id = creado.getIdRol();
 
         assertEquals("Admin role", rolController.obtenerRolPorId(id).getBody().getDescripcion());
 
@@ -58,11 +58,11 @@ class RolControllerTest {
         rolRepository.deleteAll();
 
         // 404s: obtener, actualizar, eliminar inexistente
-        assertEquals(404, rolController.obtenerRolPorId(99999L).getStatusCodeValue());
+        assertEquals(404, rolController.obtenerRolPorId(99999).getStatusCodeValue());
         
         RolDTO rolInexistente = new RolDTO();
         rolInexistente.setDescripcion("Inexistente");
-        assertEquals(404, rolController.actualizarRol(99999L, rolInexistente).getStatusCodeValue());
-        assertEquals(404, rolController.eliminarRol(99999L).getStatusCodeValue());
+        assertEquals(404, rolController.actualizarRol(99999, rolInexistente).getStatusCodeValue());
+        assertEquals(404, rolController.eliminarRol(99999).getStatusCodeValue());
     }
 }

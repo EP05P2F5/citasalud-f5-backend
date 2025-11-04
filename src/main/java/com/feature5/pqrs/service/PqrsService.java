@@ -58,7 +58,7 @@ public class PqrsService {
     }
 
     @Transactional
-    public PqrsDTO crearPqrs(Long usuarioId, Integer tipoId, Integer estadoId, PqrsDTO dto) {
+    public PqrsDTO crearPqrs(Long usuarioId, Integer tipoId, String estadoNombre, PqrsDTO dto) {
         // Validar y obtener entidades relacionadas
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
@@ -66,15 +66,14 @@ public class PqrsService {
         Tipo tipo = tipoRepository.findById(tipoId)
                 .orElseThrow(() -> new IllegalArgumentException("Tipo no encontrado"));
         
-        Estado estado = estadoRepository.findById(estadoId)
-                .orElseThrow(() -> new IllegalArgumentException("Estado no encontrado"));
+        Estado estado = estadoRepository.findByDescripcion(estadoNombre)
+                .orElseThrow(() -> new IllegalArgumentException("Estado no encontrado: " + estadoNombre));
 
         // Crear entidad Pqrs
         Pqrs pqrs = new Pqrs();
         pqrs.setUsuario(usuario);
         pqrs.setTipo(tipo);
         pqrs.setEstado(estado);
-        pqrs.setEstadoTexto(dto.getEstado());
         pqrs.setDescripcion(dto.getDescripcion());
         pqrs.setFechaDeGeneracion(dto.getFechaDeGeneracion() != null ? dto.getFechaDeGeneracion().atStartOfDay() : LocalDateTime.now());
         pqrs.setRadicado(dto.getRadicado());
@@ -121,9 +120,7 @@ public class PqrsService {
     }
 
     private void actualizarCamposSimples(Pqrs pqrs, PqrsDTO dto) {
-        if (dto.getEstado() != null) {
-            pqrs.setEstadoTexto(dto.getEstado());
-        }
+        // El estado se actualiza a través de la FK en actualizarEntidadesAsociadas
         if (dto.getDescripcion() != null) {
             pqrs.setDescripcion(dto.getDescripcion());
         }
@@ -153,8 +150,16 @@ public class PqrsService {
     }
 
     @Transactional(readOnly = true)
-    public List<PqrsDTO> buscarPorEstado(String estadoTexto) {
-        return pqrsRepository.findByEstadoTexto(estadoTexto)
+    public List<PqrsDTO> buscarPorEstadoId(Integer idEstado) {
+        return pqrsRepository.findByEstado_IdEstado(idEstado)
+                .stream()
+                .map(pqrsMapper::toDTO)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PqrsDTO> buscarPorTipo(Integer idTipo) {
+        return pqrsRepository.findByTipo_IdTipo(idTipo)
                 .stream()
                 .map(pqrsMapper::toDTO)
                 .toList();
@@ -178,13 +183,31 @@ public class PqrsService {
             Estado respondido = estadoRepository.findByDescripcion(ESTADO_RESPONDIDO).orElse(null);
             if (respondido != null) {
                 p.setEstado(respondido);
-                p.setEstadoTexto(ESTADO_RESPONDIDO);
-            } else {
-                p.setEstadoTexto(ESTADO_RESPONDIDO);
             }
 
             Pqrs actualizado = pqrsRepository.save(p);
-            log.info("PQRS con ID {} respondido", id);
+            log.info("PQRS con ID {} respondido con estado {}", id, p.getEstado().getDescripcion());
+            return pqrsMapper.toDTO(actualizado);
+        });
+    }
+
+    @Transactional
+    public Optional<PqrsDTO> responderPqrsConEstado(Long id, String respuesta, String nuevoEstado) {
+        return pqrsRepository.findById(id).map(p -> {
+            p.setRespuesta(respuesta);
+            p.setFechaDeRespuesta(LocalDateTime.now());
+
+            // Si se proporciona un nuevo estado, usarlo; sino usar RESPONDIDO por defecto
+            String estadoFinal = (nuevoEstado != null && !nuevoEstado.isBlank()) ? nuevoEstado : ESTADO_RESPONDIDO;
+            
+            // Buscar el estado en la BD
+            Estado estado = estadoRepository.findByDescripcion(estadoFinal).orElse(null);
+            if (estado != null) {
+                p.setEstado(estado);
+            }
+
+            Pqrs actualizado = pqrsRepository.save(p);
+            log.info("PQRS con ID {} respondido con estado {}", id, estadoFinal);
             return pqrsMapper.toDTO(actualizado);
         });
     }
