@@ -6,15 +6,18 @@ import com.feature5.pqrs.entities.Pqrs;
 import com.feature5.pqrs.entities.Tipo;
 import com.feature5.pqrs.entities.Usuario;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class PqrsMapperTest {
 
-    private final PqrsMapper mapper = Mappers.getMapper(PqrsMapper.class);
+    @Autowired
+    private PqrsMapper mapper;
 
     @Test
     void toDTO_shouldMapFields() {
@@ -23,8 +26,10 @@ class PqrsMapperTest {
 
         Tipo tipo = new Tipo();
         tipo.setIdTipo(1);
+        tipo.setDescripcion("Queja");
 
         Estado estado = new Estado();
+        estado.setIdEstado(1);
         estado.setDescripcion("PENDIENTE");
 
         Pqrs pqrs = new Pqrs();
@@ -42,7 +47,16 @@ class PqrsMapperTest {
         assertEquals(1, dto.getIdTipo());
         assertEquals("desc prueba", dto.getDescripcion());
         assertEquals("RAD-123", dto.getRadicado());
-        assertEquals("PENDIENTE", dto.getEstado());
+        assertEquals(1, dto.getIdEstado());
+        
+        // Verificar que los objetos completos están presentes
+        assertNotNull(dto.getTipo());
+        assertEquals(1, dto.getTipo().getIdTipo());
+        assertEquals("Queja", dto.getTipo().getDescripcion());
+        
+        assertNotNull(dto.getEstado());
+        assertEquals(1, dto.getEstado().getIdEstado());
+        assertEquals("PENDIENTE", dto.getEstado().getDescripcion());
     }
 
     @Test
@@ -52,14 +66,14 @@ class PqrsMapperTest {
         dto.setIdTipo(2);
         dto.setDescripcion("otra descripcion");
         dto.setRadicado("RAD-999");
-        dto.setEstado("CERRADO");
+        dto.setIdEstado(2);
 
         Pqrs entity = mapper.toEntity(dto);
 
         assertNotNull(entity);
         assertEquals("otra descripcion", entity.getDescripcion());
         assertEquals("RAD-999", entity.getRadicado());
-        assertNotNull(entity.getEstado());
-        assertEquals("CERRADO", entity.getEstado().getDescripcion());
+        // El estado será ignorado en el mapeo, como configuramos
+        assertNull(entity.getEstado());
     }
 }

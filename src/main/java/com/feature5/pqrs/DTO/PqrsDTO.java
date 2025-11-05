@@ -5,13 +5,17 @@ import java.time.LocalDate;
 public class PqrsDTO {
     private Long idPqrs;
     private Long idUsuario;
-    private Integer idTipo;
+    private TipoDTO tipo;
     private String descripcion;
     private LocalDate fechaDeGeneracion;
     private String radicado;
-    private String estado;
+    private EstadoDTO estado;
     private LocalDate fechaDeRespuesta;
     private String respuesta;
+
+    // Keep these for backward compatibility and internal use
+    private Integer idTipo;
+    private Integer idEstado;
 
     // Constructor por defecto
     public PqrsDTO() {}
@@ -22,7 +26,7 @@ public class PqrsDTO {
         this.idTipo = idTipo;
         this.descripcion = descripcion;
         this.fechaDeGeneracion = LocalDate.now();
-        this.estado = "PENDIENTE";
+        this.idEstado = 1; // 1 = PENDIENTE
     }
 
     // Getters y setters
@@ -74,12 +78,12 @@ public class PqrsDTO {
         this.radicado = radicado;
     }
 
-    public String getEstado() {
-        return estado;
+    public Integer getIdEstado() {
+        return idEstado;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public void setIdEstado(Integer idEstado) {
+        this.idEstado = idEstado;
     }
 
     public LocalDate getFechaDeRespuesta() {
@@ -96,5 +100,22 @@ public class PqrsDTO {
 
     public void setRespuesta(String respuesta) {
         this.respuesta = respuesta;
+    }
+
+    // Getters y setters para los objetos completos
+    public TipoDTO getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoDTO tipo) {
+        this.tipo = tipo;
+    }
+
+    public EstadoDTO getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoDTO estado) {
+        this.estado = estado;
     }
 }

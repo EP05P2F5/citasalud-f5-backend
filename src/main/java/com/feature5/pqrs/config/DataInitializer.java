@@ -87,26 +87,30 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void inicializarEstadosBasicos() {
-        ensureEstadoExists("PENDIENTE");
-        ensureEstadoExists("RESPONDIDO");
-        ensureEstadoExists("CERRADO");
+        // Los estados se inicializan via base de datos real
+        // Solo verificamos que existan los IDs básicos conocidos
+        ensureEstadoExistsById(1, "Pendiente");
+        ensureEstadoExistsById(2, "En proceso");
+        ensureEstadoExistsById(3, "Resuelta");
+        ensureEstadoExistsById(4, "Cerrada");
+        ensureEstadoExistsById(5, "Anulada");
     }
 
-    private void ensureEstadoExists(String descripcion) {
+    private void ensureEstadoExistsById(Integer id, String descripcion) {
         try {
-            Estado estadoAsegurado = estadoRepository.findByDescripcion(descripcion)
+            Estado estadoAsegurado = estadoRepository.findById(id)
                     .orElseGet(() -> {
                         Estado e = new Estado();
+                        e.setIdEstado(id);
                         e.setDescripcion(descripcion);
                         Estado saved = estadoRepository.save(e);
-                        log.info("Estado '{}' asegurado con id {}", descripcion, saved.getIdEstado());
+                        log.info("Estado '{}' creado con ID {}", descripcion, saved.getIdEstado());
                         return saved;
                     });
-            //uso de debug para estados ya existentes
-            log.debug("Estado verificado: {}", estadoAsegurado.getDescripcion());
+            log.debug("Estado verificado: ID {} - {}", estadoAsegurado.getIdEstado(), estadoAsegurado.getDescripcion());
 
         } catch (DataAccessException e) {
-            log.error("Error de base de datos al asegurar el estado '{}': {}", descripcion, e.getMessage(), e);
+            log.error("Error de base de datos al asegurar el estado ID {}: {}", id, e.getMessage(), e);
         }
     }
 

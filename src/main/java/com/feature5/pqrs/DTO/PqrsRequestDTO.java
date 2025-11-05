@@ -10,8 +10,8 @@ public class PqrsRequestDTO {
     @NotNull(message = "El tipo es obligatorio")
     public Integer tipoId;              // FK tipo
     
-    @NotBlank(message = "El estado es obligatorio")
-    public String estado;               // Nombre del estado (ej: "PENDIENTE", "EN_PROCESO")
+    @NotNull(message = "El estado es obligatorio")
+    public Integer estadoId;            // FK estado
     
     @NotBlank(message = "La descripción es obligatoria")
     public String descripcion;

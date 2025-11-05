@@ -23,7 +23,7 @@ import java.util.Optional;
 public class PqrsService {
 
     private static final Logger log = LoggerFactory.getLogger(PqrsService.class);
-    private static final String ESTADO_RESPONDIDO = "RESPONDIDO";
+    private static final Integer ESTADO_RESPONDIDO_ID = 3; // ID para estado "Resuelta"
 
     private final PqrsRepository pqrsRepository;
     private final EstadoRepository estadoRepository;
@@ -58,7 +58,7 @@ public class PqrsService {
     }
 
     @Transactional
-    public PqrsDTO crearPqrs(Long usuarioId, Integer tipoId, String estadoNombre, PqrsDTO dto) {
+    public PqrsDTO crearPqrs(Long usuarioId, Integer tipoId, Integer estadoId, PqrsDTO dto) {
         // Validar y obtener entidades relacionadas
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
@@ -66,8 +66,8 @@ public class PqrsService {
         Tipo tipo = tipoRepository.findById(tipoId)
                 .orElseThrow(() -> new IllegalArgumentException("Tipo no encontrado"));
         
-        Estado estado = estadoRepository.findByDescripcion(estadoNombre)
-                .orElseThrow(() -> new IllegalArgumentException("Estado no encontrado: " + estadoNombre));
+        Estado estado = estadoRepository.findById(estadoId)
+                .orElseThrow(() -> new IllegalArgumentException("Estado no encontrado con ID: " + estadoId));
 
         // Crear entidad Pqrs
         Pqrs pqrs = new Pqrs();
@@ -179,8 +179,8 @@ public class PqrsService {
             p.setRespuesta(respuesta);
             p.setFechaDeRespuesta(LocalDateTime.now());
 
-            // Cambiar estado a RESPONDIDO si existe ese Estado; si no, solo texto
-            Estado respondido = estadoRepository.findByDescripcion(ESTADO_RESPONDIDO).orElse(null);
+            // Cambiar estado a RESPONDIDO usando ID
+            Estado respondido = estadoRepository.findById(ESTADO_RESPONDIDO_ID).orElse(null);
             if (respondido != null) {
                 p.setEstado(respondido);
             }
@@ -192,16 +192,16 @@ public class PqrsService {
     }
 
     @Transactional
-    public Optional<PqrsDTO> responderPqrsConEstado(Long id, String respuesta, String nuevoEstado) {
+    public Optional<PqrsDTO> responderPqrsConEstado(Long id, String respuesta, Integer estadoId) {
         return pqrsRepository.findById(id).map(p -> {
             p.setRespuesta(respuesta);
             p.setFechaDeRespuesta(LocalDateTime.now());
 
-            // Si se proporciona un nuevo estado, usarlo; sino usar RESPONDIDO por defecto
-            String estadoFinal = (nuevoEstado != null && !nuevoEstado.isBlank()) ? nuevoEstado : ESTADO_RESPONDIDO;
+            // Si se proporciona un estadoId, usarlo; sino usar RESPONDIDO por defecto
+            Integer estadoFinal = (estadoId != null) ? estadoId : ESTADO_RESPONDIDO_ID;
             
-            // Buscar el estado en la BD
-            Estado estado = estadoRepository.findByDescripcion(estadoFinal).orElse(null);
+            // Buscar el estado en la BD por ID
+            Estado estado = estadoRepository.findById(estadoFinal).orElse(null);
             if (estado != null) {
                 p.setEstado(estado);
             }

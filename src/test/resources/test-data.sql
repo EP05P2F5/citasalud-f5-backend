@@ -4,13 +4,14 @@ MERGE INTO rol (idrol, descripcion) KEY(idrol) VALUES (2, 'Gestor');
 MERGE INTO rol (idrol, descripcion) KEY(idrol) VALUES (3, 'Usuario');
 
 -- Insertar estados de prueba con IDs específicos (usa MERGE para evitar duplicados)
-MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (1, 'PENDIENTE');
-MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (2, 'RESPONDIDO');
-MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (3, 'CERRADO');
-MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (4, 'ESPECIAL');
+MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (1, 'Pendiente');
+MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (2, 'En proceso');
+MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (3, 'Resuelta');
+MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (4, 'Cerrada');
+MERGE INTO estado (idestado, descripcion) KEY(idestado) VALUES (5, 'Anulada');
 
 -- Insertar tipos de PQRS con IDs específicos (usa MERGE para evitar duplicados)
-MERGE INTO tipo (idtipo, descripcion) KEY(idtipo) VALUES (1, 'PETICION');
-MERGE INTO tipo (idtipo, descripcion) KEY(idtipo) VALUES (2, 'QUEJA');
-MERGE INTO tipo (idtipo, descripcion) KEY(idtipo) VALUES (3, 'RECLAMO');
-MERGE INTO tipo (idtipo, descripcion) KEY(idtipo) VALUES (4, 'SUGERENCIA');
+MERGE INTO tipo (idtipo, descripcion) KEY(idtipo) VALUES (1, 'Queja');
+MERGE INTO tipo (idtipo, descripcion) KEY(idtipo) VALUES (2, 'Reclamo');
+MERGE INTO tipo (idtipo, descripcion) KEY(idtipo) VALUES (3, 'Sugerencia');
+MERGE INTO tipo (idtipo, descripcion) KEY(idtipo) VALUES (4, 'Petición');

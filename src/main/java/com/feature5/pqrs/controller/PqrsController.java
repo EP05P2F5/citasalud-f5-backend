@@ -80,7 +80,7 @@ public class PqrsController {
 
             PqrsDTO pqrsDTO = new PqrsDTO();
             pqrsDTO.setDescripcion(dto.descripcion);
-            pqrsDTO.setEstado(dto.estado);
+            pqrsDTO.setIdEstado(dto.estadoId);
             pqrsDTO.setRadicado(dto.radicado);
             // Las respuestas se establecen en null para nuevas PQRS - solo gestores pueden responder
             pqrsDTO.setRespuesta(null);
@@ -91,7 +91,7 @@ public class PqrsController {
             pqrsDTO.setFechaDeRespuesta(null);
             
             // Usar el ID del usuario autenticado automáticamente
-            PqrsDTO creado = pqrsService.crearPqrs(usuarioAutenticado.getIdUsuario(), dto.tipoId, dto.estado, pqrsDTO);
+            PqrsDTO creado = pqrsService.crearPqrs(usuarioAutenticado.getIdUsuario(), dto.tipoId, dto.estadoId, pqrsDTO);
             return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -159,16 +159,30 @@ public class PqrsController {
         @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content())
     })
     @PutMapping("/{id}/responder")
-    public ResponseEntity<PqrsDTO> responderPqrs(@PathVariable Long id, @RequestBody Map<String, String> body) {
-        String respuesta = body.get("respuesta");
-        String nuevoEstado = body.get("estado"); // Opcional: permite cambiar el estado
+    public ResponseEntity<PqrsDTO> responderPqrs(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+        String respuesta = (String) body.get("respuesta");
+        Integer estadoId = null;
+        
+        // Convertir estado a Integer si se proporciona
+        Object estadoObj = body.get("estadoId");
+        if (estadoObj != null) {
+            if (estadoObj instanceof Integer) {
+                estadoId = (Integer) estadoObj;
+            } else if (estadoObj instanceof String) {
+                try {
+                    estadoId = Integer.parseInt((String) estadoObj);
+                } catch (NumberFormatException e) {
+                    return ResponseEntity.badRequest().build();
+                }
+            }
+        }
 
         if (respuesta == null || respuesta.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
-        // Si se proporciona un nuevo estado, usarlo, sino mantener el actual
-        return pqrsService.responderPqrsConEstado(id, respuesta, nuevoEstado)
+        // Si se proporciona un nuevo estadoId, usarlo, sino mantener el actual
+        return pqrsService.responderPqrsConEstado(id, respuesta, estadoId)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

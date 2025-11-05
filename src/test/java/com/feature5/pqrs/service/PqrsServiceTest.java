@@ -43,20 +43,14 @@ class PqrsServiceTest {
 
     @BeforeEach
     void setup() {
-        // Limpieza ordenada para evitar errores por FK
+        // NO eliminar estados ni tipos - vienen de test-data.sql
+        // Solo limpiar datos que creamos en los tests
         pqrsRepository.deleteAll();
         usuarioRepository.deleteAll();
-        estadoRepository.deleteAll();
-        tipoRepository.deleteAll();
-        rolRepository.deleteAll();
 
-        // Crear o reutilizar el rol USER
-        Rol rol = rolRepository.findByDescripcion("USER")
-                .orElseGet(() -> {
-                    Rol nuevo = new Rol();
-                    nuevo.setDescripcion("USER");
-                    return rolRepository.save(nuevo);
-                });
+        // Usar rol Usuario (ID 3) que existe en test-data.sql
+        Rol rol = rolRepository.findById(3).orElseThrow(() -> 
+            new RuntimeException("Rol Usuario (ID 3) no encontrado en test-data.sql"));
 
         // Usuario base
         usuario = new Usuario();
@@ -67,19 +61,15 @@ class PqrsServiceTest {
         usuario.setRol(rol);
         usuario = usuarioRepository.save(usuario);
 
-        // Tipo base
-        tipo = new Tipo();
-        tipo.setDescripcion("QUEJA");
-        tipo = tipoRepository.save(tipo);
+        // Usar tipos que vienen de test-data.sql
+        tipo = tipoRepository.findById(1).orElseThrow(() -> 
+            new RuntimeException("Tipo con ID 1 no encontrado en test-data.sql"));
 
-        // Estados base
-        estadoPendiente = new Estado();
-        estadoPendiente.setDescripcion("PENDIENTE");
-        estadoPendiente = estadoRepository.save(estadoPendiente);
-
-        estadoRespondido = new Estado();
-        estadoRespondido.setDescripcion("RESPONDIDO");
-        estadoRespondido = estadoRepository.save(estadoRespondido);
+        // Usar estados que vienen de test-data.sql
+        estadoPendiente = estadoRepository.findById(1).orElseThrow(() -> 
+            new RuntimeException("Estado Pendiente (ID 1) no encontrado en test-data.sql"));
+        estadoRespondido = estadoRepository.findById(3).orElseThrow(() -> 
+            new RuntimeException("Estado Resuelta (ID 3) no encontrado en test-data.sql"));
     }
 
     @Test
@@ -87,7 +77,7 @@ class PqrsServiceTest {
         PqrsDTO pqrsDTO = new PqrsDTO();
         pqrsDTO.setDescripcion("Descripción de prueba");
 
-        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO);
+        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
 
         assertNotNull(resultado);
         assertEquals("Descripción de prueba", resultado.getDescripcion());
@@ -100,11 +90,11 @@ class PqrsServiceTest {
         PqrsDTO pqrsDTO1 = new PqrsDTO();
         pqrsDTO1.setDescripcion("Test");
         pqrsDTO1.setRadicado("R-CUSTOM-123");
-        pqrsDTO1.setEstado("PENDIENTE"); // Usar estado que existe en la BD
+        pqrsDTO1.setIdEstado(estadoPendiente.getIdEstado()); // Use actual estado ID
 
-        PqrsDTO resultado1 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO1);
+        PqrsDTO resultado1 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO1);
         assertEquals("R-CUSTOM-123", resultado1.getRadicado());
-        assertEquals("PENDIENTE", resultado1.getEstado()); // Esperar el estado que existe
+        assertEquals(estadoPendiente.getIdEstado(), resultado1.getIdEstado()); // Expect the actual estado ID
     }
 
     @Test
@@ -112,7 +102,7 @@ class PqrsServiceTest {
         PqrsDTO pqrsDTO2 = new PqrsDTO();
         pqrsDTO2.setDescripcion("Test sin radicado");
 
-        PqrsDTO resultado2 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO2);
+        PqrsDTO resultado2 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO2);
         assertNull(resultado2.getRadicado());
     }
 
@@ -124,7 +114,7 @@ class PqrsServiceTest {
         pqrsDTO.setDescripcion("Test");
         pqrsDTO.setFechaDeGeneracion(fechaAnterior);
 
-        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO);
+        PqrsDTO resultado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
 
         assertEquals(fechaAnterior, resultado.getFechaDeGeneracion());
     }
@@ -133,7 +123,7 @@ class PqrsServiceTest {
     void testResponderPqrs_DebeActualizarRespuestaYEstado() {
         PqrsDTO pqrsDTO = new PqrsDTO();
         pqrsDTO.setDescripcion("PQRS para responder");
-        PqrsDTO creado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getDescripcion(), pqrsDTO);
+        PqrsDTO creado = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO);
 
         String respuesta = "Esta es la respuesta";
         Optional<PqrsDTO> resultado = pqrsService.responderPqrs(creado.getIdPqrs(), respuesta);
@@ -141,7 +131,7 @@ class PqrsServiceTest {
         assertTrue(resultado.isPresent());
         assertEquals(respuesta, resultado.get().getRespuesta());
         assertNotNull(resultado.get().getFechaDeRespuesta());
-        assertEquals("RESPONDIDO", resultado.get().getEstado());
+        assertEquals(estadoRespondido.getIdEstado(), resultado.get().getIdEstado()); // Use actual estado ID
     }
 
     @Test

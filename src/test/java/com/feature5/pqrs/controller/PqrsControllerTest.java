@@ -37,18 +37,22 @@ class PqrsControllerTest {
 
     private Long usuarioId;
     private Integer tipoId;
+    private Integer estadoId;
 
     @BeforeEach
     void setup() {
+        // Keep catalog data (roles, tipos, estados) seeded by src/test/resources/test-data.sql
+        // Only clear users and pqrs created during tests to keep IDs deterministic
         pqrsRepository.deleteAllInBatch();
         usuarioRepository.deleteAllInBatch();
-        tipoRepository.deleteAllInBatch();
-        estadoRepository.deleteAllInBatch();
-        rolRepository.deleteAllInBatch();
 
-        Rol rol = new Rol();
-        rol.setDescripcion("TEST_ROLE");
-        rol = rolRepository.save(rol);
+        // Ensure we have at least one ROLE and one user for authentication
+        // If the test-data.sql already inserted roles, reuse them. Otherwise create a test role.
+        Rol rol = rolRepository.findById(1).orElseGet(() -> {
+            Rol r = new Rol();
+            r.setDescripcion("TEST_ROLE");
+            return rolRepository.save(r);
+        });
 
         Usuario u = new Usuario();
         u.setNombre("Test");
@@ -59,21 +63,26 @@ class PqrsControllerTest {
         usuarioRepository.save(u);
         usuarioId = u.getIdUsuario();
 
-        Tipo t = new Tipo();
-        t.setDescripcion("PETICION");
-        tipoRepository.save(t);
-        tipoId = t.getIdTipo();
+        // Use seeded Tipo with ID=1 when present
+        tipoId = tipoRepository.findById(1).map(Tipo::getIdTipo).orElseGet(() -> {
+            Tipo t = new Tipo();
+            t.setDescripcion("PETICION");
+            return tipoRepository.save(t).getIdTipo();
+        });
 
-        Estado e = new Estado();
-        e.setDescripcion("PENDIENTE");
-        estadoRepository.save(e);
+        // Use seeded Estado with ID=1 when present
+        estadoId = estadoRepository.findById(1).map(Estado::getIdEstado).orElseGet(() -> {
+            Estado e = new Estado();
+            e.setDescripcion("PENDIENTE");
+            return estadoRepository.save(e).getIdEstado();
+        });
     }
 
     private PqrsRequestDTO createBasicDTO() {
         PqrsRequestDTO dto = new PqrsRequestDTO();
         // Sin usuarioId - se obtiene automáticamente del usuario autenticado
         dto.tipoId = tipoId;
-        dto.estado = "PENDIENTE";
+        dto.estadoId = estadoId; // Use the actual generated Estado ID
         dto.descripcion = "Descripcion test";
         dto.radicado = "R-" + UUID.randomUUID().toString().substring(0, 8);
         return dto;
@@ -84,7 +93,7 @@ class PqrsControllerTest {
         dto.setIdUsuario(usuarioId);
         dto.setIdTipo(tipoId);
         dto.setDescripcion("Descripcion test");
-        dto.setEstado("PENDIENTE");
+        dto.setIdEstado(estadoId); // Use the actual generated Estado ID
         dto.setRadicado("R-" + UUID.randomUUID().toString().substring(0, 8));
         return dto;
     }
@@ -111,7 +120,7 @@ class PqrsControllerTest {
 
         PqrsDTO upd = createBasicPqrsDTO();
         upd.setDescripcion("Modificado");
-        upd.setEstado("ACTUALIZADO");
+        upd.setIdEstado(2); // 2 = ACTUALIZADO
         upd.setRadicado("R-51");
         ResponseEntity<PqrsDTO> updated = pqrsController.actualizarPqrs(id, upd);
         assertEquals(200, updated.getStatusCode().value());
@@ -133,11 +142,11 @@ class PqrsControllerTest {
     @Test
     void testBuscarPorEstadoYUsuario() {
         PqrsRequestDTO dto = createBasicDTO();
-        dto.estado = "PENDIENTE";
+        dto.estadoId = estadoId; // Use actual generated Estado ID
         pqrsController.crearPqrs(dto);
 
         // Buscar por ID de estado en lugar de por descripción
-        List<PqrsDTO> porEstadoId = pqrsController.buscarPorEstadoId(1);
+        List<PqrsDTO> porEstadoId = pqrsController.buscarPorEstadoId(estadoId);
         assertTrue(porEstadoId.size() >= 0); // Puede ser 0 o más
 
         List<PqrsDTO> porUsuario = pqrsController.buscarPorUsuario(usuarioId);
@@ -170,7 +179,7 @@ class PqrsControllerTest {
         PqrsRequestDTO dto = createBasicDTO();
         Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
 
-        java.util.Map<String, String> respuesta = new java.util.HashMap<>();
+        java.util.Map<String, Object> respuesta = new java.util.HashMap<>();
         respuesta.put("respuesta", "Esta es la respuesta");
 
         ResponseEntity<PqrsDTO> response = pqrsController.responderPqrs(id, respuesta);
@@ -194,7 +203,7 @@ class PqrsControllerTest {
 
         // Test con estado inválido
         dto = createBasicDTO();
-        dto.estado = "ESTADO_INEXISTENTE";
+        dto.estadoId = 999; // ID que no existe
         assertEquals(400, pqrsController.crearPqrs(dto).getStatusCode().value());
     }
 
@@ -226,34 +235,31 @@ class PqrsControllerTest {
         PqrsRequestDTO dto = createBasicDTO();
         Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
 
-        java.util.Map<String, String> respuestaVacia = new java.util.HashMap<>();
+        java.util.Map<String, Object> respuestaVacia = new java.util.HashMap<>();
         respuestaVacia.put("respuesta", "   ");
         assertEquals(400, pqrsController.responderPqrs(id, respuestaVacia).getStatusCode().value());
 
-        java.util.Map<String, String> respuestaNull = new java.util.HashMap<>();
+        java.util.Map<String, Object> respuestaNull = new java.util.HashMap<>();
         respuestaNull.put("respuesta", null);
         assertEquals(400, pqrsController.responderPqrs(id, respuestaNull).getStatusCode().value());
 
-        java.util.Map<String, String> respuestaValida = new java.util.HashMap<>();
+        java.util.Map<String, Object> respuestaValida = new java.util.HashMap<>();
         respuestaValida.put("respuesta", "Respuesta valida");
         assertEquals(404, pqrsController.responderPqrs(99999L, respuestaValida).getStatusCode().value());
     }
 
     @Test
     void testResponderPqrsConEstado() {
-        // Crear estado RESPONDIDO para la prueba (PENDIENTE ya existe en @BeforeEach)
-        Estado estadoRespondido = new Estado();
-        estadoRespondido.setDescripcion("RESPONDIDO");
-        estadoRepository.save(estadoRespondido);
+        // Use seeded estados from test-data.sql - no need to create them manually
 
         // Crear PQRS
         PqrsRequestDTO dto = createBasicDTO();
         Long id = pqrsController.crearPqrs(dto).getBody().getIdPqrs();
 
         // Responder con estado específico
-        java.util.Map<String, String> respuestaConEstado = new java.util.HashMap<>();
+        java.util.Map<String, Object> respuestaConEstado = new java.util.HashMap<>();
         respuestaConEstado.put("respuesta", "Esta es mi respuesta como gestor");
-        respuestaConEstado.put("estado", "RESPONDIDO");
+        respuestaConEstado.put("estadoId", 3); // ID 3 = "Resuelta" según la base de datos real
 
         ResponseEntity<PqrsDTO> response = pqrsController.responderPqrs(id, respuestaConEstado);
         assertEquals(200, response.getStatusCode().value());
@@ -261,7 +267,7 @@ class PqrsControllerTest {
         PqrsDTO pqrsRespondido = response.getBody();
         assertNotNull(pqrsRespondido);
         assertEquals("Esta es mi respuesta como gestor", pqrsRespondido.getRespuesta());
-        assertEquals("RESPONDIDO", pqrsRespondido.getEstado());
+        assertEquals(3, pqrsRespondido.getIdEstado()); // 3 = "Resuelta" según la base de datos real
         assertNotNull(pqrsRespondido.getFechaDeRespuesta());
     }
 }
