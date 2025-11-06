@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ public class PqrsService {
 
     private static final Logger log = LoggerFactory.getLogger(PqrsService.class);
     private static final Integer ESTADO_RESPONDIDO_ID = 3; // ID para estado "Resuelta"
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private final PqrsRepository pqrsRepository;
     private final EstadoRepository estadoRepository;
@@ -43,6 +45,32 @@ public class PqrsService {
         this.pqrsMapper = pqrsMapper;
     }
 
+    /**
+     * Genera un radicado único automáticamente
+     * Formato: RAD-YYYYMMDD-XXX donde XXX es secuencial del día
+     */
+    private String generarRadicado() {
+        String fecha = LocalDateTime.now().format(FORMATTER);
+        String prefijo = "RAD-" + fecha + "-";
+        
+        // Buscar el último radicado del día para generar el consecutivo
+        List<Pqrs> pqrsDelDia = pqrsRepository.findByRadicadoStartingWithOrderByRadicadoDesc(prefijo);
+        
+        int consecutivo = 1;
+        if (!pqrsDelDia.isEmpty()) {
+            String ultimoRadicado = pqrsDelDia.get(0).getRadicado();
+            String ultimoConsecutivo = ultimoRadicado.substring(ultimoRadicado.lastIndexOf("-") + 1);
+            try {
+                consecutivo = Integer.parseInt(ultimoConsecutivo) + 1;
+            } catch (NumberFormatException e) {
+                log.warn("Error al parsear consecutivo del radicado: {}", ultimoRadicado);
+                consecutivo = 1;
+            }
+        }
+        
+        return prefijo + String.format("%03d", consecutivo);
+    }
+
     @Transactional(readOnly = true)
     public List<PqrsDTO> listarTodos() {
         return pqrsRepository.findAll()
@@ -54,6 +82,12 @@ public class PqrsService {
     @Transactional(readOnly = true)
     public Optional<PqrsDTO> obtenerPorId(Long id) {
         return pqrsRepository.findById(id)
+                .map(pqrsMapper::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<PqrsDTO> obtenerPorRadicado(String radicado) {
+        return pqrsRepository.findByRadicado(radicado)
                 .map(pqrsMapper::toDTO);
     }
 
@@ -76,7 +110,7 @@ public class PqrsService {
         pqrs.setEstado(estado);
         pqrs.setDescripcion(dto.getDescripcion());
         pqrs.setFechaDeGeneracion(dto.getFechaDeGeneracion() != null ? dto.getFechaDeGeneracion().atStartOfDay() : LocalDateTime.now());
-        pqrs.setRadicado(dto.getRadicado());
+        pqrs.setRadicado(generarRadicado()); // ← GENERACIÓN AUTOMÁTICA
         pqrs.setFechaDeRespuesta(dto.getFechaDeRespuesta() != null ? dto.getFechaDeRespuesta().atStartOfDay() : null);
         pqrs.setRespuesta(dto.getRespuesta());
 
@@ -127,9 +161,7 @@ public class PqrsService {
         if (dto.getFechaDeGeneracion() != null) {
             pqrs.setFechaDeGeneracion(dto.getFechaDeGeneracion().atStartOfDay());
         }
-        if (dto.getRadicado() != null) {
-            pqrs.setRadicado(dto.getRadicado());
-        }
+        // Radicado NO se actualiza - es inmutable una vez generado
         if (dto.getFechaDeRespuesta() != null) {
             pqrs.setFechaDeRespuesta(dto.getFechaDeRespuesta().atStartOfDay());
         }

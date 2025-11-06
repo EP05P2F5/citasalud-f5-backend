@@ -31,9 +31,11 @@ public class Pqrs {
     private String descripcion;
 
     // En DB es timestamp -> usar LocalDateTime
+    @NotNull
     @Column(name = "fechadegeneracion")
     private LocalDateTime fechaDeGeneracion;
 
+    @NotNull
     @Column(name = "radicado", unique = true)
     private String radicado;
 

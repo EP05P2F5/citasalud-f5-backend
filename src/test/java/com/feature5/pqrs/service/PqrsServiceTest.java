@@ -86,24 +86,31 @@ class PqrsServiceTest {
     }
 
     @Test
-    void testCreatePqrs_RadicadoCustomDebeRespetarse() {
+    void testCreatePqrs_RadicadoSeGeneraAutomaticamente() {
         PqrsDTO pqrsDTO1 = new PqrsDTO();
         pqrsDTO1.setDescripcion("Test");
-        pqrsDTO1.setRadicado("R-CUSTOM-123");
-        pqrsDTO1.setIdEstado(estadoPendiente.getIdEstado()); // Use actual estado ID
+        // Ya no pasamos radicado - se genera automáticamente
+        pqrsDTO1.setIdEstado(estadoPendiente.getIdEstado());
 
         PqrsDTO resultado1 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO1);
-        assertEquals("R-CUSTOM-123", resultado1.getRadicado());
-        assertEquals(estadoPendiente.getIdEstado(), resultado1.getIdEstado()); // Expect the actual estado ID
+        
+        // Verificar que se generó un radicado con el formato esperado
+        assertNotNull(resultado1.getRadicado());
+        assertTrue(resultado1.getRadicado().startsWith("RAD-"));
+        assertTrue(resultado1.getRadicado().contains("-"));
+        assertEquals(estadoPendiente.getIdEstado(), resultado1.getIdEstado());
     }
 
     @Test
-    void testCreatePqrs_SinRadicadoNiEstadoTexto_DebenSerNulos() {
+    void testCreatePqrs_SinRadicadoCustom_SeGeneraAutomaticamente() {
         PqrsDTO pqrsDTO2 = new PqrsDTO();
         pqrsDTO2.setDescripcion("Test sin radicado");
 
         PqrsDTO resultado2 = pqrsService.crearPqrs(usuario.getIdUsuario(), tipo.getIdTipo(), estadoPendiente.getIdEstado(), pqrsDTO2);
-        assertNull(resultado2.getRadicado());
+        
+        // Ahora siempre se genera un radicado automáticamente
+        assertNotNull(resultado2.getRadicado());
+        assertTrue(resultado2.getRadicado().startsWith("RAD-"));
     }
 
     @Test

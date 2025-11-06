@@ -17,7 +17,7 @@ public class PqrsRequestDTO {
     public String descripcion;
     
     public LocalDateTime fechaDeGeneracion;
-    public String radicado;
     
+    // REMOVIDO: radicado - se genera automáticamente por el sistema
     // REMOVIDO: fechaDeRespuesta y respuesta - solo los gestores pueden responder
 }

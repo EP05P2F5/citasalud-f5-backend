@@ -81,7 +81,7 @@ public class PqrsController {
             PqrsDTO pqrsDTO = new PqrsDTO();
             pqrsDTO.setDescripcion(dto.descripcion);
             pqrsDTO.setIdEstado(dto.estadoId);
-            pqrsDTO.setRadicado(dto.radicado);
+            // REMOVIDO: radicado - se genera automáticamente por el servicio
             // Las respuestas se establecen en null para nuevas PQRS - solo gestores pueden responder
             pqrsDTO.setRespuesta(null);
             if (dto.fechaDeGeneracion != null) {
@@ -183,6 +183,18 @@ public class PqrsController {
 
         // Si se proporciona un nuevo estadoId, usarlo, sino mantener el actual
         return pqrsService.responderPqrsConEstado(id, respuesta, estadoId)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Buscar PQRS por radicado", description = "Obtiene una PQRS específica utilizando su número de radicado único")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "PQRS encontrada"),
+        @ApiResponse(responseCode = "404", description = "PQRS con ese radicado no encontrada", content = @Content())
+    })
+    @GetMapping("/rad/{radicado}")
+    public ResponseEntity<PqrsDTO> buscarPorRadicado(@PathVariable String radicado) {
+        return pqrsService.obtenerPorRadicado(radicado)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

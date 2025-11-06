@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -84,7 +83,7 @@ class PqrsControllerTest {
         dto.tipoId = tipoId;
         dto.estadoId = estadoId; // Use the actual generated Estado ID
         dto.descripcion = "Descripcion test";
-        dto.radicado = "R-" + UUID.randomUUID().toString().substring(0, 8);
+        // REMOVIDO: radicado - se genera automáticamente por el sistema
         return dto;
     }
 
@@ -94,7 +93,7 @@ class PqrsControllerTest {
         dto.setIdTipo(tipoId);
         dto.setDescripcion("Descripcion test");
         dto.setIdEstado(estadoId); // Use the actual generated Estado ID
-        dto.setRadicado("R-" + UUID.randomUUID().toString().substring(0, 8));
+        // REMOVIDO: radicado - se genera automáticamente por el sistema
         return dto;
     }
 
@@ -269,5 +268,29 @@ class PqrsControllerTest {
         assertEquals("Esta es mi respuesta como gestor", pqrsRespondido.getRespuesta());
         assertEquals(3, pqrsRespondido.getIdEstado()); // 3 = "Resuelta" según la base de datos real
         assertNotNull(pqrsRespondido.getFechaDeRespuesta());
+    }
+
+    @Test
+    void testBuscarPorRadicado() {
+        // Crear una PQRS para obtener su radicado
+        PqrsRequestDTO dto = createBasicDTO();
+        ResponseEntity<PqrsDTO> respuestaCreacion = pqrsController.crearPqrs(dto);
+        PqrsDTO pqrsCreado = respuestaCreacion.getBody();
+        assertNotNull(pqrsCreado);
+        String radicado = pqrsCreado.getRadicado();
+        assertNotNull(radicado);
+
+        // Buscar por radicado - caso exitoso
+        ResponseEntity<PqrsDTO> respuestaExitosa = pqrsController.buscarPorRadicado(radicado);
+        assertEquals(200, respuestaExitosa.getStatusCode().value());
+        
+        PqrsDTO pqrsEncontrado = respuestaExitosa.getBody();
+        assertNotNull(pqrsEncontrado);
+        assertEquals(radicado, pqrsEncontrado.getRadicado());
+        assertEquals(pqrsCreado.getIdPqrs(), pqrsEncontrado.getIdPqrs());
+
+        // Buscar por radicado inexistente - caso 404
+        ResponseEntity<PqrsDTO> respuesta404 = pqrsController.buscarPorRadicado("RADICADO-INEXISTENTE");
+        assertEquals(404, respuesta404.getStatusCode().value());
     }
 }
