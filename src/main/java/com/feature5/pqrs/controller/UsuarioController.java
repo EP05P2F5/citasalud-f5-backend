@@ -58,9 +58,63 @@ public class UsuarioController {
         @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
     })
-    @GetMapping("/{nickname}")
+    @GetMapping("/nickname/{nickname}")
     public ResponseEntity<UsuarioDTO> buscarPorNickname(@PathVariable String nickname) {
         UsuarioDTO usuario = usuarioService.buscarPorNickname(nickname);
+        if (usuario != null) {
+            return ResponseEntity.ok(usuario);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary = "Listar gestores", description = "Obtiene los usuarios que tienen el rol Gestor (IdRol = 2)")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Lista de gestores obtenida exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
+    })
+    @GetMapping("/gestores")
+    public ResponseEntity<List<UsuarioDTO>> listarGestores() {
+        return ResponseEntity.ok(usuarioService.listarGestores());
+    }
+
+    @Operation(summary = "Actualizar usuario", description = "Actualiza los datos de un usuario existente. No permite cambiar el nickname.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Usuario actualizado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos o conflicto (email/nickname)", content = @Content()),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<UsuarioDTO> actualizarPorId(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
+        try {
+            return usuarioService.actualizarUsuarioPorId(id, usuarioDTO)
+                    .map(ResponseEntity::ok)
+                    .orElseGet(() -> ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @Operation(summary = "Eliminar usuario", description = "Elimina un usuario existente identificado por su nickname")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Usuario eliminado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarPorId(@PathVariable Long id) {
+        if (usuarioService.eliminarUsuarioPorId(id)) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Operation(summary = "Buscar usuario por ID", description = "Obtiene la información de un usuario específico mediante su ID")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Usuario encontrado"),
+        @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioDTO> buscarPorId(@PathVariable Long id) {
+        UsuarioDTO usuario = usuarioService.buscarPorId(id);
         if (usuario != null) {
             return ResponseEntity.ok(usuario);
         }

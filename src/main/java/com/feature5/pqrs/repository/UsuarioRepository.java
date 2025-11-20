@@ -4,6 +4,7 @@ import com.feature5.pqrs.entities.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -20,6 +21,9 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByNickname(String nickname);
+
+    // Buscar usuarios por el id del rol (ej. 2 = Gestores)
+    List<Usuario> findByRol_IdRol(Integer idRol);
 }
 
 

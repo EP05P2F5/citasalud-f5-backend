@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -103,6 +104,28 @@ public class UsuarioService {
     }
 
     /**
+     * Lista usuarios que pertenecen a un rol específico (por IdRol).
+     */
+    @Transactional(readOnly = true)
+    public List<UsuarioDTO> listarUsuariosPorRol(Integer idRol) {
+        List<UsuarioDTO> usuarios = usuarioRepository.findByRol_IdRol(idRol)
+                .stream()
+                .map(usuarioMapper::toDto)
+                .toList();
+
+        log.info("Se listaron {} usuarios con rol ID {}.", usuarios.size(), idRol);
+        return usuarios;
+    }
+
+    /**
+     * Lista los usuarios con rol Gestor (IdRol = 2).
+     */
+    @Transactional(readOnly = true)
+    public List<UsuarioDTO> listarGestores() {
+        return listarUsuariosPorRol(2);
+    }
+
+    /**
      * Busca un usuario por su nickname.
      */
     @Transactional(readOnly = true)
@@ -110,5 +133,69 @@ public class UsuarioService {
         return usuarioRepository.findByNickname(nickname)
                 .map(usuarioMapper::toDto)
                 .orElse(null);
+    }
+
+    /**
+     * Busca un usuario por su ID.
+     */
+    @Transactional(readOnly = true)
+    public UsuarioDTO buscarPorId(Long id) {
+        return usuarioRepository.findById(id)
+                .map(usuarioMapper::toDto)
+                .orElse(null);
+    }
+
+    /**
+     * Actualiza un usuario identificado por su ID.
+     */
+    @Transactional
+    public Optional<UsuarioDTO> actualizarUsuarioPorId(Long id, UsuarioDTO dto) {
+        return usuarioRepository.findById(id)
+                .map(existing -> {
+                    // Validar email nuevo
+                    if (dto.getEmail() != null && !dto.getEmail().equals(existing.getEmail())) {
+                        if (usuarioRepository.existsByEmail(dto.getEmail())) {
+                            throw new IllegalArgumentException("El correo ya está registrado.");
+                        }
+                        existing.setEmail(dto.getEmail());
+                    }
+
+                    // No permitir cambio de nickname vía este endpoint (identificador)
+                    if (dto.getNickname() != null && !dto.getNickname().equals(existing.getNickname())) {
+                        throw new IllegalArgumentException("No está permitido cambiar el nickname mediante este endpoint.");
+                    }
+
+                    if (dto.getNombre() != null) existing.setNombre(dto.getNombre());
+                    if (dto.getApellido() != null) existing.setApellido(dto.getApellido());
+                    if (dto.getFechaDeNacimiento() != null) existing.setFechaDeNacimiento(dto.getFechaDeNacimiento());
+                    if (dto.getDireccion() != null) existing.setDireccion(dto.getDireccion());
+                    if (dto.getTelefono() != null) existing.setTelefono(dto.getTelefono());
+
+                    if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+                        existing.setPassword(passwordEncoder.encode(dto.getPassword()));
+                    }
+
+                    if (dto.getRol() != null && dto.getRol().getIdRol() != null) {
+                        Rol rol = rolRepository.findById(dto.getRol().getIdRol())
+                                .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado"));
+                        existing.setRol(rol);
+                    }
+
+                    Usuario guardado = usuarioRepository.save(existing);
+                    log.info("Usuario con ID {} actualizado.", guardado.getIdUsuario());
+                    return usuarioMapper.toDto(guardado);
+                });
+    }
+    /**
+     * Elimina un usuario por su ID. Retorna true si se eliminó, false si no existía.
+     */
+    @Transactional
+    public boolean eliminarUsuarioPorId(Long id) {
+        return usuarioRepository.findById(id)
+                .map(usuario -> {
+                    usuarioRepository.delete(usuario);
+                    log.info("Usuario con ID {} eliminado.", id);
+                    return true;
+                }).orElse(false);
     }
 }
