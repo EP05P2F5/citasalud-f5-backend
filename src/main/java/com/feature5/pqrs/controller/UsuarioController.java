@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -30,13 +31,13 @@ public class UsuarioController {
      */
     @Operation(summary = "Registrar nuevo usuario", description = "Crea un nuevo usuario en el sistema con credenciales encriptadas y rol asignado")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
+        @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya existe", content = @Content())
     })
     @PostMapping
     public ResponseEntity<UsuarioDTO> registrar(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         UsuarioDTO nuevoUsuario = usuarioService.registrarUsuario(usuarioDTO);
-        return ResponseEntity.ok(nuevoUsuario);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
 
     /**
@@ -69,8 +70,7 @@ public class UsuarioController {
 
     @Operation(summary = "Listar gestores", description = "Obtiene los usuarios que tienen el rol Gestor (IdRol = 2)")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Lista de gestores obtenida exitosamente"),
-        @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
+        @ApiResponse(responseCode = "200", description = "Lista de gestores obtenida exitosamente")
     })
     @GetMapping("/gestores")
     public ResponseEntity<List<UsuarioDTO>> listarGestores() {
@@ -90,19 +90,19 @@ public class UsuarioController {
                     .map(ResponseEntity::ok)
                     .orElseGet(() -> ResponseEntity.notFound().build());
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
     @Operation(summary = "Eliminar usuario", description = "Elimina un usuario existente identificado por su nickname")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Usuario eliminado exitosamente"),
+        @ApiResponse(responseCode = "204", description = "Usuario eliminado exitosamente"),
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarPorId(@PathVariable Long id) {
         if (usuarioService.eliminarUsuarioPorId(id)) {
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
     }
