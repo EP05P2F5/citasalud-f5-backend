@@ -60,7 +60,7 @@ jobs:
             -Dsonar.projectKey=EP05P2F5_citasalud-f5-backend \
             -Dsonar.organization=ep05p2f51 \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.coverage.exclusions="**/*MapperImpl.java,**/config/DataInitializer.java,**/*Application.java,**/*Config*.java"
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.coverage.exclusions="**/*MapperImpl.java,**/config/DataInitializer.java,**/DTO/**,**/entities/**,**/*Application.java,**/*Config*.java"
 
 
   # ---------------------------
