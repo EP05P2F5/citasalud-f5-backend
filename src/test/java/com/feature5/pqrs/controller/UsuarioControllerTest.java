@@ -13,6 +13,10 @@ import org.springframework.test.context.jdbc.Sql;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+
+import com.feature5.pqrs.DTO.RolDTO;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -86,6 +90,59 @@ class UsuarioControllerTest {
 
         // 8️⃣ Buscar usuario inexistente debe retornar 404
         ResponseEntity<UsuarioDTO> notFound = usuarioController.buscarPorNickname("usuarioinexistente");
+        assertEquals(404, notFound.getStatusCode().value());
+    }
+
+    @Test
+    void registrarAutenticadoListarGestoresActualizarEliminarYBuscarPorId() {
+        // Registrar un usuario con rol Gestor (id = 2) usando el endpoint autenticado
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setNombre("Gestor");
+        dto.setApellido("User");
+        dto.setFechaDeNacimiento(LocalDate.of(1985, 5, 5));
+        dto.setDireccion("Calle Gestor");
+        dto.setEmail("gestor@example.com");
+        dto.setTelefono("99999");
+        dto.setNickname("gestornick");
+        dto.setPassword("gestorpass");
+        dto.setRol(new RolDTO(2, "Gestor"));
+
+        Authentication auth = new UsernamePasswordAuthenticationToken("admin", "N/A", List.of());
+
+        ResponseEntity<UsuarioDTO> created = usuarioController.registrar(dto, auth);
+        assertEquals(201, created.getStatusCode().value());
+        assertNotNull(created.getBody());
+        Long createdId = created.getBody().getIdUsuario();
+        assertNotNull(createdId);
+        assertEquals(2, created.getBody().getRol().getIdRol());
+
+        // Listar gestores debe contener al menos el creado
+        ResponseEntity<List<UsuarioDTO>> gestores = usuarioController.listarGestores();
+        assertTrue(gestores.getBody().stream().anyMatch(u -> "gestornick".equals(u.getNickname())));
+
+        // Buscar por ID
+        ResponseEntity<UsuarioDTO> found = usuarioController.buscarPorId(createdId);
+        assertEquals(200, found.getStatusCode().value());
+
+        // Actualizar nombre
+        UsuarioDTO updateDto = new UsuarioDTO();
+        updateDto.setNombre("GestorMod");
+        ResponseEntity<UsuarioDTO> updated = usuarioController.actualizarPorId(createdId, updateDto);
+        assertEquals(200, updated.getStatusCode().value());
+        assertEquals("GestorMod", updated.getBody().getNombre());
+
+        // Intento de cambiar nickname (debe dar 400)
+        UsuarioDTO badDto = new UsuarioDTO();
+        badDto.setNickname("otro");
+        ResponseEntity<UsuarioDTO> badUpdate = usuarioController.actualizarPorId(createdId, badDto);
+        assertEquals(400, badUpdate.getStatusCode().value());
+
+        // Eliminar
+        ResponseEntity<Void> deleted = usuarioController.eliminarPorId(createdId);
+        assertEquals(204, deleted.getStatusCode().value());
+
+        // Buscar debe retornar 404
+        ResponseEntity<UsuarioDTO> notFound = usuarioController.buscarPorId(createdId);
         assertEquals(404, notFound.getStatusCode().value());
     }
 }
