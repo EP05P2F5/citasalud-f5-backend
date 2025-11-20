@@ -111,13 +111,15 @@ public class UsuarioController {
         @ApiResponse(responseCode = "404", description = "Usuario no encontrado", content = @Content())
     })
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> actualizarPorId(@PathVariable Long id, @RequestBody UsuarioDTO usuarioDTO) {
+    public ResponseEntity<UsuarioDTO> actualizarPorId(@PathVariable Long id, @Valid @RequestBody UsuarioDTO usuarioDTO) {
         try {
-            return usuarioService.actualizarUsuarioPorId(id, usuarioDTO)
-                    .map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.notFound().build());
+            var actualizadoOpt = usuarioService.actualizarUsuarioPorId(id, usuarioDTO);
+            if (actualizadoOpt.isPresent()) {
+                return ResponseEntity.status(HttpStatus.OK).body(actualizadoOpt.get());
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            return ResponseEntity.badRequest().build();
         }
     }
 
