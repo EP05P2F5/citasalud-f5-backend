@@ -2,8 +2,6 @@ package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
-import com.feature5.pqrs.entities.Rol;
-import com.feature5.pqrs.repository.RolRepository;
 import com.feature5.pqrs.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,9 +33,6 @@ class UsuarioControllerTest {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private RolRepository rolRepository;
-
     @BeforeEach
     void setup() {
         usuarioRepository.deleteAll();
@@ -58,9 +53,9 @@ class UsuarioControllerTest {
         dto.setPassword("pass123");
         // No es necesario asignar rol, el sistema asigna automáticamente ID 3
 
-        // 3️⃣ Registrar usuario
-        ResponseEntity<UsuarioDTO> created = usuarioController.registrar(dto);
-        assertEquals(200, created.getStatusCodeValue(), "El registro del usuario falló");
+        // 3️⃣ Registrar usuario (endpoint público)
+        ResponseEntity<UsuarioDTO> created = usuarioController.registrarPublic(dto);
+        assertEquals(201, created.getStatusCode().value(), "El registro del usuario falló");
         assertNotNull(created.getBody(), "El cuerpo de la respuesta no debe ser nulo");
         assertNotNull(created.getBody().getIdUsuario(), "El usuario creado debe tener ID");
 
@@ -68,7 +63,7 @@ class UsuarioControllerTest {
         ResponseEntity<?> loginOk = authController.login(
                 new LoginRequestDTO("testnick", "pass123")
         );
-        assertEquals(200, loginOk.getStatusCodeValue(), "El login debería ser exitoso");
+        assertEquals(200, loginOk.getStatusCode().value(), "El login debería ser exitoso");
         assertTrue(loginOk.getBody() instanceof Map, "La respuesta del login debe ser un Map");
 
         Map<?, ?> okBody = (Map<?, ?>) loginOk.getBody();
@@ -79,7 +74,7 @@ class UsuarioControllerTest {
         ResponseEntity<?> loginFail = authController.login(
                 new LoginRequestDTO("testnick", "wrong")
         );
-        assertEquals(401, loginFail.getStatusCodeValue(), "El login con contraseña incorrecta debe devolver 401");
+        assertEquals(401, loginFail.getStatusCode().value(), "El login con contraseña incorrecta debe devolver 401");
 
         // 6️⃣ Listar usuarios
         ResponseEntity<List<UsuarioDTO>> list = usuarioController.listar();
@@ -87,10 +82,10 @@ class UsuarioControllerTest {
 
         // 7️⃣ Buscar por nickname
         ResponseEntity<UsuarioDTO> found = usuarioController.buscarPorNickname("testnick");
-        assertEquals(200, found.getStatusCodeValue());
+        assertEquals(200, found.getStatusCode().value());
 
         // 8️⃣ Buscar usuario inexistente debe retornar 404
         ResponseEntity<UsuarioDTO> notFound = usuarioController.buscarPorNickname("usuarioinexistente");
-        assertEquals(404, notFound.getStatusCodeValue());
+        assertEquals(404, notFound.getStatusCode().value());
     }
 }

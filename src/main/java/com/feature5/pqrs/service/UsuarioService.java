@@ -71,6 +71,44 @@ public class UsuarioService {
     }
 
     /**
+     * Registra un nuevo usuario permitiendo que el llamador especifique
+     * el rol por id. Si {@code roleIdOverride} es null, se usa el rol por
+     * defecto (ID = 3) — comportamiento equivalente a {@link #registrarUsuario(UsuarioDTO)}.
+     * Este método no valida permisos; el controlador debe asegurarse de que
+     * sólo usuarios autorizados invocan esta variante con un role diferente.
+     */
+    public UsuarioDTO registrarUsuarioWithRole(UsuarioDTO dto, Integer roleIdOverride) {
+        // Validaciones de unicidad (reusar lógica existente)
+        if (usuarioRepository.existsByEmail(dto.getEmail())) {
+            log.warn("Intento de registro con email duplicado (oculto por seguridad).{}");
+            throw new IllegalArgumentException("El correo ya está registrado.");
+        }
+
+        if (usuarioRepository.existsByNickname(dto.getNickname())) {
+            log.warn("Intento de registro con nickname duplicado (oculto por seguridad).{}");
+            throw new IllegalArgumentException("El nickname ya está registrado.");
+        }
+
+        Usuario usuario = usuarioMapper.toEntity(dto);
+        usuario.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        Rol rol;
+        if (roleIdOverride != null) {
+            rol = rolRepository.findById(roleIdOverride)
+                    .orElseThrow(() -> new IllegalArgumentException("Rol no encontrado"));
+        } else {
+            rol = rolRepository.findById(3)
+                    .orElseThrow(() -> new IllegalStateException("Rol con ID 3 no existe en la base de datos"));
+        }
+        usuario.setRol(rol);
+
+        Usuario guardado = usuarioRepository.save(usuario);
+        log.info("Usuario '{}' registrado con rol '{}'.", guardado.getNickname(), guardado.getRol().getDescripcion());
+
+        return usuarioMapper.toDto(guardado);
+    }
+
+    /**
      * Valida credenciales de acceso.
      */
     @Transactional(readOnly = true)

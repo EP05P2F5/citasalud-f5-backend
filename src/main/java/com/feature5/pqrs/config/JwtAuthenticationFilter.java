@@ -60,9 +60,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        // Permitir POST /usuarios como endpoint público de registro
+        // Permitir POST /usuarios/registrar como endpoint público de registro
         String normalizedForCheck = normalizePath(path);
-        if ("/usuarios".equals(normalizedForCheck) && "POST".equalsIgnoreCase(method)) {
+        if ("/usuarios/registrar".equals(normalizedForCheck) && "POST".equalsIgnoreCase(method)) {
             filterChain.doFilter(request, response);
             return;
         }

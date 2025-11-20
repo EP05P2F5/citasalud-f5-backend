@@ -64,8 +64,8 @@ public class SecurityConfig {
                                 "/api/test/env"
                         ).permitAll()
 
-            // Permitir registro de usuario mediante POST /usuarios
-            .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuarios").permitAll()
+            // Permitir registro público mediante POST /usuarios/registrar
+            .requestMatchers(org.springframework.http.HttpMethod.POST, "/usuarios/registrar").permitAll()
 
 
                         // Resto requiere autenticación

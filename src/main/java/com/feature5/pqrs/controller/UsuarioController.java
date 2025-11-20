@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -29,13 +30,39 @@ public class UsuarioController {
      * Se omite cualquier registro o exposición directa de los datos ingresados por el cliente
      * para prevenir vulnerabilidades de inyección en logs (Sonar rule javasecurity:S5145).
      */
-    @Operation(summary = "Registrar nuevo usuario", description = "Crea un nuevo usuario en el sistema con credenciales encriptadas y rol asignado")
+    @Operation(summary = "Registrar nuevo usuario (autenticado)", description = "Crea un nuevo usuario en el sistema. Requiere autenticación. Si el cuerpo incluye rol.idRol, se usará el rol indicado.")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya existe", content = @Content()),
+    })
+    @PostMapping
+    public ResponseEntity<UsuarioDTO> registrar(@Valid @RequestBody UsuarioDTO usuarioDTO,
+                                                Authentication authentication) {
+        // Si el request viene autenticado, permitir que se asigne el rol
+        // enviado en el DTO (si está presente). La ruta ya requiere
+        // autenticación según la configuración de seguridad.
+        Integer roleIdToUse = null;
+        if (authentication != null && authentication.isAuthenticated()) {
+            if (usuarioDTO.getRol() != null && usuarioDTO.getRol().getIdRol() != null) {
+                roleIdToUse = usuarioDTO.getRol().getIdRol();
+            }
+        }
+
+        UsuarioDTO nuevoUsuario = usuarioService.registrarUsuarioWithRole(usuarioDTO, roleIdToUse);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
+    }
+
+    /**
+     * Endpoint público para registro estándar: siempre crea usuario con rol por defecto (ID = 3).
+     * Ruta pública: POST /usuarios/registrar
+     */
+    @Operation(summary = "Registrar nuevo usuario (público)", description = "Registro público estándar. Siempre crea usuario con rol por defecto (ID = 3). No requiere autenticación.")
     @ApiResponses({
         @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente"),
         @ApiResponse(responseCode = "400", description = "Datos inválidos o usuario ya existe", content = @Content())
     })
-    @PostMapping
-    public ResponseEntity<UsuarioDTO> registrar(@Valid @RequestBody UsuarioDTO usuarioDTO) {
+    @PostMapping("/registrar")
+    public ResponseEntity<UsuarioDTO> registrarPublic(@Valid @RequestBody UsuarioDTO usuarioDTO) {
         UsuarioDTO nuevoUsuario = usuarioService.registrarUsuario(usuarioDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(nuevoUsuario);
     }
