@@ -49,14 +49,7 @@ public class AuthController {
                 mediaType = "application/json",
                 schema = @Schema(implementation = Map.class),
                 examples = @ExampleObject(
-                    value = """
-                        {
-                            "role": "ROLE_USER",
-                            "email": "test@example.com",
-                            "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTa5MTk2NzE1MSwiZXhwIjoxNzYxOTcwNzUxfQ.IKbUsQPv6tUJlGu9SfDbMwqOJzrGy3I8mgChpontXL0",
-                            "username": "testuser"
-                        }
-                        """
+                    value = "{ \"role\": \"ROLE_USER\", \"email\": \"test@example.com\", \"token\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6MTa5MTk2NzE1MSwiZXhwIjoxNzYxOTcwNzUxfQ.IKbUsQPv6tUJlGu9SfDbMwqOJzrGy3I8mgChpontXL0\", \"username\": \"testuser\" }" // NOSONAR
                 )
             )
         ),
