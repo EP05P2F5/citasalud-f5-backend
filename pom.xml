@@ -30,7 +30,7 @@
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>
             **/config/DataInitializer.java,
-            **/dto/**,
+            **/DTO/**,
             **/entities/**,
             **/*Application.java,
             **/*Config.java,
@@ -188,7 +188,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/config/DataInitializer.class</exclude>
-                        <exclude>**/dto/**</exclude>
+                        <exclude>**/DTO/**</exclude>
                         <exclude>**/entities/**</exclude>
                         <exclude>**/*Application.class</exclude>
                         <exclude>**/*Config.class</exclude>
