@@ -89,12 +89,12 @@ public class AuthController {
             log.info("Usuario autenticado correctamente: {}", usuario.getNickname());
             return ResponseEntity.ok(response);
 
-        } catch (BadCredentialsException e) { // NOSONAR
+        } catch (BadCredentialsException e) {
             log.warn("Credenciales inválidas: {}", e.getMessage());
             return ResponseEntity.status(401)
                     .body(Map.of(ERROR, "Credenciales inválidas"));
 
-        } catch (Exception e) { // NOSONAR - No es práctico testear casos de error genéricos en integración
+        } catch (Exception e) {
             log.error("Error interno en login: {}", e.getMessage(), e);
             return ResponseEntity.status(500)
                     .body(Map.of(ERROR, "Error interno del servidor"));
