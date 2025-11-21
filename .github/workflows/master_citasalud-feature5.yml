@@ -51,17 +51,31 @@ jobs:
       - name: Run Tests with coverage
         run: mvn -B clean verify jacoco:report
 
+      - name: Verify JaCoCo report exists
+        run: |
+          echo "Verificando reporte de JaCoCo..."
+          ls -la target/site/jacoco/
+          if [ -f "target/site/jacoco/jacoco.xml" ]; then
+            echo "✅ Reporte JaCoCo generado correctamente"
+            echo "Líneas cubiertas:"
+            grep "line-counter" target/site/jacoco/jacoco.xml | head -5
+          else
+            echo "❌ No se encontró el reporte JaCoCo"
+            exit 1
+          fi
+
       - name: Run SonarCloud analysis
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn sonar:sonar \
+          mvn -B sonar:sonar \
             -Dsonar.projectKey=EP05P2F5_citasalud-f5-backend \
             -Dsonar.organization=ep05p2f51 \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml -Dsonar.coverage.exclusions="**/*MapperImpl.java,**/config/DataInitializer.java,**/DTO/**,**/entities/**,**/*Application.java,**/*Config*.java",**/controller/AuthController.java
-
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+            -Dsonar.coverage.exclusions="**/dto/**,**/entities/**,**/*Application.java,**/*Config.java,**/mapper/**,**/exception/**,**/config/DataInitializer.java" \
+            -Dsonar.coverage.inclusions="**/service/**,**/controller/**,**/config/Jwt*,**/repository/**"
 
   # ---------------------------
   # 2. Build & Docker Push

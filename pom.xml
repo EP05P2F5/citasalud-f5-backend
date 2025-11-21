@@ -27,9 +27,22 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         
         <!-- Exclusiones de cobertura para SonarCloud -->
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <sonar.coverage.exclusions>
-            **/config/DataInitializer.java
+            **/config/DataInitializer.java,
+            **/dto/**,
+            **/entities/**,
+            **/*Application.java,
+            **/*Config.java,
+            **/mapper/**,
+            **/exception/**
         </sonar.coverage.exclusions>
+        <sonar.coverage.inclusions>
+            **/service/**,
+            **/controller/**,
+            **/config/Jwt*,
+            **/repository/**
+        </sonar.coverage.inclusions>
     </properties>
 
     <dependencies>
@@ -172,26 +185,50 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.10</version>
+                <configuration>
+                    <excludes>
+                        <exclude>**/config/DataInitializer.class</exclude>
+                        <exclude>**/dto/**</exclude>
+                        <exclude>**/entities/**</exclude>
+                        <exclude>**/*Application.class</exclude>
+                        <exclude>**/*Config.class</exclude>
+                        <exclude>**/mapper/**</exclude>
+                        <exclude>**/exception/**</exclude>
+                    </excludes>
+                    <rules>
+                        <rule>
+                            <element>BUNDLE</element>
+                            <limits>
+                                <limit>
+                                    <counter>INSTRUCTION</counter>
+                                    <value>COVEREDRATIO</value>
+                                    <minimum>0.60</minimum>
+                                </limit>
+                            </limits>
+                        </rule>
+                    </rules>
+                </configuration>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>test</phase>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
                     </execution>
+                    <execution>
+                        <id>check</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
                 </executions>
-                <configuration>
-                    <excludes>
-                        <!-- Excluir DataInitializer: solo se ejecuta en producción, no en tests -->
-                        <exclude>**/config/DataInitializer.class</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
 
             <!-- Compiler plugin -->
