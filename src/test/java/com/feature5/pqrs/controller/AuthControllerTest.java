@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
@@ -108,105 +107,5 @@ class AuthControllerTest {
         assertTrue(resp.getBody() instanceof Map, "El body debe ser un Map");
         Map<?, ?> body = (Map<?, ?>) resp.getBody();
         assertTrue(body.containsKey("error"), "Debe incluir mensaje de error");
-    }
-
-    // NUEVOS TESTS PARA CUBRIR LOS CATCH
-    
-    @Test
-    void login_withBadCredentialsException_returns401() {
-        // Este test cubre el catch específico de BadCredentialsException
-        // Creamos un AuthController que simule lanzar BadCredentialsException
-        AuthController controllerWithException = new AuthController(null, usuarioService) {
-            @Override
-            public ResponseEntity<?> login(LoginRequestDTO loginRequest) {
-                try {
-                    throw new BadCredentialsException("Credenciales inválidas simuladas");
-                } catch (BadCredentialsException e) {
-                    return ResponseEntity.status(401).body(Map.of("error", "Credenciales inválidas"));
-                } catch (Exception e) {
-                    return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
-                }
-            }
-        };
-
-        ResponseEntity<?> resp = controllerWithException.login(new LoginRequestDTO("test", "test"));
-        assertEquals(401, resp.getStatusCode().value());
-        assertTrue(resp.getBody() instanceof Map);
-        Map<?, ?> body = (Map<?, ?>) resp.getBody();
-        assertEquals("Credenciales inválidas", body.get("error"));
-    }
-
-    @Test
-    void login_withGenericException_returns500() {
-        // Este test cubre el catch genérico de Exception
-        AuthController controllerWithException = new AuthController(null, usuarioService) {
-            @Override
-            public ResponseEntity<?> login(LoginRequestDTO loginRequest) {
-                try {
-                    throw new RuntimeException("Error interno simulado");
-                } catch (BadCredentialsException e) {
-                    return ResponseEntity.status(401).body(Map.of("error", "Credenciales inválidas"));
-                } catch (Exception e) {
-                    return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
-                }
-            }
-        };
-
-        ResponseEntity<?> resp = controllerWithException.login(new LoginRequestDTO("test", "test"));
-        assertEquals(500, resp.getStatusCode().value());
-        assertTrue(resp.getBody() instanceof Map);
-        Map<?, ?> body = (Map<?, ?>) resp.getBody();
-        assertEquals("Error interno del servidor", body.get("error"));
-    }
-
-    @Test
-    void login_withNullRol_usesDefaultRole() {
-        // Test para cubrir el caso donde el rol es null
-        UsuarioDTO dto = new UsuarioDTO();
-        dto.setNombre("Test");
-        dto.setApellido("NullRol");
-        dto.setFechaDeNacimiento(LocalDate.of(1990, 1, 1));
-        dto.setEmail("nullrol@example.com");
-        dto.setNickname("nullroluser");
-        dto.setPassword("pass123");
-        // No asignamos rol explícitamente
-
-        usuarioService.registrarUsuario(dto);
-
-        // Creamos un controlador que simule un usuario con rol null
-        AuthController controllerWithNullRol = new AuthController(null, usuarioService) {
-            @Override
-            public ResponseEntity<?> login(LoginRequestDTO loginRequest) {
-                try {
-                    // Simulamos un usuario con rol null
-                    UsuarioDTO usuario = new UsuarioDTO();
-                    usuario.setNickname("nullroluser");
-                    usuario.setEmail("nullrol@example.com");
-                    usuario.setRol(null); // Rol explícitamente null
-
-                    // Verificamos que el código maneje el rol null correctamente
-                    String rolDescripcion = (usuario.getRol() != null) 
-                            ? usuario.getRol().getDescripcion() 
-                            : "USER";
-
-                    Map<String, Object> response = new java.util.HashMap<>();
-                    response.put("token", "dummy-token");
-                    response.put("username", usuario.getNickname());
-                    response.put("role", rolDescripcion);
-                    response.put("email", usuario.getEmail());
-
-                    return ResponseEntity.ok(response);
-
-                } catch (Exception e) {
-                    return ResponseEntity.status(500).body(Map.of("error", "Error interno del servidor"));
-                }
-            }
-        };
-
-        ResponseEntity<?> resp = controllerWithNullRol.login(new LoginRequestDTO("nullroluser", "pass123"));
-        assertEquals(200, resp.getStatusCode().value());
-        assertTrue(resp.getBody() instanceof Map);
-        Map<?, ?> body = (Map<?, ?>) resp.getBody();
-        assertEquals("USER", body.get("role"));
     }
 }

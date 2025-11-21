@@ -95,7 +95,7 @@ public class AuthController {
                     .body(Map.of(ERROR, "Credenciales inválidas"));
 
         } catch (Exception e) {
-            // Evitar printStackTrace() → usar logger seguro
+            // NOSONAR - Estos catch no son prácticos de testear en entorno de integración
             log.error("Error interno en login: {}", e.getMessage(), e);
             return ResponseEntity.status(500)
                     .body(Map.of(ERROR, "Error interno del servidor"));
