@@ -180,7 +180,7 @@ public class PqrsController {
         content = @Content(
             mediaType = "application/json",
             examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                value = "{ \"respuesta\": \"Su solicitud ha sido procesada correctamente\", \"estadoId\": 3 }"
+                value = "{ \"respuesta\": \"Su solicitud ha sido procesada correctamente\", \"idEstado\": 3 }"
             )
         )
     )
@@ -189,8 +189,22 @@ public class PqrsController {
         String respuesta = (String) body.get("respuesta");
         Integer estadoId = null;
         
-        // Convertir estado a Integer si se proporciona
-        Object estadoObj = body.get("estadoId");
+        // Convertir estado a Integer si se proporciona (soporta idEstado directo o anidado en objeto estado)
+        Object estadoObj = body.get("idEstado");
+        if (estadoObj == null) {
+            estadoObj = body.get("estadoId");
+        }
+        
+        // Si no hay idEstado directo, buscar en objeto anidado
+        if (estadoObj == null && body.containsKey("estado")) {
+            Object estadoNestedObj = body.get("estado");
+            if (estadoNestedObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> estadoMap = (Map<String, Object>) estadoNestedObj;
+                estadoObj = estadoMap.get("idEstado");
+            }
+        }
+        
         if (estadoObj != null) {
             if (estadoObj instanceof Integer) {
                 estadoId = (Integer) estadoObj;
