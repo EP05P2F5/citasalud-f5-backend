@@ -107,8 +107,21 @@ public class PqrsController {
     @PutMapping("/{id}")
     public ResponseEntity<PqrsDTO> actualizarPqrs(@PathVariable Long id, @RequestBody PqrsDTO pqrsDTO) {
         try {
+            // Extraer IDs, considerando tanto los campos directos como los objetos anidados
+            Long usuarioId = pqrsDTO.getIdUsuario();
+            
+            Integer tipoId = pqrsDTO.getIdTipo();
+            if (tipoId == null && pqrsDTO.getTipo() != null) {
+                tipoId = pqrsDTO.getTipo().getIdTipo();
+            }
+            
+            Integer estadoId = pqrsDTO.getIdEstado();
+            if (estadoId == null && pqrsDTO.getEstado() != null) {
+                estadoId = pqrsDTO.getEstado().getIdEstado();
+            }
+            
             // Para PUT, los administradores envían PqrsDTO completo con todos los campos
-            return pqrsService.actualizarPqrs(id, pqrsDTO.getIdUsuario(), pqrsDTO.getIdTipo(), null, pqrsDTO)
+            return pqrsService.actualizarPqrs(id, usuarioId, tipoId, estadoId, pqrsDTO)
                     .map(actualizado -> ResponseEntity.status(HttpStatus.OK).body(actualizado))
                     .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 
@@ -152,12 +165,25 @@ public class PqrsController {
         return pqrsService.buscarPorUsuario(idUsuario);
     }
 
-    @Operation(summary = "Responder PQRS", description = "Permite a gestores y administradores responder PQRS y cambiar su estado")
+    @Operation(
+        summary = "Responder PQRS", 
+        description = "Permite a gestores y administradores responder PQRS y cambiar su estado. La fecha de respuesta se genera automáticamente."
+    )
     @ApiResponses({
         @ApiResponse(responseCode = "200", description = "Respuesta registrada exitosamente"),
         @ApiResponse(responseCode = "400", description = "Respuesta vacía o inválida", content = @Content()),
         @ApiResponse(responseCode = "404", description = "PQRS no encontrada", content = @Content())
     })
+    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+        description = "Datos de la respuesta",
+        required = true,
+        content = @Content(
+            mediaType = "application/json",
+            examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                value = "{ \"respuesta\": \"Su solicitud ha sido procesada correctamente\", \"estadoId\": 3 }"
+            )
+        )
+    )
     @PutMapping("/{id}/responder")
     public ResponseEntity<PqrsDTO> responderPqrs(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         String respuesta = (String) body.get("respuesta");
