@@ -2,6 +2,7 @@ package com.feature5.pqrs.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
+import com.feature5.pqrs.config.JwtUtils;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.mapper.RolMapper;
 import com.feature5.pqrs.repository.RolRepository;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.jdbc.Sql;
 
@@ -18,6 +20,8 @@ import java.time.LocalDate;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 
 /**
  * Pruebas de /auth/login verificando estructura de respuesta:
@@ -41,6 +45,9 @@ class AuthControllerTest {
 
     @Autowired
     private RolMapper rolMapper;
+
+    @SpyBean
+    private JwtUtils jwtUtils;
 
     @BeforeEach
     void setup() {
@@ -107,5 +114,34 @@ class AuthControllerTest {
         assertTrue(resp.getBody() instanceof Map, "El body debe ser un Map");
         Map<?, ?> body = (Map<?, ?>) resp.getBody();
         assertTrue(body.containsKey("error"), "Debe incluir mensaje de error");
+    }
+
+    @Test
+    void login_fail_unexpectedException_returns500() {
+        // Registrar usuario primero
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setNombre("Error");
+        dto.setApellido("Test");
+        dto.setFechaDeNacimiento(LocalDate.of(1990, 1, 1));
+        dto.setDireccion("Calle 789");
+        dto.setEmail("error@example.com");
+        dto.setTelefono("555-2222");
+        dto.setNickname("erroruser");
+        dto.setPassword("pass123");
+
+        usuarioService.registrarUsuario(dto);
+
+        // Forzar excepción en generateToken usando Mockito
+        doThrow(new RuntimeException("JWT generation failed"))
+                .when(jwtUtils).generateToken(anyString());
+
+        // Intentar login, debería capturar la excepción
+        ResponseEntity<?> resp = authController.login(new LoginRequestDTO("erroruser", "pass123"));
+        
+        assertEquals(500, resp.getStatusCode().value(), "Excepción inesperada debe responder 500");
+        assertTrue(resp.getBody() instanceof Map, "El body debe ser un Map");
+        Map<?, ?> body = (Map<?, ?>) resp.getBody();
+        assertTrue(body.containsKey("error"), "Debe incluir mensaje de error");
+        assertEquals("Error interno del servidor", body.get("error"));
     }
 }

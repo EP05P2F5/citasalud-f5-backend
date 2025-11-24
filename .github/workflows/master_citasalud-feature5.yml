@@ -17,10 +17,6 @@ jobs:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
 
-    env:
-      ADMIN_USERNAME: test_admin
-      ADMIN_PASSWORD: test_password
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -49,19 +45,39 @@ jobs:
           restore-keys: ${{ runner.os }}-m2
 
       - name: Run Tests with coverage
-        run: mvn -B clean verify jacoco:report
+        run: |
+          echo "🧪 Ejecutando tests con coverage..."
+          mvn -B clean test jacoco:report -X | tee test-output.log
+          echo "📊 Resumen de tests:"
+          grep -E "(Tests run:|BUILD SUCCESS|BUILD FAILURE)" test-output.log || true
 
       - name: Verify JaCoCo report exists
         run: |
           echo "Verificando reporte de JaCoCo..."
-          ls -la target/site/jacoco/
+          ls -la target/site/jacoco/ || echo "❌ Directorio jacoco no existe"
+          ls -la target/jacoco.exec || echo "❌ jacoco.exec no existe"
           if [ -f "target/site/jacoco/jacoco.xml" ]; then
             echo "✅ Reporte JaCoCo generado correctamente"
             echo "Líneas cubiertas:"
             grep "line-counter" target/site/jacoco/jacoco.xml | head -5
           else
             echo "❌ No se encontró el reporte JaCoCo"
+            echo "Contenido de target/:"
+            ls -la target/ || true
+            echo "Contenido de target/site/:"
+            ls -la target/site/ || true
             exit 1
+          fi
+      
+      - name: Show test results
+        if: always()
+        run: |
+          echo "📋 Resultados de tests:"
+          if [ -d "target/surefire-reports" ]; then
+            echo "Tests ejecutados:"
+            find target/surefire-reports -name "*.txt" -exec echo "---" \; -exec cat {} \;
+          else
+            echo "❌ No se encontraron reportes de Surefire"
           fi
 
       - name: Run SonarCloud analysis

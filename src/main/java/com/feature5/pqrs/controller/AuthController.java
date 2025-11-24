@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -66,7 +65,7 @@ public class AuthController {
             );
 
             if (usuario == null) {
-                log.warn("Intento de login con usuario inexistente: {}", loginRequest.getNickname());
+                log.warn("Intento de login con credenciales inválidas");
                 return ResponseEntity.status(401)
                         .body(Map.of(ERROR, "Credenciales inválidas"));
             }
@@ -86,16 +85,11 @@ public class AuthController {
             response.put(ROLE, rolDescripcion);
             response.put(EMAIL, usuario.getEmail());
 
-            log.info("Usuario autenticado correctamente: {}", usuario.getNickname());
+            log.info("Usuario autenticado correctamente");
             return ResponseEntity.ok(response);
 
-        } catch (BadCredentialsException e) {
-            log.warn("Credenciales inválidas: {}", e.getMessage());
-            return ResponseEntity.status(401)
-                    .body(Map.of(ERROR, "Credenciales inválidas"));
-
         } catch (Exception e) {
-            log.error("Error interno en login: {}", e.getMessage(), e);
+            log.error("Error inesperado durante login: {}", e.getMessage(), e);
             return ResponseEntity.status(500)
                     .body(Map.of(ERROR, "Error interno del servidor"));
         }

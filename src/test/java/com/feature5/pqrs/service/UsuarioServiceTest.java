@@ -34,48 +34,66 @@ class UsuarioServiceTest {
 
     @Test
     void registrarUsuario_emailDuplicado_lanzaExcepcion() {
-        // El rol enviado se ignora, siempre se asigna rol ID 3
-        UsuarioDTO usuario1 = crearUsuarioDTO("user1@test.com", "user1", null);
-        usuarioService.registrarUsuario(usuario1);
-
-        UsuarioDTO usuario2 = crearUsuarioDTO("user1@test.com", "user2", null);
-
-        assertThrows(IllegalArgumentException.class, () -> usuarioService.registrarUsuario(usuario2));
+        usuarioService.registrarUsuario(crearUsuarioDTO("user@test.com", "user1", null));
+        assertThrows(IllegalArgumentException.class, 
+            () -> usuarioService.registrarUsuario(crearUsuarioDTO("user@test.com", "user2", null)));
     }
 
     @Test
     void registrarUsuario_nicknameDuplicado_lanzaExcepcion() {
-        // El rol enviado se ignora, siempre se asigna rol ID 3
-        UsuarioDTO usuario1 = crearUsuarioDTO("email1@test.com", "duplicado", null);
-        usuarioService.registrarUsuario(usuario1);
-
-        UsuarioDTO usuario2 = crearUsuarioDTO("email2@test.com", "duplicado", null);
-
-        assertThrows(IllegalArgumentException.class, () -> usuarioService.registrarUsuario(usuario2));
+        usuarioService.registrarUsuario(crearUsuarioDTO("email1@test.com", "duplicado", null));
+        assertThrows(IllegalArgumentException.class, 
+            () -> usuarioService.registrarUsuario(crearUsuarioDTO("email2@test.com", "duplicado", null)));
     }
 
     @Test
-    void registrarUsuario_rolNoExiste_creaRolAutomaticamente() {
-        // Este test ya no aplica: los usuarios siempre reciben rol ID 3
-        // No importa qué rol se envíe, siempre se asigna rol ID 3 (Usuario)
-        RolDTO cualquierRol = new RolDTO();
-        cualquierRol.setDescripcion("NUEVO_ROL");
-
-        UsuarioDTO usuario = crearUsuarioDTO("test@test.com", "testuser", cualquierRol);
-        UsuarioDTO resultado = usuarioService.registrarUsuario(usuario);
-
-        // Verifica que se asignó rol ID 3 (Usuario), no el rol enviado
-        assertEquals("Usuario", resultado.getRol().getDescripcion());
+    void registrarUsuario_asignaRolUsuarioPorDefecto() {
+        UsuarioDTO resultado = usuarioService.registrarUsuario(crearUsuarioDTO("test@test.com", "testuser", null));
         assertEquals(3, resultado.getRol().getIdRol());
+        assertEquals("Usuario", resultado.getRol().getDescripcion());
     }
 
     @Test
-    void registrarUsuario_sinRol_asignaUserPorDefecto() {
-        UsuarioDTO usuario = crearUsuarioDTO("test@test.com", "testuser", null);
-        UsuarioDTO resultado = usuarioService.registrarUsuario(usuario);
+    void registrarUsuarioWithRole_conRolEspecifico_asignaRolCorrectamente() {
+        UsuarioDTO resultado = usuarioService.registrarUsuarioWithRole(crearUsuarioDTO("gestor@test.com", "gestoruser", null), 2);
+        assertEquals(2, resultado.getRol().getIdRol());
+        assertEquals("Gestor", resultado.getRol().getDescripcion());
+    }
 
-        assertEquals("Usuario", resultado.getRol().getDescripcion());
-        assertEquals(3, resultado.getRol().getIdRol());
+    @Test
+    void actualizarUsuarioPorId_cambiarEmail_emailDuplicado_lanzaExcepcion() {
+        UsuarioDTO guardado1 = usuarioService.registrarUsuario(crearUsuarioDTO("email1@test.com", "user1", null));
+        usuarioService.registrarUsuario(crearUsuarioDTO("email2@test.com", "user2", null));
+
+        UsuarioDTO actualizacion = new UsuarioDTO();
+        actualizacion.setEmail("email2@test.com");
+
+        assertThrows(IllegalArgumentException.class, 
+            () -> usuarioService.actualizarUsuarioPorId(guardado1.getIdUsuario(), actualizacion));
+    }
+
+    @Test
+    void actualizarUsuarioPorId_cambiarEmailPasswordYRol_actualizaCorrectamente() {
+        UsuarioDTO guardado = usuarioService.registrarUsuario(crearUsuarioDTO("old@test.com", "testuser", null));
+
+        // Actualizar email, password y rol
+        RolDTO nuevoRol = new RolDTO();
+        nuevoRol.setIdRol(2); // Gestor
+        UsuarioDTO actualizacion = new UsuarioDTO();
+        actualizacion.setEmail("new@test.com");
+        actualizacion.setPassword("newPassword123");
+        actualizacion.setRol(nuevoRol);
+
+        usuarioService.actualizarUsuarioPorId(guardado.getIdUsuario(), actualizacion);
+
+        // Verificar email y rol
+        UsuarioDTO actualizado = usuarioService.buscarPorId(guardado.getIdUsuario());
+        assertEquals("new@test.com", actualizado.getEmail());
+        assertEquals(2, actualizado.getRol().getIdRol());
+        assertEquals("Gestor", actualizado.getRol().getDescripcion());
+        
+        // Verificar password con login
+        assertNotNull(usuarioService.login("testuser", "newPassword123"));
     }
 
     private UsuarioDTO crearUsuarioDTO(String email, String nickname, RolDTO rol) {
