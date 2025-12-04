@@ -2,7 +2,6 @@ package com.feature5.pqrs.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -56,6 +55,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+
+                        // Actuator endpoints (métricas y health)
+                        .requestMatchers("/actuator/**").permitAll()
 
                         // Endpoints públicos (auth y pruebas)
                         .requestMatchers(

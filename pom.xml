@@ -154,6 +154,19 @@
             <version>2.6.0</version>
         </dependency>
 
+        <!-- Actuator para métricas y health checks -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Micrometer Prometheus para exportar métricas -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
 
         <!-- Spring Security test -->
         <dependency>
