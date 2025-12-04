@@ -15,6 +15,8 @@ docker-compose -f docker-compose-monitoring.yml up -d
 - Usuario: `admin`
 - Contraseña: `admin`o`admin123`
 
+## Añadir a los dashboards una importacion con el codigo 11378, para las graficas.
+
 ## Detener el monitoreo
 
 ```bash
