@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: pqrs-backend-service
+  namespace: citasalud
+  labels:
+    app: pqrs-backend
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+    prometheus.io/path: "/actuator/prometheus"
+spec:
+  type: ClusterIP  # Cambiar a LoadBalancer si necesitas IP externa
+  selector:
+    app: pqrs-backend
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 8080
+  - name: actuator
+    protocol: TCP
+    port: 8080
+    targetPort: 8080
+  sessionAffinity: None
+---
+# Service adicional para métricas (opcional)
+apiVersion: v1
+kind: Service
+metadata:
+  name: pqrs-backend-metrics
+  namespace: citasalud
+  labels:
+    app: pqrs-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: pqrs-backend
+  ports:
+  - name: metrics
+    protocol: TCP
+    port: 8080
+    targetPort: 8080

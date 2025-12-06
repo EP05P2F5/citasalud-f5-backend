@@ -1,0 +1,69 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pqrs-backend-ingress
+  namespace: citasalud
+  annotations:
+    # NGINX Ingress Controller
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    
+    # CORS
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, PUT, DELETE, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    
+    # Rate limiting (opcional)
+    nginx.ingress.kubernetes.io/limit-rps: "100"
+    
+    # Cert-manager para SSL automático (si está instalado)
+    # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  # TLS configuration (descomentar si tienes certificado)
+  # tls:
+  # - hosts:
+  #   - api.citasalud.com
+  #   secretName: pqrs-backend-tls
+  
+  rules:
+  - host: api.citasalud.com  # Cambiar por tu dominio
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pqrs-backend-service
+            port:
+              number: 80
+      
+      # Ruta específica para métricas (opcional, puede restringirse)
+      - path: /actuator
+        pathType: Prefix
+        backend:
+          service:
+            name: pqrs-backend-service
+            port:
+              number: 8080
+---
+# Ingress alternativo para entornos locales (sin dominio)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pqrs-backend-ingress-local
+  namespace: citasalud
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pqrs-backend-service
+            port:
+              number: 80

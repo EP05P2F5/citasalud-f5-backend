@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pqrs-backend
+  namespace: citasalud
+  labels:
+    app: pqrs-backend
+    version: v1
+spec:
+  replicas: 2  # 2 réplicas para alta disponibilidad
+  selector:
+    matchLabels:
+      app: pqrs-backend
+  template:
+    metadata:
+      labels:
+        app: pqrs-backend
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      containers:
+      - name: pqrs-backend
+        image: citasalud/pqrs-backend:latest  # Cambiar por tu imagen de Docker Hub/Registry
+        imagePullPolicy: Always
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: actuator
+          containerPort: 8080
+          protocol: TCP
+        
+        # Variables de entorno desde ConfigMap
+        envFrom:
+        - configMapRef:
+            name: pqrs-config
+        
+        # Variables sensibles desde Secret
+        env:
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: pqrs-secret
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pqrs-secret
+              key: DB_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: pqrs-secret
+              key: JWT_SECRET
+        - name: ADMIN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: pqrs-secret
+              key: ADMIN_USERNAME
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pqrs-secret
+              key: ADMIN_PASSWORD
+        
+        # Health checks
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        
+        readinessProbe:
+          httpGet:
+            path: /actuator/health/readiness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        
+        # Recursos (límites y requests)
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        
+        # Security context
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false
+      
+      # Estrategia de despliegue
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30

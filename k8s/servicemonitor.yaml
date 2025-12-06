@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: pqrs-backend-monitor
+  namespace: citasalud
+  labels:
+    app: pqrs-backend
+    release: prometheus  # Label que busca Prometheus Operator
+spec:
+  selector:
+    matchLabels:
+      app: pqrs-backend
+  endpoints:
+  - port: actuator
+    path: /actuator/prometheus
+    interval: 15s
+    scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+    - citasalud
