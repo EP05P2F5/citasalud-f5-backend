@@ -1,4 +1,4 @@
-package com.feature5.pqrs.config;
+package com.feature5.pqrs.testJunit.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
+import com.feature5.pqrs.config.CustomUserDetailsService;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.entities.Usuario;
 import com.feature5.pqrs.repository.RolRepository;

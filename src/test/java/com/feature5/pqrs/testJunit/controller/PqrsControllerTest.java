@@ -1,7 +1,8 @@
-package com.feature5.pqrs.controller;
+package com.feature5.pqrs.testJunit.controller;
 
 import com.feature5.pqrs.DTO.PqrsDTO;
 import com.feature5.pqrs.DTO.PqrsRequestDTO;
+import com.feature5.pqrs.controller.PqrsController;
 import com.feature5.pqrs.entities.Estado;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.entities.Tipo;

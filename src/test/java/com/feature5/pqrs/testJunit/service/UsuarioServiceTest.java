@@ -1,10 +1,12 @@
-package com.feature5.pqrs.service;
+package com.feature5.pqrs.testJunit.service;
 
 import com.feature5.pqrs.DTO.RolDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.entities.Rol;
 import com.feature5.pqrs.repository.RolRepository;
 import com.feature5.pqrs.repository.UsuarioRepository;
+import com.feature5.pqrs.service.UsuarioService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,10 @@
-package com.feature5.pqrs.config;
+package com.feature5.pqrs.testJunit.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import com.feature5.pqrs.config.JwtUtils;
 
 import static org.junit.jupiter.api.Assertions.*;
 

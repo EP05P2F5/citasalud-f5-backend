@@ -1,11 +1,9 @@
-package com.feature5.pqrs.controller;
+package com.feature5.pqrs.testJunit.controller;
 
 import com.feature5.pqrs.DTO.LoginRequestDTO;
 import com.feature5.pqrs.DTO.UsuarioDTO;
 import com.feature5.pqrs.config.JwtUtils;
-import com.feature5.pqrs.entities.Rol;
-import com.feature5.pqrs.mapper.RolMapper;
-import com.feature5.pqrs.repository.RolRepository;
+import com.feature5.pqrs.controller.AuthController;
 import com.feature5.pqrs.repository.UsuarioRepository;
 import com.feature5.pqrs.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +16,6 @@ import org.springframework.test.context.jdbc.Sql;
 
 import java.time.LocalDate;
 import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -29,7 +26,7 @@ import static org.mockito.Mockito.doThrow;
  */
 @SpringBootTest
 @Sql(scripts = "/test-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-class AuthControllerTest {
+class AuthControllerIntegrationTest {
 
     @Autowired
     private AuthController authController;
@@ -39,12 +36,6 @@ class AuthControllerTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private RolRepository rolRepository;
-
-    @Autowired
-    private RolMapper rolMapper;
 
     @SpyBean
     private JwtUtils jwtUtils;
