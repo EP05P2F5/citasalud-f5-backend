@@ -34,30 +34,36 @@ Feature: Gestión de Roles - /roles
     Then status 404
 
   Scenario: Crear nuevo rol
+    # Descripción única con timestamp para evitar conflictos entre ejecuciones
+    * def ts = java.lang.System.currentTimeMillis()
+    * def descripcionNueva = 'RolKarate_' + ts
     Given path '/roles'
     And header Authorization = 'Bearer ' + authToken
-    And request { descripcion: 'RolKarateTest' }
+    And request { descripcion: '#(descripcionNueva)' }
     When method POST
     Then status 200
-    And match response.descripcion == 'RolKarateTest'
+    And match response.descripcion == descripcionNueva
     And match response.idRol == '#number'
     * def nuevoRolId = response.idRol
 
   Scenario: Actualizar un rol existente
-    # Crear el rol primero
+    # Crear el rol primero con nombre único
+    * def ts = java.lang.System.currentTimeMillis()
+    * def descripcionBase = 'RolActualizar_' + ts
+    * def descripcionActualizada = 'RolActualizado_' + ts
     Given path '/roles'
     And header Authorization = 'Bearer ' + authToken
-    And request { descripcion: 'RolParaActualizar' }
+    And request { descripcion: '#(descripcionBase)' }
     When method POST
     Then status 200
     * def rolId = response.idRol
     # Luego actualizar
     Given path '/roles/' + rolId
     And header Authorization = 'Bearer ' + authToken
-    And request { descripcion: 'RolActualizadoKarate' }
+    And request { descripcion: '#(descripcionActualizada)' }
     When method PUT
     Then status 200
-    And match response.descripcion == 'RolActualizadoKarate'
+    And match response.descripcion == descripcionActualizada
 
   Scenario: Actualizar un rol inexistente retorna 404
     Given path '/roles/9999'
@@ -67,10 +73,12 @@ Feature: Gestión de Roles - /roles
     Then status 404
 
   Scenario: Eliminar un rol creado
-    # Crear el rol primero
+    # Crear el rol primero con nombre único
+    * def ts = java.lang.System.currentTimeMillis()
+    * def descripcionElim = 'RolEliminar_' + ts
     Given path '/roles'
     And header Authorization = 'Bearer ' + authToken
-    And request { descripcion: 'RolParaEliminar' }
+    And request { descripcion: '#(descripcionElim)' }
     When method POST
     Then status 200
     * def rolIdElim = response.idRol

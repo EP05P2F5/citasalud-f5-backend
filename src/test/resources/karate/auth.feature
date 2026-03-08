@@ -8,10 +8,10 @@ Feature: Autenticación - /auth/login
     And request { nickname: 'karate_user', password: 'Karate123!' }
     When method POST
     Then status 200
-    And match response.token != null
+    And match response.token == '#notnull'
     And match response.username == 'karate_user'
-    And match response.role != null
-    And match response.email != null
+    And match response.rol == '#notnull'
+    And match response.email == '#notnull'
 
   Scenario: Login con password incorrecto retorna 401
     Given path '/auth/login'
