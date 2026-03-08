@@ -1,6 +1,7 @@
-package com.feature5.pqrs.config;
+package com.feature5.pqrs.testJunit.config;
 
 import com.feature5.pqrs.DTO.UsuarioDTO;
+import com.feature5.pqrs.config.JwtUtils;
 import com.feature5.pqrs.repository.UsuarioRepository;
 import com.feature5.pqrs.service.UsuarioService;
 import org.junit.jupiter.api.BeforeEach;

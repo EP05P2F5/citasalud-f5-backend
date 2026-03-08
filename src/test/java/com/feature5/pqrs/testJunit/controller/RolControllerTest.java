@@ -1,6 +1,7 @@
-package com.feature5.pqrs.controller;
+package com.feature5.pqrs.testJunit.controller;
 
 import com.feature5.pqrs.DTO.RolDTO;
+import com.feature5.pqrs.controller.RolController;
 import com.feature5.pqrs.repository.RolRepository;
 import com.feature5.pqrs.repository.UsuarioRepository;
 import org.junit.jupiter.api.Test;

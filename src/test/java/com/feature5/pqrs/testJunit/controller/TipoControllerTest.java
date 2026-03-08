@@ -1,6 +1,8 @@
-package com.feature5.pqrs.controller;
+package com.feature5.pqrs.testJunit.controller;
 
 import com.feature5.pqrs.DTO.TipoDTO;
+import com.feature5.pqrs.controller.TipoController;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
